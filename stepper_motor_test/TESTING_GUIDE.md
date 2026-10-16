@@ -222,19 +222,19 @@ $$V_{ref} = I_{max} \times 8 \times R_s = I_{max} \times 0.8$$
                   ┌────────────────────────┐
                   │      [ USB-C PORT ]    │
                   │                        │
-       5V Power   │ [5V]             [GND] │ Ground (Common Bus)
-       Ground Bus │ [GND]            [IO7] │ Motor A EN (Active LOW)
-       3.3V Logic │ [3V3]            [IO8] │ Unused GPIO
- MS1 Shared Bus   │ [IO1]            [IO9] │ Motor B STEP Pulse
- MS2 Shared Bus   │ [IO2]           [IO10] │ Motor B DIR Direction
- Unused / Strap   │ [IO3]           [IO11] │ Motor B EN (Active LOW)
- MS3 Shared Bus   │ [IO4]           [IO12] │ Unused GPIO
- Motor A STEP     │ [IO5]           [IO13] │ Onboard Status LED
- Motor A DIR      │ [IO6]           [TX0]  │ Debug UART TX (GPIO 43)
+       5V Power   │ [5V]              [5]  │ Motor A STEP (GPIO 5)
+     Common GND   │ [GND]             [6]  │ Motor A DIR (GPIO 6)
+     3.3V Logic   │ [3V3]             [7]  │ Motor A EN (GPIO 7, Active LOW)
+  UART0 TX (IO43) │ [TX]              [8]  │ Unused GPIO (GPIO 8)
+  UART0 RX (IO44) │ [RX]              [9]  │ Motor B STEP (GPIO 9)
+   MS1 Shared Bus │ [1]              [10]  │ Motor B DIR (GPIO 10)
+   MS2 Shared Bus │ [2]              [11]  │ Motor B EN (GPIO 11, Active LOW)
+   Unused / Strap │ [3]              [12]  │ Unused GPIO (GPIO 12)
+   MS3 Shared Bus │ [4]              [13]  │ Onboard Status LED (GPIO 13)
                   │                        │
                   └────────────────────────┘
 ```
-*(Notice: **GPIO 4** is utilized for MS3 because it is physically exposed on the outer breadboard header, completely avoiding the need to solder to underside castellated pads!)*
+*(Notice: The outer DIP headers expose power `5V`, `GND`, `3V3`, serial `TX`/`RX`, and GPIOs `1` through `13`. Pin `4` (GPIO 4) is utilized for MS3 because it is physically exposed on the outer header, completely avoiding the need to solder to underside pads!)*
 
 #### 2. Allegro A4988 Module Physical Pinout (Top View)
 ```
@@ -285,24 +285,21 @@ For initial bring-up, current calibration, and single-axis speed tuning:
        +------------------------------------+
        |        ESP32-S3 SuperMini          |
        |                                    |
-       |   [3.3V] ──────────────────────────┼───────────────────────────────┐
-       |                                    |                               │
+       | (Left Row)            (Right Row)  |
+       |   [3V3] ───────────────────────────┼───────────────────────────────┐
        |   [GND]  ──+                       |                               │
        |            │ (Common GND)          |                               │
-       |   [IO5] ───┼───────────────────────┼─────────────┐ (STEP)          │
-       |            │                       |             │                 │
-       |   [IO6] ───┼───────────────────────┼───────┐     │                 │
-       |            │                       |       │     │                 │
-       |   [IO7] ───┼───────────────────────┼─┐     │     │                 │
-       |            │                       | │     │     │                 │
-       |   [IO1] ───┼─────────────────┐     | │     │     │                 │
-       |   [IO2] ───┼───────────┐     │     | │     │     │                 │
-       |   [IO4] ───┼─────┐     │     │     | │     │     │                 │
-       +------------+-----│-----│-----│-----+ │     │     │                 │
-                          │     │     │       │     │     │                 │
-                          │     │     │       v     v     v                 v
-                       +--┴─────┴─────┴───────┴─────┴─────┴─────────────────┴----+
-                       | MS3   MS2   MS1     EN    DIR   STEP              VDD   |
+       |   [1]   ───┼─────────────────┐     |                               │
+       |   [2]   ───┼───────────┐     │     |                               │
+       |   [4]   ───┼─────┐     │     │     |                               │
+       |            │     │     │     │     │   [5] (STEP) ─────────────────┤
+       |            │     │     │     │     │   [6] (DIR)  ───────────┐     │
+       |            │     │     │     │     │   [7] (EN)   ─────┐     │     │
+       +------------+-----│-----│-----│-----+-----------------│-----│-----│-----+
+                          │     │     │                       │     │     │
+                          │     │     │                       v     v     v
+                       +--┴─────┴─────┴───────────────────────┴─────┴─────┴───────+
+                       | MS3   MS2   MS1                     EN    DIR   STEP VDD |
                        |                                                         |
                        |                     A4988 DRIVER MODULE                 |
                        |                          (MOTOR A)                      |
@@ -363,15 +360,15 @@ This schematic connects both Motor A (X-Mirror) and Motor B (Y-Mirror) to the ES
 
                                              ESP32-S3 SuperMini
                                      ┌─────────────────────────────────┐
-                       USB 5V Supply │ [5V]                      [GND] ├─── Common System GND
-               Common System GND Bus │ [GND]                     [IO7] ├─── Motor A EN (GPIO 7)
-               Common 3.3V Logic Bus │ [3V3]                     [IO8] │
-                      MS1 Shared Bus │ [IO1]                     [IO9] ├─── Motor B STEP (GPIO 9)
-                      MS2 Shared Bus │ [IO2]                    [IO10] ├─── Motor B DIR (GPIO 10)
-                      Unused / Strap │ [IO3]                    [IO11] ├─── Motor B EN (GPIO 11)
-                      MS3 Shared Bus │ [IO4]                    [IO12] │
-                  Motor A STEP Pulse │ [IO5]                    [IO13] ├─── Status LED
-               Motor A DIR Direction │ [IO6]                     [TX0] │    (Debug Serial)
+                       USB 5V Supply │ [5V]                        [5] ├─── Motor A STEP (GPIO 5)
+               Common System GND Bus │ [GND]                       [6] ├─── Motor A DIR (GPIO 6)
+               Common 3.3V Logic Bus │ [3V3]                       [7] ├─── Motor A EN (GPIO 7, Active LOW)
+                     UART0 TX Serial │ [TX]                        [8] │    (Available GPIO 8)
+                     UART0 RX Serial │ [RX]                        [9] ├─── Motor B STEP (GPIO 9)
+                      MS1 Shared Bus │ [1]                        [10] ├─── Motor B DIR (GPIO 10)
+                      MS2 Shared Bus │ [2]                        [11] ├─── Motor B EN (GPIO 11, Active LOW)
+                      Unused / Strap │ [3]                        [12] │    (Available GPIO 12)
+                      MS3 Shared Bus │ [4]                        [13] ├─── Status LED (GPIO 13)
                                      └─────────────────────────────────┘
                                         │   │   │   │   │   │   │   │
                      ┌──────────────────┘   │   │   │   │   │   │   └───────────────────────────────┐
@@ -473,8 +470,8 @@ Follow these step-by-step written instructions carefully when assembling your te
 1. **Place the ESP32-S3 SuperMini:**
    - Mount the ESP32-S3 SuperMini straddling the center divider groove on one side of the breadboard, with the **USB-C connector pointing towards the top edge**.
    - Note the two 9-pin rows:
-     - **Left Row (Pins 1–9, top to bottom):** `5V`, `GND`, `3V3`, `IO1`, `IO2`, `IO3`, `IO4`, `IO5`, `IO6`.
-     - **Right Row (Pins 1–9, top to bottom):** `GND`, `IO7`, `IO8`, `IO9`, `IO10`, `IO11`, `IO12`, `IO13`, `TX0` (GPIO 43).
+     - **Left Row (Pins 1–9, top to bottom):** `5V`, `GND`, `3V3`, `TX`, `RX`, `1` (GPIO 1), `2` (GPIO 2), `3` (GPIO 3), `4` (GPIO 4).
+     - **Right Row (Pins 1–9, top to bottom):** `5` (GPIO 5), `6` (GPIO 6), `7` (GPIO 7), `8` (GPIO 8), `9` (GPIO 9), `10` (GPIO 10), `11` (GPIO 11), `12` (GPIO 12), `13` (GPIO 13).
 2. **Place A4988 Driver Module A (X-Axis):**
    - Insert Driver Module A into the breadboard straddling the center divider groove.
    - **Crucial Orientation Check:** Ensure the small metal potentiometer (trimpot) is facing **UP (towards the same side as the USB-C connector)**.
@@ -524,16 +521,16 @@ Follow this exact sequential order to build the circuit safely:
   4. **Phase B (-) :** Connect **Orange Wire** to A4988 **Pin 3 (Right Column, `2B`)**.
 
 ##### Step 6: Wire Motor A Control Lines
-* **STEP Pulse:** Connect ESP32-S3 SuperMini **Pin 8 (Left Row, `IO5`)** to A4988 **Pin 7 (Left Column, `STEP`)**.
-* **DIR Direction:** Connect ESP32-S3 SuperMini **Pin 9 (Left Row, `IO6`)** to A4988 **Pin 8 (Left Column, `DIR`)**.
-* **ENABLE Control:** Connect ESP32-S3 SuperMini **Pin 2 (Right Row, `IO7`)** to A4988 **Pin 1 (Left Column, `ENABLE`)**.
+* **STEP Pulse:** Connect ESP32-S3 SuperMini **Pin 1 (Right Row, `5` / GPIO 5)** to A4988 **Pin 7 (Left Column, `STEP`)**.
+* **DIR Direction:** Connect ESP32-S3 SuperMini **Pin 2 (Right Row, `6` / GPIO 6)** to A4988 **Pin 8 (Left Column, `DIR`)**.
+* **ENABLE Control:** Connect ESP32-S3 SuperMini **Pin 3 (Right Row, `7` / GPIO 7)** to A4988 **Pin 1 (Left Column, `ENABLE`)**.
 
 ##### Step 7: Wire Shared Microstepping Bus (MS1, MS2, MS3)
-* **MS1 Line:** Connect ESP32-S3 SuperMini **Pin 4 (Left Row, `IO1`)** to A4988 **Pin 2 (Left Column, `MS1`)**.
-* **MS2 Line:** Connect ESP32-S3 SuperMini **Pin 5 (Left Row, `IO2`)** to A4988 **Pin 3 (Left Column, `MS2`)**.
-* **MS3 Line:** Connect ESP32-S3 SuperMini **Pin 7 (Left Row, `IO4`)** to A4988 **Pin 4 (Left Column, `MS3`)**.
+* **MS1 Line:** Connect ESP32-S3 SuperMini **Pin 6 (Left Row, `1` / GPIO 1)** to A4988 **Pin 2 (Left Column, `MS1`)**.
+* **MS2 Line:** Connect ESP32-S3 SuperMini **Pin 7 (Left Row, `2` / GPIO 2)** to A4988 **Pin 3 (Left Column, `MS2`)**.
+* **MS3 Line:** Connect ESP32-S3 SuperMini **Pin 9 (Left Row, `4` / GPIO 4)** to A4988 **Pin 4 (Left Column, `MS3`)**.
   > [!IMPORTANT]
-  > **No Underside Soldering Required:** GPIO 4 sits conveniently on the outer breadboard DIP header of the ESP32-S3 SuperMini. Leaving GPIO 3 unconnected avoids boot strapping conflicts.
+  > **Clean Outer Pin Hookup:** GPIOs `1`, `2`, and `4` are located on the left outer header row (Pins 6, 7, and 9). GPIO `3` (Pin 8) is a boot strapping pin and is safely bypassed.
 
 ---
 
@@ -558,9 +555,9 @@ Once Motor A is verified and rotating smoothly, add Motor B (Y-Axis) to achieve 
 * *(Both drivers will now switch microstep resolutions synchronously from a single serial command!)*
 
 ##### Step 4: Wire Motor B Independent Control Lines
-* **STEP Pulse B:** Connect ESP32-S3 SuperMini **Pin 4 (Right Row, `IO9`)** to Driver B **`STEP`**.
-* **DIR Direction B:** Connect ESP32-S3 SuperMini **Pin 5 (Right Row, `IO10`)** to Driver B **`DIR`**.
-* **ENABLE Control B:** Connect ESP32-S3 SuperMini **Pin 6 (Right Row, `IO11`)** to Driver B **`ENABLE`**.
+* **STEP Pulse B:** Connect ESP32-S3 SuperMini **Pin 5 (Right Row, `9` / GPIO 9)** to Driver B **`STEP`**.
+* **DIR Direction B:** Connect ESP32-S3 SuperMini **Pin 6 (Right Row, `10` / GPIO 10)** to Driver B **`DIR`**.
+* **ENABLE Control B:** Connect ESP32-S3 SuperMini **Pin 7 (Right Row, `11` / GPIO 11)** to Driver B **`ENABLE`**.
 
 ##### Step 5: Connect Motor B Coil Wires
 * Connect Motor B's 4-wire modded bipolar cable:
@@ -581,15 +578,18 @@ Use this master lookup table to double-check every wire on your breadboard befor
 | **5V Motor Power** | Pin 1 (Left Row, `5V`) | Pin 1 Right (`VMOT`) | Pin 1 Right (`VMOT`) | Cap (+) $\to$ Breadboard 5V Rail | **Red** |
 | **Common Ground** | Pin 2 (Left Row, `GND`) | Pin 2 & 8 Right (`GND`) | Pin 2 & 8 Right (`GND`) | Cap (-) $\to$ Ground Rail | **Black / Grey** |
 | **3.3V Logic Supply** | Pin 3 (Left Row, `3V3`) | Pin 7 Right (`VDD`) | Pin 7 Right (`VDD`) | Driver Logic Power | **Orange** |
-| **Microstep Bit 1** | Pin 4 (Left Row, `IO1`) | Pin 2 Left (`MS1`) | Pin 2 Left (`MS1`) | Shared Microstep Bus | **Cyan / Blue** |
-| **Microstep Bit 2** | Pin 5 (Left Row, `IO2`) | Pin 3 Left (`MS2`) | Pin 3 Left (`MS2`) | Shared Microstep Bus | **Green** |
-| **Microstep Bit 3** | Pin 7 (Left Row, `IO4`) | Pin 4 Left (`MS3`) | Pin 4 Left (`MS3`) | Shared Microstep Bus | **Purple** |
-| **Motor A STEP** | Pin 8 (Left Row, `IO5`) | Pin 7 Left (`STEP`) | — (Not connected) | Driver A Step Trigger | **Yellow** |
-| **Motor A DIR** | Pin 9 (Left Row, `IO6`) | Pin 8 Left (`DIR`) | — (Not connected) | Driver A Direction | **White** |
-| **Motor A ENABLE** | Pin 2 (Right Row, `IO7`) | Pin 1 Left (`ENABLE`) | — (Not connected) | Driver A Active LOW Enable | **Brown** |
-| **Motor B STEP** | Pin 4 (Right Row, `IO9`) | — (Not connected) | Pin 7 Left (`STEP`) | Driver B Step Trigger | **Yellow** |
-| **Motor B DIR** | Pin 5 (Right Row, `IO10`)| — (Not connected) | Pin 8 Left (`DIR`) | Driver B Direction | **White** |
-| **Motor B ENABLE** | Pin 6 (Right Row, `IO11`)| — (Not connected) | Pin 1 Left (`ENABLE`) | Driver B Active LOW Enable | **Brown** |
+| **UART0 TX Serial** | Pin 4 (Left Row, `TX`) | — (Not connected) | — (Not connected) | Debug Console / Flashing | **Blue** |
+| **UART0 RX Serial** | Pin 5 (Left Row, `RX`) | — (Not connected) | — (Not connected) | Debug Console / Flashing | **Green** |
+| **Microstep Bit 1** | Pin 6 (Left Row, `1` / GPIO 1) | Pin 2 Left (`MS1`) | Pin 2 Left (`MS1`) | Shared Microstep Bus | **Cyan / Blue** |
+| **Microstep Bit 2** | Pin 7 (Left Row, `2` / GPIO 2) | Pin 3 Left (`MS2`) | Pin 3 Left (`MS2`) | Shared Microstep Bus | **Green** |
+| **Microstep Bit 3** | Pin 9 (Left Row, `4` / GPIO 4) | Pin 4 Left (`MS3`) | Pin 4 Left (`MS3`) | Shared Microstep Bus | **Purple** |
+| **Motor A STEP** | Pin 1 (Right Row, `5` / GPIO 5) | Pin 7 Left (`STEP`) | — (Not connected) | Driver A Step Trigger | **Yellow** |
+| **Motor A DIR** | Pin 2 (Right Row, `6` / GPIO 6) | Pin 8 Left (`DIR`) | — (Not connected) | Driver A Direction | **White** |
+| **Motor A ENABLE** | Pin 3 (Right Row, `7` / GPIO 7) | Pin 1 Left (`ENABLE`) | — (Not connected) | Driver A Active LOW Enable | **Brown** |
+| **Motor B STEP** | Pin 5 (Right Row, `9` / GPIO 9) | — (Not connected) | Pin 7 Left (`STEP`) | Driver B Step Trigger | **Yellow** |
+| **Motor B DIR** | Pin 6 (Right Row, `10` / GPIO 10)| — (Not connected) | Pin 8 Left (`DIR`) | Driver B Direction | **White** |
+| **Motor B ENABLE** | Pin 7 (Right Row, `11` / GPIO 11)| — (Not connected) | Pin 1 Left (`ENABLE`) | Driver B Active LOW Enable | **Brown** |
+| **Status LED** | Pin 9 (Right Row, `13` / GPIO 13)| — (Not connected) | — (Not connected) | Built-in / Onboard Indicator | **Onboard SMD** |
 | **Driver A Sleep** | — | Pin 6 Left (`SLEEP`) | — | Jumper to Driver A `RESET` | **Short wire** |
 | **Driver A Reset** | — | Pin 5 Left (`RESET`) | — | Jumper to Driver A `SLEEP` | **Short wire** |
 | **Driver B Sleep** | — | — | Pin 6 Left (`SLEEP`) | Jumper to Driver B `RESET` | **Short wire** |

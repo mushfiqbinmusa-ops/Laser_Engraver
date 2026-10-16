@@ -156,15 +156,15 @@ flowchart TD
                        ┌─────────────────────┐
                        │   [ USB-C PORT ]    │
                        │                     │
-        5V Power (VBUS)│ [5V]          [GND] │ Ground (Common Bus)
-            Ground Bus │ [GND]         [IO7] │ (Available)
-            3.3V Logic │ [3V3]         [IO8] │ (Available)
-                       │ [IO1]         [IO9] │ (Available)
-                       │ [IO2]        [IO10] │ (Available)
-                       │ [IO3]        [IO11] │ (Available)
-                       │ [IO4]        [IO12] │ (Available)
-      Sensor X OUT ───►│ [IO5]        [IO13] │ Onboard Status LED (Mirrored)
-      Sensor Y OUT ───►│ [IO6]         [TX0] │ Debug UART TX (GPIO 43)
+        5V Power (VBUS)│ [5V]             [5]│◄─── Sensor X OUT (GPIO 5)
+            Common GND │ [GND]            [6]│◄─── Sensor Y OUT (GPIO 6)
+            3.3V Logic │ [3V3]            [7]│    (Available)
+       UART0 TX (IO43) │ [TX]             [8]│    (Available)
+       UART0 RX (IO44) │ [RX]             [9]│    (Available)
+                       │ [1]             [10]│    (Available)
+                       │ [2]             [11]│    (Available)
+                       │ [3]             [12]│    (Available)
+                       │ [4]             [13]│───► Onboard Status LED (Mirrored)
                        │                     │
                        └─────────────────────┘
 ```
@@ -177,13 +177,13 @@ flowchart TD
 #### Single Sensor Test Setup (X-Axis Only)
 
 ```
-  ESP32-S3 Super Mini                         FC-51 IR Obstacle Sensor (X-Axis)
-  ┌─────────────────┐                         ┌─────────────────────────────────┐
-  │              5V │────────────────────────►│ VCC                             │
-  │             GND │────────────────────────►│ GND                             │
-  │          GPIO 5 │◄────────────────────────│ OUT (Active LOW on detect)      │
-  │         GPIO 13 │───► [Onboard Status LED]│                                 │
-  └─────────────────┘                         │ [Trim-pot] [LM393] [LEDs]       │
+  ESP32-S3 SuperMini                          FC-51 IR Obstacle Sensor (X-Axis)
+  ┌─────────────────────────┐                 ┌─────────────────────────────────┐
+  │ [5V]  (Pin 1 Left Row)  │────────────────►│ VCC                             │
+  │ [GND] (Pin 2 Left Row)  │────────────────►│ GND                             │
+  │ [5]   (Pin 1 Right Row) │◄────────────────│ OUT (Active LOW on detect)      │
+  │ [13]  (Pin 9 Right Row) │──► [Status LED] │                                 │
+  └─────────────────────────┘                 │ [Trim-pot] [LM393] [LEDs]       │
                                               └─────────────────────────────────┘
 ```
 
@@ -205,14 +205,14 @@ flowchart TD
                       │             Common Ground Rail (GND)          │
                       └───────────────────────┬───────────────────────┘
                                               │
-  ESP32-S3 Super Mini                         │
+  ESP32-S3 SuperMini                          │
   ┌────────────────────────────────────────┐  │
-  │ 5V                                     │  │
-  │ GND ───────────────────────────────────┼──┘
+  │ [5V]  (Pin 1 Left Row)                 │  │
+  │ [GND] (Pin 2 Left Row) ────────────────┼──┘
   │                                        │
-  │ GPIO 5 ◄───────────────────────────────┼──────── Sensor X OUT
-  │ GPIO 6 ◄───────────────────────────────┼──────── Sensor Y OUT
-  │ GPIO 13 ──► [Status LED Indicator]     │
+  │ [5]   (Pin 1 Right Row) ◄──────────────┼──────── Sensor X OUT
+  │ [6]   (Pin 2 Right Row) ◄──────────────┼──────── Sensor Y OUT
+  │ [13]  (Pin 9 Right Row) ──► Status LED │
   └────────────────────────────────────────┘
 ```
 
@@ -271,8 +271,8 @@ Before connecting any wires, inspect your IR sensor module:
 1. **Mount the ESP32-S3 SuperMini:**
    - Insert the ESP32-S3 SuperMini straddling the center divider of your breadboard, with the **USB-C connector pointing towards the top edge**.
    - Review your physical pin locations:
-     - **Left Column (Pins 1–9, top to bottom):** `5V`, `GND`, `3V3`, `IO1`, `IO2`, `IO3`, `IO4`, `IO5`, `IO6`.
-     - **Right Column (Pins 1–9, top to bottom):** `GND`, `IO7`, `IO8`, `IO9`, `IO10`, `IO11`, `IO12`, `IO13`, `TX0` (GPIO 43).
+     - **Left Column (Pins 1–9, top to bottom):** `5V`, `GND`, `3V3`, `TX`, `RX`, `1` (GPIO 1), `2` (GPIO 2), `3` (GPIO 3), `4` (GPIO 4).
+     - **Right Column (Pins 1–9, top to bottom):** `5` (GPIO 5), `6` (GPIO 6), `7` (GPIO 7), `8` (GPIO 8), `9` (GPIO 9), `10` (GPIO 10), `11` (GPIO 11), `12` (GPIO 12), `13` (GPIO 13).
 2. **Establish Common Power & Ground Rails:**
    - **5V Red Rail (+):** Connect ESP32-S3 SuperMini **Pin 1 (Left Row, `5V`)** to the breadboard **Red (+) Bus Rail** using a red jumper wire.
    - **GND Black Rail (-):** Connect ESP32-S3 SuperMini **Pin 2 (Left Row, `GND`)** to the breadboard **Blue/Black (-) Bus Rail** using a black jumper wire.
@@ -285,8 +285,8 @@ Assemble the primary X-axis homing endstop first to verify sensor functionality 
 
 * **Step 1 (Sensor Power):** Connect a red jumper wire from the breadboard **Red 5V Rail** to the **`VCC`** pin of Sensor X.
 * **Step 2 (Sensor Ground):** Connect a black jumper wire from the breadboard **Black/Blue GND Rail** to the **`GND`** pin of Sensor X.
-* **Step 3 (Digital Signal Line):** Connect a jumper wire (e.g. Yellow or Green) from Sensor X **`OUT`** directly to ESP32-S3 SuperMini **Pin 8 (Left Row, `IO5`)**.
-* **Step 4 (Status LED):** The firmware automatically mirrors the detection state onto the onboard LED on **Pin 8 (Right Row, `IO13`)**. When an obstacle is detected, `IO13` illuminates.
+* **Step 3 (Digital Signal Line):** Connect a jumper wire (e.g. Yellow or Green) from Sensor X **`OUT`** directly to ESP32-S3 SuperMini **Pin 1 (Right Row, `5` / GPIO 5)**.
+* **Step 4 (Status LED):** The firmware automatically mirrors the detection state onto the onboard LED on **Pin 9 (Right Row, `13` / GPIO 13)**. When an obstacle is detected, `13` illuminates.
 
 ---
 
@@ -296,7 +296,7 @@ When ready to test both axes simultaneously:
 
 * **Step 1 (Sensor Y Power):** Connect a red jumper wire from the breadboard **Red 5V Rail** to the **`VCC`** pin of Sensor Y.
 * **Step 2 (Sensor Y Ground):** Connect a black jumper wire from the breadboard **Black/Blue GND Rail** to the **`GND`** pin of Sensor Y.
-* **Step 3 (Sensor Y Signal Line):** Connect a jumper wire (e.g. Blue or White) from Sensor Y **`OUT`** directly to ESP32-S3 SuperMini **Pin 9 (Left Row, `IO6`)**.
+* **Step 3 (Sensor Y Signal Line):** Connect a jumper wire (e.g. Blue or White) from Sensor Y **`OUT`** directly to ESP32-S3 SuperMini **Pin 2 (Right Row, `6` / GPIO 6)**.
 
 ---
 
@@ -306,14 +306,16 @@ When ready to test both axes simultaneously:
 |---|---|---|---|---|
 | **ESP32 5V** | 5V Rail (`VBUS`) | **Pin 1 (Left Row, `5V`)** | +5V DC from USB | **Red** |
 | **ESP32 GND** | Common GND Rail | **Pin 2 (Left Row, `GND`)** | 0V Common Ground | **Black** |
+| **ESP32 3V3** | 3.3V Logic Rail | **Pin 3 (Left Row, `3V3`)** | +3.3V DC Regulated | **Orange** |
+| **UART0 TX Serial** | Debug Console / Flashing | **Pin 4 (Left Row, `TX` / GPIO 43)** | 3.3V UART Output | **Blue** |
+| **UART0 RX Serial** | Debug Console / Flashing | **Pin 5 (Left Row, `RX` / GPIO 44)** | 3.3V UART Input | **Green** |
 | **Sensor X VCC** | Sensor X Power | Connected to 5V Rail | +5V DC | **Red** |
 | **Sensor X GND** | Sensor X Ground | Connected to GND Rail | 0V Ground | **Black** |
-| **Sensor X OUT** | X Endstop Signal | **Pin 8 (Left Row, `IO5`)** | 0V (Detected) / ~3.0V (Clear) | **Yellow / Green** |
+| **Sensor X OUT** | X Endstop Signal | **Pin 1 (Right Row, `5` / GPIO 5)** | 0V (Detected) / ~3.0V (Clear) | **Yellow / Green** |
 | **Sensor Y VCC** | Sensor Y Power | Connected to 5V Rail | +5V DC | **Red** |
 | **Sensor Y GND** | Sensor Y Ground | Connected to GND Rail | 0V Ground | **Black** |
-| **Sensor Y OUT** | Y Endstop Signal | **Pin 9 (Left Row, `IO6`)** | 0V (Detected) / ~3.0V (Clear) | **Blue / White** |
-| **Onboard Status LED** | Endstop Indicator | **Pin 8 (Right Row, `IO13`)** | Active HIGH drive | Built-in SMD LED |
-| **Serial Debug TX** | 115200 Baud Console | **Pin 9 (Right Row, `TX0` / GPIO 43)** | 3.3V UART Output | USB-CDC / Serial |
+| **Sensor Y OUT** | Y Endstop Signal | **Pin 2 (Right Row, `6` / GPIO 6)** | 0V (Detected) / ~3.0V (Clear) | **Blue / White** |
+| **Onboard Status LED** | Endstop Indicator | **Pin 9 (Right Row, `13` / GPIO 13)** | Active HIGH drive | Built-in SMD LED |
 
 ---
 
