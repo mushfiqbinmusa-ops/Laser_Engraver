@@ -145,9 +145,15 @@ By converting the motor to a **4-wire bipolar configuration**, both phases are d
 2. **ENABLE Pin Control:**
    - The `~ENABLE` pin is **active LOW**.
    - Connected to ESP32 GPIO: `LOW` = Driver energized; `HIGH` = Outputs high-impedance (de-energized, cool idle).
-3. **VMOT Decoupling Capacitor:**
-   - Place a **100 µF (16V–35V) electrolytic capacitor** directly across `VMOT` and `GND` as close to each A4988 module as possible.
-   - **Crucial:** Never disconnect a motor while VMOT is energized; inductive flyback will instantly destroy the A4988 MOSFETs.
+3. **VMOT Decoupling Capacitor Selection (Is 100 µF Mandatory?):**
+   - **No, 100 µF is NOT strictly mandatory — it is simply the typical nominal value recommended in the Pololu datasheet!**
+   - **Any electrolytic capacitor from 47 µF up to 1000 µF rated at 16V or 25V is completely safe and effective for your 5V VMOT setup:**
+     - **`47 µF (16V or 25V)`:** Acceptable for a single driver bench test. (Small, easy to fit on breadboard).
+     - **`470 µF (16V or 25V)` [RECOMMENDED OPTION]:** **The sweet spot!** Provides exceptional transient absorption, dampens inductive coil kickback, and filters switching ripple significantly better than 100 µF without causing excessive power-on inrush current.
+     - **`1000 µF (25V)`:** Also completely safe electrically. However, its physical barrel size is large on a breadboard, and charging a 1000 µF cap draws a momentary inrush pulse when switching on 5V.
+     - **Voltage Rating Check:** Since your motor supply is **5V DC**, both **16V** and **25V** capacitors provide more than 3x to 5x voltage headroom (derating rule requires capacitor rated $\ge 1.5 	imes V_{	ext{rail}}$), so both are 100% safe.
+   - **Polarity Warning:** Observe electrolytic polarity! The stripe with **minus signs (-)** connects to **GND**, and the longer lead (+) connects to **VMOT**.
+   - **Crucial Rule:** Always keep the capacitor physically close to the A4988 VMOT and GND pins. Never plug or unplug a stepper motor while VMOT is energized — inductive flyback spikes will blow the driver FETs.
 
 ### Current Limit Setting ($V_{ref}$ Formula)
 
@@ -189,96 +195,268 @@ $$V_{ref} = I_{max} \times 8 \times R_s = I_{max} \times 0.8$$
 
 ---
 
-## 4. Circuit Wiring Diagrams
+## 4. Circuit Wiring Diagrams & Detailed Component Schematics
+
+This section presents the full component pinouts, followed by complete step-by-step schematics for both **Single Motor** and **Dual Motor** bench testing.
+
+---
+
+### 4.0 Component Pinout References
+
+#### 1. ESP32-S3 SuperMini Pinout (Top View)
+```
+                  ┌────────────────────────┐
+                  │      [ USB-C PORT ]    │
+                  │                        │
+       3.3V Power │ [3V3]            [GND] │ Ground (Common Bus)
+       3.3V Power │ [3V3]            [GND] │ Ground (Common Bus)
+            Reset │ [RST]             [5V] │ 5V (USB VBUS output)
+      Unused GPIO │ [IO4]             [5V] │ 5V (USB VBUS output)
+       Motor A EN │ [IO5]            [TX0] │ UART TX / GPIO 43 (Debug)
+      Motor A DIR │ [IO6]            [RX0] │ UART RX / GPIO 44 (Debug)
+     Motor A STEP │ [IO7]            [IO1] │ MS1 (Shared Microstep Bus)
+      Unused GPIO │ [IO8]            [IO2] │ MS2 (Shared Microstep Bus)
+     Motor B STEP │ [IO9]           [IO42] │ Unused GPIO
+      Motor B DIR │ [IO10]          [IO41] │ Unused GPIO
+       Motor B EN │ [IO11]          [IO40] │ Unused GPIO
+      Unused GPIO │ [IO12]          [IO39] │ Unused GPIO
+       Status LED │ [IO13]          [IO38] │ MS3 (Shared Microstep Bus)
+                  │                        │
+                  └────────────────────────┘
+```
+
+#### 2. Allegro A4988 Module Physical Pinout (Top View)
+```
+                     ┌──────────────────┐
+                     │   [TRIMPOT VREF] │
+       Enable (LOW)  │ [ENABLE]  [VMOT] │ Motor DC Supply (5V)
+    Microstep Bit 1  │ [MS1]      [GND] │ Motor Ground
+    Microstep Bit 2  │ [MS2]       [2B] │ Coil B (-)  --> Orange Wire
+    Microstep Bit 3  │ [MS3]       [2A] │ Coil B (+)  --> Yellow Wire
+       Reset Input   │ [RESET]     [1A] │ Coil A (+)  --> Blue Wire
+       Sleep Input   │ [SLEEP]     [1B] │ Coil A (-)  --> Pink Wire
+         Step Pulse  │ [STEP]     [VDD] │ Logic Power (3.3V from ESP32)
+    Direction Logic  │ [DIR]      [GND] │ Logic Ground (Common GND)
+                     └──────────────────┘
+```
+
+#### 3. Converted 28BYJ-48 4-Wire Bipolar Stepper Pinout
+```
+                ┌───────────────────────────────────┐
+                │     28BYJ-48 Stepper Motor        │
+                │        (Bipolar Modded)           │
+                │                                   │
+                │   [Coil Phase A (~100 Ω)]         │
+                │   • Blue Wire   ──────> A4988 1A  │
+                │   • Pink Wire   ──────> A4988 1B  │
+                │                                   │
+                │   [Coil Phase B (~100 Ω)]         │
+                │   • Yellow Wire ──────> A4988 2A  │
+                │   • Orange Wire ──────> A4988 2B  │
+                │                                   │
+                │   [Cut Center Tap]                │
+                │   • Red Wire    ──────> NOT USED  │
+                │                         (Cut/NC)  │
+                └───────────────────────────────────┘
+```
+
+---
 
 ### 4.1 Single Motor Test Wiring (Motor A Only)
 
-For initial bring-up and characterising Motor A:
+For initial bring-up, current calibration, and single-axis speed tuning:
 
 ```
-  ESP32-S3 SuperMini               A4988 Driver Module A
-┌─────────────────────┐          ┌───────────────────────┐
-│                 GND ├──────────┤ GND (Logic Ground)    │
-│                 3.3V├──────────┤ VDD (Logic Power)     │
-│ GPIO 5 (STEP_A)     ├──────────┤ STEP                  │
-│ GPIO 6 (DIR_A)      ├──────────┤ DIR                   │
-│ GPIO 7 (EN_A)       ├──────────┤ ENABLE                │
-│ GPIO 1 (MS1)        ├──────────┤ MS1                   │
-│ GPIO 2 (MS2)        ├──────────┤ MS2                   │
-│ GPIO 38 (MS3)       ├──────────┤ MS3                   │
-│                     │          │ RESET ──┐             │
-│                     │          │ SLEEP ──┘ (Jumpered)  │
-└─────────────────────┘          │                       │
-                                 │ 1A ────── Blue Wire   │
-  5V External Supply             │ 1B ────── Pink Wire   │──> 28BYJ-48
-┌─────────────────────┐          │ 2A ────── Yellow Wire │    Motor A
-│ 5V (+)              ├──────────┤ VMOT                  │  (Red wire CUT)
-│ GND (-)             ├──┬───────┤ GND (Motor Ground)    │
-└─────────────────────┘  │       │ 2B ────── Orange Wire │
-                      ┌──┴──┐    └───────────────────────┘
-                      │100uF│
-                      │ Cap │ (Electrolytic across VMOT & GND)
-                      └──┬──┘
++================================================================================================================+
+|                                SINGLE MOTOR (MOTOR A) BENCH TEST SCHEMATIC                                     |
++================================================================================================================+
+
+       +------------------------------------+
+       |        ESP32-S3 SuperMini          |
+       |                                    |
+       |   [3.3V] ──────────────────────────┼───────────────────────────────┐
+       |                                    |                               │
+       |   [GND]  ──+                       |                               │
+       |            │ (Common GND)          |                               │
+       |   [IO5] ───┼───────────────────────┼─────────────┐ (STEP)          │
+       |            │                       |             │                 │
+       |   [IO6] ───┼───────────────────────┼───────┐     │                 │
+       |            │                       |       │     │                 │
+       |   [IO7] ───┼───────────────────────┼─┐     │     │                 │
+       |            │                       | │     │     │                 │
+       |   [IO1] ───┼─────────────────┐     | │     │     │                 │
+       |   [IO2] ───┼───────────┐     │     | │     │     │                 │
+       |   [IO38] ──┼─────┐     │     │     | │     │     │                 │
+       +------------+-----│-----│-----│-----+ │     │     │                 │
+                          │     │     │       │     │     │                 │
+                          │     │     │       │     │     │                 │
+                          │     │     │       v     v     v                 v
+                       +--┴─────┴─────┴───────┴─────┴─────┴─────────────────┴----+
+                       | MS3   MS2   MS1     EN    DIR   STEP              VDD   |
+                       |                                                         |
+                       |                     A4988 DRIVER MODULE                 |
+                       |                          (MOTOR A)                      |
+                       |                                                         |
+                       | [RESET]  [SLEEP]    2B    2A    1A    1B   GND    VMOT  |
+                       +----┬────────┬--------┬─────┬─────┬─────┬────┬───────┬---+
+                            │        │        │     │     │     │    │       │
+                            +──Jumper+        │     │     │     │    │       │
+                            (Tied Together)   │     │     │     │    │       │
+                                              │     │     │     │    │       │
+              +-------------------------------+     │     │     │    │       │
+              | Orange Wire                         │     │     │    │       │
+              |        +----------------------------+     │     │    │       │
+              |        | Yellow Wire                      │     │    │       │
+              |        |        +-------------------------+     │    │       │
+              |        |        | Blue Wire                     │    │       │
+              |        |        |        +----------------------+    │       │
+              |        |        |        | Pink Wire                 │       │
+              v        v        v        v                           │       │
+       +------------------------------------+                        │       │
+       |       28BYJ-48 Stepper Motor       |                        │       │
+       |       Phase B        Phase A       |                        │       │
+       |   [Orange/Yellow]  [Blue/Pink]     |                        │       │
+       |                                    |                        │       │
+       |    Red Wire (Center-Tap): CUT / NC |                        │       │
+       +------------------------------------+                        │       │
+                                                                     │       │
+       +------------------------------------+                        │       │
+       |        5V MOTOR POWER SUPPLY       |                        │       │
+       |                                    |                        │       │
+       |   [+5V Output] ────────────────────┼────────────────────────┼───────┘
+       |                                    |                        │
+       |   [GND Output] ────────────────────┼───────────┬────────────┘
+       +------------------------------------+           │
+                         │                              │
+                         │           +───────────[ - ]──┴─────────────────+
+                         │           |  ELECTROLYTIC FILTER CAPACITOR     |
+                         │           |  47uF, 470uF, or 1000uF (16V / 25V)|
+                         │           |  (470uF 16V/25V Recommended)       |
+                         │           +───────────[ + ]──┬─────────────────+
+                         │                              │
+                         +──────────────────────────────┴──────────────────> Ties to VMOT
                          │
-     [Common Ground] ────┴─────────────────────── (To ESP32 GND)
+                         v
+                [ COMMON SYSTEM GND ] <═════ Tied to ESP32-S3 [GND] pin
 ```
 
 ---
 
 ### 4.2 Dual Motor Test Wiring (Motor A + Motor B)
 
-Complete dual-axis wiring layout for the Laser-XY mirror steering assembly:
+This schematic connects both Motor A (X-Mirror) and Motor B (Y-Mirror) to the ESP32-S3 SuperMini, using a **shared 3-wire microstepping bus** (MS1, MS2, MS3) and independent STEP, DIR, and ENABLE control lines.
 
 ```
-                      ESP32-S3 SuperMini
-                    ┌─────────────────────┐
-                    │ 3.3V            GND ├─── Common GND Bus
-                    │ 3.3V            GND │
-                    │ RST              5V │
-                    │ GPIO 4           5V │
-   STEP_A ──────────┤ GPIO 5         GPIO 43 (TX0)
-   DIR_A  ──────────┤ GPIO 6         GPIO 44 (RX0)
-   EN_A   ──────────┤ GPIO 7         GPIO 1  ├────── MS1 Bus
-                    │ GPIO 8         GPIO 2  ├────── MS2 Bus
-   STEP_B ──────────┤ GPIO 9         GPIO 42 │
-   DIR_B  ──────────┤ GPIO 10        GPIO 41 │
-   EN_B   ──────────┤ GPIO 11        GPIO 40 │
-                    │ GPIO 12        GPIO 39 │
-   Status LED ──────┤ GPIO 13        GPIO 38 ├────── MS3 Bus
-                    └─────────────────────┘
++==================================================================================================================+
+|                                    DUAL MOTOR BENCH TEST FULL SCHEMATIC                                          |
++==================================================================================================================+
 
-               A4988 - MOTOR A (X)                  A4988 - MOTOR B (Y)
-             ┌─────────────────────┐              ┌─────────────────────┐
-  EN_A ──────┤ ENABLE       ENABLE ├──────────────┤ ENABLE       ENABLE ├── EN_B
-   MS1 ──────┤ MS1             MS1 ├──────┬───────┤ MS1             MS1 ├── MS1
-   MS2 ──────┤ MS2             MS2 ├──┬───┼───────┤ MS2             MS2 ├── MS2
-   MS3 ──────┤ MS3             MS3 ├──┼───┼───┬───┤ MS3             MS3 ├── MS3
-             │ RESET ──┐           │  │   │   │   │ RESET ──┐           │
-             │ SLEEP ──┘ (Tied)    │  │   │   │   │ SLEEP ──┘ (Tied)    │
-STEP_A ──────┤ STEP           STEP │  │   │   │   │ STEP           STEP ├── STEP_B
- DIR_A ──────┤ DIR             DIR │  │   │   │   │ DIR             DIR ├── DIR_B
-   GND ──────┤ GND             GND │  │   │   │   │ GND             GND ├── GND
-  3.3V ──────┤ VDD             VDD │  │   │   │   │ VDD             VDD ├── 3.3V
-             │ 1B ── Pink          │  │   │   │   │ 1B ── Pink          │
-             │ 1A ── Blue  Motor A │  │   │   │   │ 1A ── Blue  Motor B │
-             │ 2A ── Yellow (X)    │  │   │   │   │ 2A ── Yellow (Y)    │
-             │ 2B ── Orange        │  │   │   │   │ 2B ── Orange        │
-   GND ──────┤ GND             GND │  │   │   │   │ GND             GND ├── GND
-5V VMOT ─────┤ VMOT           VMOT │  │   │   │   │ VMOT           VMOT ├── 5V VMOT
-             └──────────┬──────────┘  │   │   │   └──────────┬──────────┘
-                      ┌─┴─┐           │   │   │            ┌─┴─┐
-                      │Cap│ 100uF     │   │   │            │Cap│ 100uF
-                      └───┘           └───┼───┼────────────┘   │
-                                          └───┼────────────────┘
-                                              └────────────────┘
+                                             ESP32-S3 SuperMini
+                                     ┌─────────────────────────────────┐
+               Common 3.3V Logic Bus │ [3V3]                     [GND] ├─── Common System GND
+                                     │ [3V3]                     [GND] ├─── Common System GND
+                                     │ [RST]                      [5V] │
+                                     │ [IO4]                      [5V] │
+                      Motor A Enable │ [IO5]                     [TX0] │
+                   Motor A Direction │ [IO6]                     [RX0] │
+                        Motor A Step │ [IO7]                     [IO1] ├─── MS1 Shared Bus
+                                     │ [IO8]                     [IO2] ├─── MS2 Shared Bus
+                        Motor B Step │ [IO9]                    [IO42] │
+                   Motor B Direction │ [IO10]                   [IO41] │
+                      Motor B Enable │ [IO11]                   [IO40] │
+                                     │ [IO12]                   [IO39] │
+                 Onboard Status LED  │ [IO13]                   [IO38] ├─── MS3 Shared Bus
+                                     └─────────────────────────────────┘
+                                        │   │   │   │   │   │   │   │
+                     ┌──────────────────┘   │   │   │   │   │   │   └───────────────────────────────┐
+                     │                      │   │   │   │   │   └───────────────────────┐       │
+                     │  ┌───────────────────┘   │   │   │   └───────────────┐       │       │       │
+                     │  │                       │   │   └───────────┐   │       │       │       │       │
+                     │  │  ┌────────────────────┘   │               │   │       │       │       │       │
+                     │  │  │                        └───────┐       │   │       │       │       │       │
+                     │  │  │  ┌─────────────────────────────┼───────┼───┼───────┼───────┼───────┼──┐    │
+                     │  │  │  │                             │       │   │       │       │       │  │    │
+                     v  v  v  v                             │       │   │       │       │       v  v    v
+                 +-------------------+                      │       │   │       │      +-------------------+
+                 | EN  DIR STEP VDD  |                      │       │   │       │      | EN  DIR STEP VDD  |
+                 |                   |                      │       │   │       │      |                   |
+                 |   A4988 DRIVER    |                      │       │   │       │      |   A4988 DRIVER    |
+                 |     MODULE A      |                      │       │   │       │      |     MODULE B      |
+                 |     (X-AXIS)      |                      │       │   │       │      |     (Y-AXIS)      |
+                 |                   |                      │       │   │       │      |                   |
+                 | MS1 MS2 MS3 RESET |                      │       │   │       │      | MS1 MS2 MS3 RESET |
+                 | GND VMOT    SLEEP |                      │       │   │       │      | GND VMOT    SLEEP |
+                 | 1B  1A  2A  2B    |                      │       │   │       │      | 1B  1A  2A  2B    |
+                 +--┬──┬──┬──┬──┬─┬--+                      │       │   │       │      +--┬──┬──┬──┬──┬─┬--+
+                    │  │  │  │  │ │                         │       │   │       │         │  │  │  │  │ │
+          MS1 Bus ──┼──┼──┼──┼──┼─┼─────────────────────────┼───────┼───┼───────┼─────────┘  │  │  │  │ │
+          MS2 Bus ──┼──┼──┼──┼──┼─┼─────────────────────────┼───────┼───┼───────┴────────────┘  │  │  │ │
+          MS3 Bus ──┼──┼──┼──┼──┼─┼─────────────────────────┼───────┼───┼───────────────────────┘  │  │ │
+                    │  │  │  │  │ └──[RESET tied to SLEEP]  │       │   │                          │  │ └──[RESET tied to SLEEP]
+                    │  │  │  │  │                           v       v   v                          │  │
+                    │  │  │  │  │                         [From ESP32-S3]                          │  │
+                    │  │  │  │  │                         IO11   IO10  IO9                         │  │
+                    │  │  │  │  │                         (EN)  (DIR) (STEP)                       │  │
+                    │  │  │  │  │                           │       │   │                          │  │
+                    │  │  │  │  │                           └───────┼───┼──────────────────────────┘  │
+                    │  │  │  │  │                                   └───┼─────────────────────────────┘
+                    │  │  │  │  │                                       └─────────────────────────────┘
+                    │  │  │  │  │
+                    │  │  │  │  │   +-------------------------+     +-------------------------+
+                    │  │  │  │  │   | 28BYJ-48 MOTOR A (X)    |     | 28BYJ-48 MOTOR B (Y)    |
+                    │  │  │  │  │   |   Coil A:               |     |   Coil A:               |
+                    │  │  │  │  └───┤     • 1B -> Pink        |     |     • 1B -> Pink        ├─────┐
+                    │  │  │  └──────┤     • 1A -> Blue        |     |     • 1A -> Blue        ├──┐  │
+                    │  │  └─────────┤   Coil B:               |     |   Coil B:               |  │  │
+                    │  └────────────┤     • 2A -> Yellow      |     |     • 2A -> Yellow      ├┐ │  │
+                    └───────────────┤     • 2B -> Orange      |     |     • 2B -> Orange      ├┼─┘  │
+                                    |                         |     |                         |│ │  │
+                                    |   Red Wire: Cut / NC    |     |   Red Wire: Cut / NC    |│ │  │
+                                    +-------------------------+     +-------------------------+│ │  │
+                                                                                               │ │  │
+                                             ┌─────────────────────────────────────────────────┘ │  │
+                                             ├───────────────────────────────────────────────────┘  │
+                                             ├──────────────────────────────────────────────────────┘
+                                             │
+      +======================================┴======================================================+
+      |                                  POWER DISTRIBUTION NETWORK                                 |
+      +=============================================================================================+
+
+       5V Motor Power Supply                       Driver A Filter Cap             Driver B Filter Cap
+      ┌─────────────────────┐                   ┌────────────────────────┐      ┌────────────────────────┐
+      │  +5V DC Rail        ├───────────────────┤ (+) 47uF to 1000uF     ├──────┤ (+) 47uF to 1000uF     ├──> VMOT (Both A4988)
+      │                     │                   │     (470uF 16/25V rec) │      │     (470uF 16/25V rec) │
+      │  GND Rail           ├──┬────────────────┤ (-)                    ├──┬───┤ (-)                    ├──> GND (Both A4988)
+      └─────────────────────┘  │                └────────────────────────┘  │   └────────────────────────┘
+                               │                                            │
+                               v                                            v
+                      [ STAR GROUND POINT ] <═══════════════════════════════╧═══> Tied to ESP32-S3 GND
 ```
-
-> [!IMPORTANT]
-> - Ensure all grounds (**ESP32-S3 GND**, **5V Power Supply GND**, **A4988 Logic GND**, **A4988 Motor GND**) are tied to a single common low-impedance ground point.
-> - Never route motor high-current return loops through the ESP32 breadboard tracks.
 
 ---
 
+### 4.3 Capacitor Selection Analysis (Addressing Your Inventory)
+
+You asked whether the **100 µF capacitor is mandatory** and noted that you have **1000 µF, 47 µF, and 470 µF capacitors rated at 16V and 25V**. Here is the definitive engineering analysis:
+
+| Your Capacitor | Voltage Rating | Verdict | Detailed Technical Assessment |
+|---|---|---|---|
+| **`470 µF`** | **16V or 25V** | **BEST CHOICE (RECOMMENDED)** | **The ideal capacitor.** 470 µF provides nearly 5x the charge reservoir of 100 µF, significantly smoothing the motor switching ripple and absorbing inductive back-EMF without drawing an excessive power-on inrush current. Fits comfortably on a breadboard. |
+| **`1000 µF`** | **25V** | **FULLY COMPATIBLE & SAFE** | Electrically safe and provides massive bulk capacitance. It will easily handle both motors. Note: When first connected to 5V, it draws a momentary inrush spike as it charges up; ensure your 5V supply does not trip. |
+| **`47 µF`** | **16V or 25V** | **ACCEPTABLE (Single Motor)** | Perfectly fine for single-motor bring-up and characterization. Slightly small for dual simultaneous rapid acceleration, but completely safe. |
+
+#### Voltage Rating Verification:
+- **Your Supply:** 5V DC VMOT.
+- **Capacitor Ratings:** 16V and 25V.
+- **Rule of Thumb:** Working voltage should be $\ge 1.5 	imes V_{	ext{rail}}$ (i.e. $\ge 7.5\,	ext{V}$).
+- **Result:** Both **16V** ($3.2	imes$ safety margin) and **25V** ($5	imes$ safety margin) have massive headroom and will never suffer overvoltage breakdown.
+
+#### Installation Rules:
+1. **Polarity:** Always connect the negative lead (marked with a white stripe and minus symbols `-`) to **GND**, and the positive lead (longer leg) to **VMOT**.
+2. **Proximity:** Position the capacitor as close as physically possible to the A4988 `VMOT` and `GND` pins on the breadboard (within 1 to 2 cm) to minimize wire inductance.
+3. **Dedicated Cap per Driver:** If running both motors, placing one 470 µF capacitor near Driver A and one 470 µF (or 47 µF) near Driver B is far better than a single capacitor placed far away.
+
+---
 ## 5. Microstepping Resolution & Kinematics Table
 
 The 28BYJ-48 features a 4-stage internal spur reduction gearbox. 
