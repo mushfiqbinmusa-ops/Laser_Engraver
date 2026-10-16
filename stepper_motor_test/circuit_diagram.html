@@ -3,1103 +3,577 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ESP32-S3 SuperMini Dual Stepper & A4988 Interactive Circuit Schematic</title>
+  <title>ESP32-S3 SuperMini — Dual Stepper &amp; A4988 Circuit Diagram</title>
   <style>
-    :root {
-      --bg-dark: #0b0f19;
-      --card-bg: rgba(22, 29, 49, 0.85);
-      --card-border: #1e293b;
-      --accent-blue: #38bdf8;
-      --accent-green: #22c55e;
-      --accent-amber: #f59e0b;
-      --accent-purple: #c084fc;
-      --accent-red: #ef4444;
-      --accent-pink: #ec4899;
-      --text-main: #f8fafc;
-      --text-muted: #94a3b8;
-      --wire-step-a: #38bdf8;
-      --wire-dir-a: #fbbf24;
-      --wire-en-a: #f43f5e;
-      --wire-step-b: #a855f7;
-      --wire-dir-b: #eab308;
-      --wire-en-b: #ec4899;
-      --wire-ms1: #06b6d4;
-      --wire-ms2: #10b981;
-      --wire-ms3: #8b5cf6;
-      --wire-5v: #ef4444;
-      --wire-3v3: #f97316;
-      --wire-gnd: #475569;
+    *{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#0a0e1a;--card:#141b2d;--border:#1e293b;
+      --text:#e2e8f0;--muted:#94a3b8;
+      --red:#ef4444;--orange:#f97316;--amber:#fbbf24;--yellow:#eab308;
+      --green:#22c55e;--teal:#06b6d4;--cyan:#38bdf8;
+      --blue:#3b82f6;--indigo:#6366f1;--purple:#a855f7;--pink:#ec4899;
+      --slate:#64748b;
     }
+    body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    /* ── Header ─────────────────────────────────────────── */
+    header{background:linear-gradient(180deg,#111827 0%,var(--bg) 100%);border-bottom:1px solid var(--border);padding:1rem 1.5rem;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:.75rem;position:sticky;top:0;z-index:50;backdrop-filter:blur(12px)}
+    .hdr-left h1{font-size:1.25rem;background:linear-gradient(135deg,var(--cyan),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .hdr-left p{font-size:.8rem;color:var(--muted);margin-top:.15rem}
+    .badge{display:inline-block;font-size:.68rem;padding:.15rem .5rem;border-radius:999px;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+    .badge-s3{background:rgba(56,189,248,.12);color:var(--cyan);border:1px solid rgba(56,189,248,.35)}
+    .badge-bp{background:rgba(34,197,94,.12);color:var(--green);border:1px solid rgba(34,197,94,.35)}
+    .ctrls{display:flex;flex-wrap:wrap;gap:.4rem}
+    .btn{background:#1e293b;border:1px solid #334155;color:#cbd5e1;padding:.45rem .85rem;border-radius:.45rem;font-size:.78rem;font-weight:600;cursor:pointer;transition:.15s;display:flex;align-items:center;gap:.35rem}
+    .btn:hover{background:#334155;color:#fff}
+    .btn.on{background:linear-gradient(135deg,#0284c7,#2563eb);color:#fff;border-color:var(--cyan);box-shadow:0 0 14px rgba(56,189,248,.3)}
 
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "JetBrains Mono", monospace;
-      background: var(--bg-dark);
-      color: var(--text-main);
-      overflow-x: hidden;
-      min-height: 100vh;
-    }
+    /* ── Layout ─────────────────────────────────────────── */
+    .wrap{max-width:1700px;margin:0 auto;padding:1.2rem 1.5rem;display:grid;grid-template-columns:1fr 330px;gap:1.2rem}
+    @media(max-width:1200px){.wrap{grid-template-columns:1fr}}
 
-    header {
-      background: linear-gradient(180deg, rgba(15, 23, 42, 0.95) 0%, rgba(11, 15, 25, 0.8) 100%);
-      border-bottom: 1px solid #1e293b;
-      padding: 1.25rem 2rem;
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      align-items: center;
-      gap: 1rem;
-      position: sticky;
-      top: 0;
-      z-index: 50;
-      backdrop-filter: blur(12px);
-    }
+    /* ── Schematic Card ─────────────────────────────────── */
+    .sch{background:var(--card);border:1px solid var(--border);border-radius:.85rem;padding:1.2rem;box-shadow:0 16px 40px rgba(0,0,0,.45)}
+    .sch-bar{display:flex;justify-content:space-between;align-items:center;padding-bottom:.6rem;border-bottom:1px solid var(--border);margin-bottom:.8rem;flex-wrap:wrap;gap:.5rem}
+    .sch-title{font-size:.88rem;font-weight:600;color:#e2e8f0}
+    .legend{display:flex;flex-wrap:wrap;gap:.6rem;font-size:.7rem;color:var(--muted)}
+    .legend i{display:inline-block;width:10px;height:10px;border-radius:50%;vertical-align:middle;margin-right:3px}
 
-    .header-title h1 {
-      font-size: 1.4rem;
-      font-weight: 700;
-      background: linear-gradient(135deg, #38bdf8, #818cf8, #c084fc);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
+    .canvas{width:100%;background:radial-gradient(circle at 50% 50%,#111827,var(--bg));border:1px solid #1f2937;border-radius:.6rem;overflow:hidden}
+    svg{display:block;width:100%;height:auto}
 
-    .header-title p {
-      font-size: 0.85rem;
-      color: var(--text-muted);
-      margin-top: 0.2rem;
-    }
+    /* ── SVG Internals ──────────────────────────────────── */
+    .pin{cursor:pointer;transition:.15s}
+    .pin:hover{r:6;stroke:#fff;stroke-width:2}
+    .lbl{font-family:'Segoe UI',system-ui,sans-serif;font-size:10px;font-weight:600;fill:var(--muted);pointer-events:none}
+    .wire{fill:none;stroke-linecap:round;stroke-linejoin:round;cursor:pointer;transition:stroke-width .15s,filter .2s}
+    .wire:hover{stroke-width:4.5!important;filter:drop-shadow(0 0 6px currentColor)}
+    .dash{stroke-dasharray:8 5;animation:flow 1.2s linear infinite}
+    @keyframes flow{to{stroke-dashoffset:-26}}
+    .faded{opacity:.14!important;filter:grayscale(80%);pointer-events:none}
 
-    .badge {
-      display: inline-block;
-      font-size: 0.72rem;
-      padding: 0.15rem 0.5rem;
-      border-radius: 9999px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-    .badge-s3 { background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.4); }
-    .badge-bipolar { background: rgba(34, 197, 94, 0.15); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.4); }
+    /* ── Sidebar ────────────────────────────────────────── */
+    .side{display:flex;flex-direction:column;gap:1rem}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:.65rem;padding:1rem;box-shadow:0 8px 20px rgba(0,0,0,.3)}
+    .card h3{font-size:.88rem;font-weight:600;margin-bottom:.6rem;padding-bottom:.4rem;border-bottom:1px solid var(--border);color:#e2e8f0}
+    .card p,.card li{font-size:.78rem;line-height:1.5;color:var(--muted)}
+    .card ul{list-style:none;padding:0}
+    .card li::before{content:"•";color:var(--cyan);font-weight:700;margin-right:.35rem}
+    .card li{margin-bottom:.3rem}
+    .tbl{width:100%;border-collapse:collapse;font-size:.72rem;margin-top:.4rem}
+    .tbl th{text-align:left;padding:.3rem .4rem;background:#1e293b;color:var(--muted);font-weight:600}
+    .tbl td{padding:.3rem .4rem;border-bottom:1px solid #1e293b;color:#cbd5e1}
+    .tbl tr:hover td{background:rgba(56,189,248,.06);color:#fff}
+    .chip{display:inline-block;background:#1e293b;border:1px solid #334155;color:var(--cyan);padding:.2rem .45rem;border-radius:4px;font-size:.7rem;font-family:monospace;margin:.15rem;cursor:pointer;transition:.15s}
+    .chip:hover{background:var(--cyan);color:#0b0f19;box-shadow:0 0 8px rgba(56,189,248,.5)}
+    .term{background:#050811;border:1px solid var(--border);border-radius:.4rem;padding:.6rem;font-family:monospace;font-size:.7rem;color:var(--cyan);max-height:130px;overflow-y:auto;white-space:pre-wrap;margin-top:.4rem}
+    .hi{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);border-radius:6px;padding:.5rem;margin:.4rem 0}
+    .hi strong{color:#4ade80}
 
-    .controls-panel {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .btn-toggle {
-      background: #1e293b;
-      border: 1px solid #334155;
-      color: #cbd5e1;
-      padding: 0.5rem 1rem;
-      border-radius: 0.5rem;
-      font-size: 0.82rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-    }
-
-    .btn-toggle:hover {
-      background: #334155;
-      color: #fff;
-      border-color: #64748b;
-    }
-
-    .btn-toggle.active {
-      background: linear-gradient(135deg, #0284c7, #2563eb);
-      color: #fff;
-      border-color: #38bdf8;
-      box-shadow: 0 0 15px rgba(56, 189, 248, 0.35);
-    }
-
-    .main-container {
-      max-width: 1650px;
-      margin: 0 auto;
-      padding: 1.5rem 2rem;
-      display: grid;
-      grid-template-columns: 1fr 340px;
-      gap: 1.5rem;
-    }
-
-    @media (max-width: 1200px) {
-      .main-container {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    /* Diagram Card */
-    .schematic-card {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 1rem;
-      padding: 1.5rem;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .schematic-toolbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1rem;
-      padding-bottom: 0.75rem;
-      border-bottom: 1px solid #1e293b;
-    }
-
-    .toolbar-title {
-      font-size: 0.95rem;
-      font-weight: 600;
-      color: #e2e8f0;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .legend-bar {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.75rem;
-      font-size: 0.75rem;
-    }
-
-    .legend-item {
-      display: flex;
-      align-items: center;
-      gap: 0.35rem;
-      color: var(--text-muted);
-    }
-
-    .legend-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-    }
-
-    /* SVG Canvas */
-    .svg-wrapper {
-      width: 100%;
-      height: 760px;
-      background: radial-gradient(circle at 50% 50%, #111827 0%, #0b0f19 100%);
-      border: 1px solid #1f2937;
-      border-radius: 0.75rem;
-      position: relative;
-    }
-
-    svg {
-      width: 100%;
-      height: 100%;
-      user-select: none;
-    }
-
-    /* SVG styles */
-    .board-body {
-      stroke-width: 1.5;
-      rx: 10;
-      transition: all 0.3s ease;
-    }
-
-    .pin-label {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 10px;
-      font-weight: 600;
-      fill: #94a3b8;
-      pointer-events: none;
-    }
-
-    .pin-circle {
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    .pin-circle:hover {
-      r: 6;
-      stroke: #fff;
-      stroke-width: 2;
-    }
-
-    .wire {
-      fill: none;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-      transition: stroke-width 0.2s, opacity 0.3s, filter 0.3s;
-      cursor: pointer;
-    }
-
-    .wire:hover {
-      stroke-width: 4.5 !important;
-      filter: drop-shadow(0 0 6px currentColor);
-    }
-
-    .wire-pulse {
-      stroke-dasharray: 6 6;
-      animation: pulseMotion 1.5s linear infinite;
-    }
-
-    @keyframes pulseMotion {
-      0% { stroke-dashoffset: 24; }
-      100% { stroke-dashoffset: 0; }
-    }
-
-    .component-faded {
-      opacity: 0.18 !important;
-      filter: grayscale(80%);
-      pointer-events: none;
-    }
-
-    /* Sidebar info panel */
-    .info-panel {
-      display: flex;
-      flex-direction: column;
-      gap: 1.25rem;
-    }
-
-    .info-card {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 0.75rem;
-      padding: 1.25rem;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-    }
-
-    .info-card h3 {
-      font-size: 0.95rem;
-      font-weight: 600;
-      margin-bottom: 0.75rem;
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-      color: #e2e8f0;
-      border-bottom: 1px solid #1e293b;
-      padding-bottom: 0.5rem;
-    }
-
-    .info-card p, .info-card li {
-      font-size: 0.8rem;
-      line-height: 1.5;
-      color: var(--text-muted);
-    }
-
-    .info-card ul {
-      list-style-type: none;
-    }
-
-    .info-card li {
-      margin-bottom: 0.4rem;
-      display: flex;
-      align-items: flex-start;
-      gap: 0.4rem;
-    }
-
-    .info-card li::before {
-      content: "•";
-      color: var(--accent-blue);
-      font-weight: bold;
-    }
-
-    .pin-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.75rem;
-      font-family: 'JetBrains Mono', monospace;
-      margin-top: 0.5rem;
-    }
-
-    .pin-table th {
-      text-align: left;
-      padding: 0.35rem 0.5rem;
-      background: #1e293b;
-      color: #94a3b8;
-      font-weight: 600;
-      border-radius: 4px;
-    }
-
-    .pin-table td {
-      padding: 0.35rem 0.5rem;
-      border-bottom: 1px solid #1e293b;
-      color: #cbd5e1;
-    }
-
-    .pin-table tr:hover td {
-      background: rgba(56, 189, 248, 0.08);
-      color: #fff;
-    }
-
-    /* Live command emulator */
-    .cmd-chip {
-      display: inline-block;
-      background: #1e293b;
-      border: 1px solid #334155;
-      color: #38bdf8;
-      padding: 0.25rem 0.5rem;
-      border-radius: 4px;
-      font-size: 0.72rem;
-      font-family: 'JetBrains Mono', monospace;
-      margin: 0.2rem;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .cmd-chip:hover {
-      background: #38bdf8;
-      color: #0b0f19;
-      border-color: #38bdf8;
-      box-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
-    }
-
-    .terminal-box {
-      background: #050811;
-      border: 1px solid #1e293b;
-      border-radius: 0.5rem;
-      padding: 0.75rem;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.73rem;
-      color: #38bdf8;
-      max-height: 140px;
-      overflow-y: auto;
-      white-space: pre-wrap;
-      margin-top: 0.5rem;
-    }
-
-    /* Tooltip popup */
-    #tooltip {
-      position: absolute;
-      display: none;
-      background: rgba(15, 23, 42, 0.95);
-      border: 1px solid #38bdf8;
-      padding: 0.75rem 1rem;
-      border-radius: 0.5rem;
-      font-size: 0.8rem;
-      pointer-events: none;
-      z-index: 100;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.7);
-      backdrop-filter: blur(8px);
-      max-width: 280px;
-    }
-
-    #tooltip .tt-title {
-      font-weight: 700;
-      color: #38bdf8;
-      margin-bottom: 0.25rem;
-    }
-
-    #tooltip .tt-desc {
-      color: #e2e8f0;
-      font-size: 0.75rem;
-      line-height: 1.4;
-    }
+    /* ── Tooltip ────────────────────────────────────────── */
+    #tip{position:fixed;display:none;background:rgba(15,23,42,.96);border:1px solid var(--cyan);padding:.6rem .8rem;border-radius:.45rem;font-size:.78rem;pointer-events:none;z-index:200;box-shadow:0 8px 20px rgba(0,0,0,.7);max-width:260px}
+    #tip b{display:block;color:var(--cyan);margin-bottom:.15rem}
+    #tip span{color:#e2e8f0;font-size:.72rem;line-height:1.35}
   </style>
 </head>
 <body>
 
-  <!-- Header -->
-  <header>
-    <div class="header-title">
-      <h1>
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <rect x="4" y="4" width="16" height="16" rx="2"/>
-          <rect x="9" y="9" width="6" height="6"/>
-          <path d="M9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 14h3M1 9h3M1 14h3"/>
-        </svg>
-        ESP32-S3 SuperMini Interactive Stepper Wiring System
-      </h1>
-      <p>
-        Dual A4988 Drivers • Bipolar-Converted 28BYJ-48 Steppers • Laser-XY-Scanner Test Suite
-        <span class="badge badge-s3" style="margin-left: 0.5rem;">ESP32-S3 SuperMini Pinout</span>
-        <span class="badge badge-bipolar">4-Wire Bipolar Mod</span>
-      </p>
+<header>
+  <div class="hdr-left">
+    <h1>⚡ ESP32-S3 SuperMini — Stepper Motor Circuit Diagram</h1>
+    <p>Dual A4988 Drivers · Bipolar 28BYJ-48 · Laser-XY-Scanner Test Suite
+      <span class="badge badge-s3">SuperMini</span>
+      <span class="badge badge-bp">Bipolar Mod</span>
+    </p>
+  </div>
+  <div class="ctrls">
+    <button class="btn on" id="bSingle" onclick="mode('s')">🔧 Single Motor (A Only)</button>
+    <button class="btn"    id="bDual"   onclick="mode('d')">⚙️ Dual Motor (A + B)</button>
+    <button class="btn"    id="bPulse"  onclick="pulse()">〰️ Signal Flow: <b id="pTxt">ON</b></button>
+  </div>
+</header>
+
+<div class="wrap">
+
+<!-- ════════════════════════════════════════════════════════
+     LEFT — SVG SCHEMATIC
+     ════════════════════════════════════════════════════════ -->
+<div class="sch">
+  <div class="sch-bar">
+    <span class="sch-title">Interactive Circuit — <span id="modeLbl">Single Motor Bring-Up</span></span>
+    <div class="legend">
+      <span><i style="background:var(--cyan)"></i>STEP</span>
+      <span><i style="background:var(--amber)"></i>DIR</span>
+      <span><i style="background:var(--red)"></i>EN</span>
+      <span><i style="background:var(--teal)"></i>MS Bus</span>
+      <span><i style="background:#ef4444"></i>5 V</span>
+      <span><i style="background:var(--orange)"></i>3.3 V</span>
+      <span><i style="background:var(--slate)"></i>GND</span>
     </div>
+  </div>
 
-    <div class="controls-panel">
-      <button class="btn-toggle active" id="btnModeSingle" onclick="setMode('single')">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-        Single Motor Test (Motor A Only)
-      </button>
-      <button class="btn-toggle" id="btnModeDual" onclick="setMode('dual')">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
-        Dual Motor Test (Full X + Y)
-      </button>
-      <button class="btn-toggle" id="btnPulseAnim" onclick="togglePulse()">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-        Signal Flow Animation: <span id="pulseStatus">ON</span>
-      </button>
+  <div class="canvas">
+    <!--
+      Coordinate Map (all absolute after transforms)
+      ─────────────────────────────────────────────────
+      ESP32 board: translate(80, 50)  →  200 × 310 rect
+        Left  pins at board-local x=200 (abs 280), right at x=0 (abs 80)
+        Pin spacing: 30 px,  first pin at board-local y=40
+
+        Left row (top→bottom):  5V  GND  3V3  IO1  IO2  IO3  IO4  IO5  IO6
+        Right row (top→bottom): GND IO7  IO8  IO9  IO10 IO11 IO12 IO13 TX0
+
+        Absolute Y for pin N (0-indexed): 50 + 40 + N*30
+          pin0 → 90,  pin1 → 120,  pin2 → 150,  … pin8 → 330
+
+      Capacitor: translate(480, 60)  45×65
+      Driver A:  translate(570, 55)  150×290
+        Left  pins at abs x=570 (VMOT‥GND)
+        Right pins at abs x=720 (ENABLE‥DIR)
+        Pin spacing 32, first at local y=26
+
+        Left:  VMOT(82) GND(114) 2B(146) 2A(178) 1A(210) 1B(242) VDD(274) GND(306)
+        Right: EN(82)   MS1(114) MS2(146) MS3(178) RST(210) SLP(242) STEP(274) DIR(306)
+
+      Motor A: translate(900,55)  circle r=55 at (55,80)
+      Driver B: translate(570,370)  same layout as A, +315 y offset
+      Motor B: translate(900,370)
+    -->
+    <svg viewBox="0 0 1140 700" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <filter id="sh"><feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="#000" flood-opacity=".55"/></filter>
+        <filter id="gl"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        <linearGradient id="gS3" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1e1b4b"/><stop offset="1" stop-color="#0f172a"/></linearGradient>
+        <linearGradient id="gA4" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7f1d1d"/><stop offset="1" stop-color="#450a0a"/></linearGradient>
+        <linearGradient id="gMot" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#475569"/><stop offset=".5" stop-color="#334155"/><stop offset="1" stop-color="#1e293b"/></linearGradient>
+      </defs>
+
+      <!-- ── WIRES (behind everything) ──────────────────── -->
+      <g id="wires">
+        <!-- POWER: 5V  ESP32 pin0-L (280,90) → Cap+ (480,92) → VMOT-A (570,82) -->
+        <path class="wire dash" d="M280,90 H460 L480,82 H570" stroke="var(--red)" stroke-width="2.8"
+          data-t="5 V Motor Power (VBUS)" data-d="USB 5 V rail → 470 µF cap → A4988 VMOT. Powers the stepper coils."/>
+        <!-- Cap− to GND bus -->
+        <path class="wire" d="M525,125 V140 H450 V120" stroke="var(--slate)" stroke-width="2.5"
+          data-t="Cap (−) → GND" data-d="Negative terminal of 470 µF capacitor ties to common ground bus."/>
+        <!-- 5V to Driver B VMOT -->
+        <path class="wire dash D" d="M480,82 V395 H570" stroke="var(--red)" stroke-width="2.8"
+          data-t="5 V → Driver B VMOT" data-d="Motor power branch to Driver B (Y-axis)."/>
+
+        <!-- POWER: 3V3  ESP32 pin2-L (280,150) → VDD-A (570,274) -->
+        <path class="wire dash" d="M280,150 H420 V274 H570" stroke="var(--orange)" stroke-width="2.3"
+          data-t="3.3 V Logic (VDD)" data-d="ESP32-S3 regulated 3.3 V feeds A4988 logic power (VDD). Matches GPIO levels exactly."/>
+        <!-- 3V3 to Driver B VDD -->
+        <path class="wire dash D" d="M420,274 V589 H570" stroke="var(--orange)" stroke-width="2.3"
+          data-t="3.3 V → Driver B VDD" data-d="Shared 3.3 V logic power to Driver B."/>
+
+        <!-- POWER: GND  ESP32 pin1-L (280,120) → GND-A logic (570,306) -->
+        <path class="wire dash" d="M280,120 H440 V306 H570" stroke="var(--slate)" stroke-width="3"
+          data-t="Common GND" data-d="Master ground bus. Connects ESP32 GND, A4988 logic GND, motor GND, and cap (−)."/>
+        <!-- GND motor side of A (570,114) bridged -->
+        <path class="wire" d="M570,114 H550 V306" stroke="var(--slate)" stroke-width="2.5"
+          data-t="Motor GND bridge" data-d="A4988 motor-side GND tied to common ground."/>
+        <!-- GND to Driver B -->
+        <path class="wire dash D" d="M440,306 V621 H570" stroke="var(--slate)" stroke-width="3"
+          data-t="GND → Driver B" data-d="Common ground branch to Driver B."/>
+
+        <!-- CONTROL A: STEP (IO5) ESP32 pin7-L (280,300) → A4988-A STEP (720,274) -->
+        <path class="wire dash" d="M280,300 H350 V30 H750 V274 H720" stroke="var(--cyan)" stroke-width="2.5"
+          data-t="Motor A STEP (GPIO 5)" data-d="Rising-edge pulse advances Motor A by 1 microstep. Firmware supports up to 25 000 steps/s."/>
+        <!-- DIR (IO6) ESP32 pin8-L (280,330) → A4988-A DIR (720,306) -->
+        <path class="wire" d="M280,330 H340 V22 H766 V306 H720" stroke="var(--amber)" stroke-width="2.5"
+          data-t="Motor A DIR (GPIO 6)" data-d="Direction control: HIGH = CW, LOW = CCW."/>
+        <!-- EN (IO7)  ESP32 pin1-R (80,120) → A4988-A ENABLE (720,82) -->
+        <path class="wire" d="M80,120 H50 V14 H780 V82 H720" stroke="var(--red)" stroke-width="2.3"
+          data-t="Motor A ENABLE (GPIO 7)" data-d="Active LOW. LOW = coils energized; HIGH = outputs high-Z (coils off, cool idle)."/>
+
+        <!-- MS BUS (shared) -->
+        <!-- MS1 (IO1) ESP32 pin3-L (280,180) → A4988-A MS1 (720,114) -->
+        <path class="wire" d="M280,180 H370 V60 H700 V114 H720" stroke="var(--teal)" stroke-width="2"
+          data-t="MS1 Bus (GPIO 1)" data-d="Microstep bit 1. Shared to both Driver A and B."/>
+        <!-- MS2 (IO2) ESP32 pin4-L (280,210) → A4988-A MS2 (720,146) -->
+        <path class="wire" d="M280,210 H385 V68 H690 V146 H720" stroke="#10b981" stroke-width="2"
+          data-t="MS2 Bus (GPIO 2)" data-d="Microstep bit 2. Shared to both Driver A and B."/>
+        <!-- MS3 (IO4) ESP32 pin6-L (280,270) → A4988-A MS3 (720,178) -->
+        <path class="wire" d="M280,270 H400 V76 H680 V178 H720" stroke="var(--purple)" stroke-width="2"
+          data-t="MS3 Bus (GPIO 4)" data-d="Microstep bit 3. GPIO 4 sits on the outer header — no underside soldering!"/>
+
+        <!-- MS bus branches to Driver B -->
+        <path class="wire D" d="M700,114 V429 H720" stroke="var(--teal)" stroke-width="2"
+          data-t="MS1 → Driver B" data-d="Shared microstep bit 1 branch to Driver B."/>
+        <path class="wire D" d="M690,146 V461 H720" stroke="#10b981" stroke-width="2"
+          data-t="MS2 → Driver B" data-d="Shared microstep bit 2 branch to Driver B."/>
+        <path class="wire D" d="M680,178 V493 H720" stroke="var(--purple)" stroke-width="2"
+          data-t="MS3 → Driver B" data-d="Shared microstep bit 3 branch to Driver B."/>
+
+        <!-- RESET↔SLEEP jumper A -->
+        <path class="wire" d="M720,210 C700,210 700,242 720,242" stroke="var(--green)" stroke-width="2.5"
+          data-t="RESET ↔ SLEEP (A)" data-d="Direct jumper wire. Required to keep the driver awake and active."/>
+
+        <!-- COIL WIRES A (A4988-A left side → Motor A) -->
+        <path class="wire dash" d="M570,210 H555 L870,138 H900" stroke="var(--blue)" stroke-width="2.8"
+          data-t="Coil 1A → Blue" data-d="Phase A (+). ~100 Ω across Blue &amp; Pink."/>
+        <path class="wire dash" d="M570,242 H555 L870,158 H900" stroke="var(--pink)" stroke-width="2.8"
+          data-t="Coil 1B → Pink" data-d="Phase A (−)."/>
+        <path class="wire dash" d="M570,178 H555 L870,178 H900" stroke="var(--yellow)" stroke-width="2.8"
+          data-t="Coil 2A → Yellow" data-d="Phase B (+). ~100 Ω across Yellow &amp; Orange."/>
+        <path class="wire dash" d="M570,146 H555 L870,198 H900" stroke="var(--orange)" stroke-width="2.8"
+          data-t="Coil 2B → Orange" data-d="Phase B (−)."/>
+        <!-- Red cut -->
+        <line x1="900" y1="218" x2="935" y2="218" stroke="var(--red)" stroke-width="2" stroke-dasharray="3 3"/>
+        <text x="940" y="222" class="lbl" fill="var(--red)" font-size="8" font-weight="700">RED CUT</text>
+
+        <!-- ── DUAL-ONLY WIRES ──────────────────────────── -->
+        <!-- CONTROL B: STEP (IO9) ESP32 pin3-R (80,180) → A4988-B STEP (720,589) -->
+        <path class="wire dash D" d="M80,180 H40 V660 H750 V589 H720" stroke="var(--purple)" stroke-width="2.5"
+          data-t="Motor B STEP (GPIO 9)" data-d="Step pulse for Y-axis Motor B."/>
+        <!-- DIR (IO10) ESP32 pin4-R (80,210) → A4988-B DIR (720,621) -->
+        <path class="wire D" d="M80,210 H32 V668 H766 V621 H720" stroke="var(--yellow)" stroke-width="2.5"
+          data-t="Motor B DIR (GPIO 10)" data-d="Direction control for Motor B."/>
+        <!-- EN (IO11)  ESP32 pin5-R (80,240) → A4988-B ENABLE (720,397) -->
+        <path class="wire D" d="M80,240 H24 V676 H780 V397 H720" stroke="var(--pink)" stroke-width="2.3"
+          data-t="Motor B ENABLE (GPIO 11)" data-d="Active LOW enable for Driver B."/>
+
+        <!-- RESET↔SLEEP jumper B -->
+        <path class="wire D" d="M720,525 C700,525 700,557 720,557" stroke="var(--green)" stroke-width="2.5"
+          data-t="RESET ↔ SLEEP (B)" data-d="Jumper for Driver B."/>
+
+        <!-- COIL WIRES B -->
+        <path class="wire dash D" d="M570,525 H555 L870,453 H900" stroke="var(--blue)" stroke-width="2.8"
+          data-t="Motor B 1A → Blue" data-d="Coil 1 (+) for Motor B."/>
+        <path class="wire dash D" d="M570,557 H555 L870,473 H900" stroke="var(--pink)" stroke-width="2.8"
+          data-t="Motor B 1B → Pink" data-d="Coil 1 (−) for Motor B."/>
+        <path class="wire dash D" d="M570,493 H555 L870,493 H900" stroke="var(--yellow)" stroke-width="2.8"
+          data-t="Motor B 2A → Yellow" data-d="Coil 2 (+) for Motor B."/>
+        <path class="wire dash D" d="M570,461 H555 L870,513 H900" stroke="var(--orange)" stroke-width="2.8"
+          data-t="Motor B 2B → Orange" data-d="Coil 2 (−) for Motor B."/>
+        <line class="D" x1="900" y1="533" x2="935" y2="533" stroke="var(--red)" stroke-width="2" stroke-dasharray="3 3"/>
+        <text class="D lbl" x="940" y="537" fill="var(--red)" font-size="8" font-weight="700">RED CUT</text>
+      </g>
+
+      <!-- ── ESP32-S3 SuperMini ─────────────────────────── -->
+      <g id="esp" transform="translate(80,50)">
+        <rect width="200" height="310" rx="10" fill="url(#gS3)" stroke="#4338ca" stroke-width="2" filter="url(#sh)"/>
+        <!-- USB-C -->
+        <rect x="60" y="-10" width="80" height="20" rx="4" fill="#94a3b8" stroke="#cbd5e1" stroke-width="1.5"/>
+        <text x="100" y="4" text-anchor="middle" fill="#0f172a" font-size="9" font-weight="700">USB-C</text>
+        <!-- IC -->
+        <rect x="40" y="36" width="120" height="95" rx="5" fill="#1e293b" stroke="#334155"/>
+        <text x="100" y="76" text-anchor="middle" fill="#f8fafc" font-size="12" font-weight="700">ESP32-S3</text>
+        <text x="100" y="92" text-anchor="middle" fill="var(--cyan)" font-size="10" font-weight="600">SuperMini</text>
+        <text x="100" y="107" text-anchor="middle" fill="#64748b" font-size="7.5">Xtensa LX7 • 240 MHz</text>
+        <!-- Buttons -->
+        <circle cx="55" cy="150" r="7" fill="#334155" stroke="#64748b"/><circle cx="55" cy="150" r="3.5" fill="#0284c7"/>
+        <text x="55" y="167" text-anchor="middle" class="lbl" font-size="7.5">BOOT</text>
+        <circle cx="145" cy="150" r="7" fill="#334155" stroke="#64748b"/><circle cx="145" cy="150" r="3.5" fill="var(--red)"/>
+        <text x="145" y="167" text-anchor="middle" class="lbl" font-size="7.5">RESET</text>
+        <!-- LED -->
+        <rect x="90" y="178" width="20" height="8" rx="2" fill="var(--green)" stroke="#34d399" filter="url(#gl)"/>
+        <text x="100" y="198" text-anchor="middle" fill="#34d399" class="lbl" font-size="7.5">LED IO13</text>
+
+        <!-- LEFT HEADER (x=200, y starts at 40, spacing 30) -->
+        <!-- Pin 0: 5V -->
+        <circle class="pin" cx="200" cy="40" r="4" fill="var(--red)" data-t="5 V (VBUS)" data-d="5 V from USB rail. Powers motor bus via capacitor."/>
+        <text x="190" y="44" text-anchor="end" class="lbl">5V</text>
+        <!-- Pin 1: GND -->
+        <circle class="pin" cx="200" cy="70" r="4" fill="var(--slate)" data-t="GND" data-d="Common ground. Connect to all GND rails."/>
+        <text x="190" y="74" text-anchor="end" class="lbl">GND</text>
+        <!-- Pin 2: 3V3 -->
+        <circle class="pin" cx="200" cy="100" r="4" fill="var(--orange)" data-t="3.3 V" data-d="Regulated 3.3 V output. Feeds A4988 VDD logic supply."/>
+        <text x="190" y="104" text-anchor="end" class="lbl">3V3</text>
+        <!-- Pin 3: IO1 (MS1) -->
+        <circle class="pin" cx="200" cy="130" r="4" fill="var(--teal)" data-t="GPIO 1 (MS1)" data-d="Microstep select bit 1. Shared to both drivers."/>
+        <text x="190" y="134" text-anchor="end" class="lbl">IO1 (MS1)</text>
+        <!-- Pin 4: IO2 (MS2) -->
+        <circle class="pin" cx="200" cy="160" r="4" fill="#10b981" data-t="GPIO 2 (MS2)" data-d="Microstep select bit 2. Shared to both drivers."/>
+        <text x="190" y="164" text-anchor="end" class="lbl">IO2 (MS2)</text>
+        <!-- Pin 5: IO3 (NC) -->
+        <circle class="pin" cx="200" cy="190" r="4" fill="var(--slate)" data-t="GPIO 3 (NC)" data-d="Strapping pin — left unconnected for boot safety."/>
+        <text x="190" y="194" text-anchor="end" class="lbl" fill="#4b5563">IO3</text>
+        <!-- Pin 6: IO4 (MS3) -->
+        <circle class="pin" cx="200" cy="220" r="4" fill="var(--purple)" data-t="GPIO 4 (MS3)" data-d="Microstep select bit 3. On the outer header — no underside soldering!"/>
+        <text x="190" y="224" text-anchor="end" class="lbl">IO4 (MS3)</text>
+        <!-- Pin 7: IO5 (STEP_A) -->
+        <circle class="pin" cx="200" cy="250" r="4" fill="var(--cyan)" data-t="GPIO 5 (STEP A)" data-d="Step pulse for Motor A (X-axis mirror)."/>
+        <text x="190" y="254" text-anchor="end" class="lbl">IO5 (STEP_A)</text>
+        <!-- Pin 8: IO6 (DIR_A) -->
+        <circle class="pin" cx="200" cy="280" r="4" fill="var(--amber)" data-t="GPIO 6 (DIR A)" data-d="Direction for Motor A. HIGH=CW, LOW=CCW."/>
+        <text x="190" y="284" text-anchor="end" class="lbl">IO6 (DIR_A)</text>
+
+        <!-- RIGHT HEADER (x=0, y starts at 40, spacing 30) -->
+        <!-- Pin 0: GND -->
+        <circle class="pin" cx="0" cy="40" r="4" fill="var(--slate)" data-t="GND" data-d="Secondary ground pin."/>
+        <text x="10" y="44" class="lbl">GND</text>
+        <!-- Pin 1: IO7 (EN_A) -->
+        <circle class="pin" cx="0" cy="70" r="4" fill="var(--red)" data-t="GPIO 7 (EN A)" data-d="Enable for Driver A. Active LOW."/>
+        <text x="10" y="74" class="lbl">IO7 (EN_A)</text>
+        <!-- Pin 2: IO8 (NC) -->
+        <circle class="pin" cx="0" cy="100" r="4" fill="var(--slate)" data-t="GPIO 8 (NC)" data-d="Unused GPIO."/>
+        <text x="10" y="104" class="lbl" fill="#4b5563">IO8</text>
+        <!-- Pin 3: IO9 (STEP_B) -->
+        <circle class="pin" cx="0" cy="130" r="4" fill="var(--purple)" data-t="GPIO 9 (STEP B)" data-d="Step pulse for Motor B (Y-axis)."/>
+        <text x="10" y="134" class="lbl">IO9 (STEP_B)</text>
+        <!-- Pin 4: IO10 (DIR_B) -->
+        <circle class="pin" cx="0" cy="160" r="4" fill="var(--yellow)" data-t="GPIO 10 (DIR B)" data-d="Direction for Motor B."/>
+        <text x="10" y="164" class="lbl">IO10 (DIR_B)</text>
+        <!-- Pin 5: IO11 (EN_B) -->
+        <circle class="pin" cx="0" cy="190" r="4" fill="var(--pink)" data-t="GPIO 11 (EN B)" data-d="Enable for Driver B. Active LOW."/>
+        <text x="10" y="194" class="lbl">IO11 (EN_B)</text>
+        <!-- Pin 6: IO12 (NC) -->
+        <circle class="pin" cx="0" cy="220" r="4" fill="var(--slate)" data-t="GPIO 12 (NC)" data-d="Unused GPIO."/>
+        <text x="10" y="224" class="lbl" fill="#4b5563">IO12</text>
+        <!-- Pin 7: IO13 (LED) -->
+        <circle class="pin" cx="0" cy="250" r="4" fill="var(--green)" data-t="GPIO 13 (LED)" data-d="Onboard status LED."/>
+        <text x="10" y="254" class="lbl">IO13 (LED)</text>
+        <!-- Pin 8: TX0 -->
+        <circle class="pin" cx="0" cy="280" r="4" fill="var(--blue)" data-t="GPIO 43 (TX0)" data-d="UART TX for 115 200 baud serial monitor."/>
+        <text x="10" y="284" class="lbl">TX0</text>
+      </g>
+
+      <!-- ── Decoupling Capacitor ───────────────────────── -->
+      <g transform="translate(480,60)">
+        <rect width="45" height="65" rx="5" fill="#1e293b" stroke="var(--slate)" stroke-width="1.5" filter="url(#sh)"/>
+        <circle cx="22" cy="7" r="4" fill="none" stroke="#94a3b8"/><line x1="19" y1="7" x2="25" y2="7" stroke="#94a3b8"/><line x1="22" y1="4" x2="22" y2="10" stroke="#94a3b8"/>
+        <rect x="30" y="14" width="10" height="46" fill="#0f172a"/>
+        <text x="35" y="30" fill="#94a3b8" font-size="8" font-weight="700" text-anchor="middle">−</text>
+        <text x="35" y="48" fill="#94a3b8" font-size="8" font-weight="700" text-anchor="middle">−</text>
+        <text x="14" y="32" fill="#f8fafc" font-size="7.5" font-weight="700">470µF</text>
+        <text x="14" y="44" fill="var(--cyan)" font-size="7" font-weight="600">25 V</text>
+      </g>
+
+      <!-- ── A4988 Driver A (X-axis) ────────────────────── -->
+      <g id="drvA" transform="translate(570,55)">
+        <rect width="150" height="290" rx="7" fill="url(#gA4)" stroke="#dc2626" stroke-width="2" filter="url(#sh)"/>
+        <!-- Trimpot -->
+        <circle cx="75" cy="38" r="12" fill="#cbd5e1" stroke="#475569" stroke-width="2"/>
+        <line x1="68" y1="38" x2="82" y2="38" stroke="#1e293b" stroke-width="2.5"/>
+        <text x="75" y="60" text-anchor="middle" fill="#fca5a5" font-size="7.5" font-weight="700">VREF 0.43 V</text>
+        <!-- IC -->
+        <rect x="45" y="100" width="60" height="55" rx="3" fill="#0f172a" stroke="#334155"/>
+        <text x="75" y="132" text-anchor="middle" fill="#f8fafc" font-size="10" font-weight="700">A4988</text>
+        <!-- LEFT PINS (spacing 32, start y=27) -->
+        <circle class="pin" cx="0" cy="27" r="3.5" fill="var(--red)" data-t="VMOT" data-d="Motor power supply. 5 V via decoupling cap."/>
+        <text x="10" y="31" class="lbl">VMOT</text>
+        <circle class="pin" cx="0" cy="59" r="3.5" fill="var(--slate)" data-t="GND (motor)" data-d="High-current motor ground."/>
+        <text x="10" y="63" class="lbl">GND</text>
+        <circle class="pin" cx="0" cy="91" r="3.5" fill="var(--orange)" data-t="2B" data-d="Coil B (−) → Orange wire."/>
+        <text x="10" y="95" class="lbl">2B (Org)</text>
+        <circle class="pin" cx="0" cy="123" r="3.5" fill="var(--yellow)" data-t="2A" data-d="Coil B (+) → Yellow wire."/>
+        <text x="10" y="127" class="lbl">2A (Yel)</text>
+        <circle class="pin" cx="0" cy="155" r="3.5" fill="var(--blue)" data-t="1A" data-d="Coil A (+) → Blue wire."/>
+        <text x="10" y="159" class="lbl">1A (Blu)</text>
+        <circle class="pin" cx="0" cy="187" r="3.5" fill="var(--pink)" data-t="1B" data-d="Coil A (−) → Pink wire."/>
+        <text x="10" y="191" class="lbl">1B (Pnk)</text>
+        <circle class="pin" cx="0" cy="219" r="3.5" fill="var(--orange)" data-t="VDD" data-d="3.3 V logic supply from ESP32."/>
+        <text x="10" y="223" class="lbl">VDD (3V3)</text>
+        <circle class="pin" cx="0" cy="251" r="3.5" fill="var(--slate)" data-t="GND (logic)" data-d="Logic ground. Tied to common bus."/>
+        <text x="10" y="255" class="lbl">GND</text>
+        <!-- RIGHT PINS -->
+        <circle class="pin" cx="150" cy="27" r="3.5" fill="var(--red)" data-t="ENABLE" data-d="Active LOW. GPIO 7."/>
+        <text x="140" y="31" text-anchor="end" class="lbl">ENABLE</text>
+        <circle class="pin" cx="150" cy="59" r="3.5" fill="var(--teal)" data-t="MS1" data-d="Microstep bit 1 (GPIO 1)."/>
+        <text x="140" y="63" text-anchor="end" class="lbl">MS1</text>
+        <circle class="pin" cx="150" cy="91" r="3.5" fill="#10b981" data-t="MS2" data-d="Microstep bit 2 (GPIO 2)."/>
+        <text x="140" y="95" text-anchor="end" class="lbl">MS2</text>
+        <circle class="pin" cx="150" cy="123" r="3.5" fill="var(--purple)" data-t="MS3" data-d="Microstep bit 3 (GPIO 4)."/>
+        <text x="140" y="127" text-anchor="end" class="lbl">MS3</text>
+        <circle class="pin" cx="150" cy="155" r="3.5" fill="var(--green)" data-t="RESET" data-d="Tied to SLEEP via jumper."/>
+        <text x="140" y="159" text-anchor="end" class="lbl">RESET</text>
+        <circle class="pin" cx="150" cy="187" r="3.5" fill="var(--green)" data-t="SLEEP" data-d="Tied to RESET via jumper."/>
+        <text x="140" y="191" text-anchor="end" class="lbl">SLEEP</text>
+        <circle class="pin" cx="150" cy="219" r="3.5" fill="var(--cyan)" data-t="STEP" data-d="Step pulse input (GPIO 5)."/>
+        <text x="140" y="223" text-anchor="end" class="lbl">STEP</text>
+        <circle class="pin" cx="150" cy="251" r="3.5" fill="var(--amber)" data-t="DIR" data-d="Direction input (GPIO 6)."/>
+        <text x="140" y="255" text-anchor="end" class="lbl">DIR</text>
+        <text x="75" y="280" text-anchor="middle" fill="#f8fafc" font-size="10" font-weight="700">DRIVER A (X)</text>
+      </g>
+
+      <!-- ── Motor A ────────────────────────────────────── -->
+      <g id="motA" transform="translate(900,55)">
+        <circle cx="55" cy="80" r="55" fill="url(#gMot)" stroke="var(--slate)" stroke-width="2" filter="url(#sh)"/>
+        <path d="M55,25 L110,55 L110,105 L55,135Z" fill="#334155" stroke="var(--slate)" stroke-width="1.5"/>
+        <circle cx="90" cy="80" r="12" fill="#d97706" stroke="#b45309" stroke-width="2"/>
+        <rect x="87" y="70" width="6" height="20" fill="#92400e"/>
+        <text x="42" y="75" text-anchor="middle" fill="#f8fafc" font-size="9.5" font-weight="700">28BYJ-48</text>
+        <text x="42" y="87" text-anchor="middle" fill="var(--green)" font-size="7.5" font-weight="600">BIPOLAR</text>
+        <text x="42" y="98" text-anchor="middle" fill="var(--muted)" font-size="6.5">64:1 Gear</text>
+        <!-- Wire dots -->
+        <circle cx="0" cy="58" r="3" fill="var(--blue)"/><text x="7" y="62" class="lbl" font-size="8">Blue</text>
+        <circle cx="0" cy="78" r="3" fill="var(--pink)"/><text x="7" y="82" class="lbl" font-size="8">Pink</text>
+        <circle cx="0" cy="98" r="3" fill="var(--yellow)"/><text x="7" y="102" class="lbl" font-size="8">Yellow</text>
+        <circle cx="0" cy="118" r="3" fill="var(--orange)"/><text x="7" y="122" class="lbl" font-size="8">Orange</text>
+        <circle cx="0" cy="138" r="3" fill="var(--red)" stroke="#fff" stroke-dasharray="2 2"/>
+        <text x="7" y="142" class="lbl" font-size="8" fill="var(--red)">Red (CUT)</text>
+      </g>
+
+      <!-- ── A4988 Driver B (Y-axis) [DUAL] ─────────────── -->
+      <g id="drvB" class="D" transform="translate(570,370)">
+        <rect width="150" height="290" rx="7" fill="url(#gA4)" stroke="#9333ea" stroke-width="2" filter="url(#sh)"/>
+        <circle cx="75" cy="38" r="12" fill="#cbd5e1" stroke="#475569" stroke-width="2"/>
+        <line x1="68" y1="38" x2="82" y2="38" stroke="#1e293b" stroke-width="2.5"/>
+        <text x="75" y="60" text-anchor="middle" fill="#d8b4fe" font-size="7.5" font-weight="700">VREF 0.43 V</text>
+        <rect x="45" y="100" width="60" height="55" rx="3" fill="#0f172a" stroke="#334155"/>
+        <text x="75" y="132" text-anchor="middle" fill="#f8fafc" font-size="10" font-weight="700">A4988</text>
+        <!-- LEFT -->
+        <circle class="pin" cx="0" cy="27" r="3.5" fill="var(--red)"/><text x="10" y="31" class="lbl">VMOT</text>
+        <circle class="pin" cx="0" cy="59" r="3.5" fill="var(--slate)"/><text x="10" y="63" class="lbl">GND</text>
+        <circle class="pin" cx="0" cy="91" r="3.5" fill="var(--orange)"/><text x="10" y="95" class="lbl">2B (Org)</text>
+        <circle class="pin" cx="0" cy="123" r="3.5" fill="var(--yellow)"/><text x="10" y="127" class="lbl">2A (Yel)</text>
+        <circle class="pin" cx="0" cy="155" r="3.5" fill="var(--blue)"/><text x="10" y="159" class="lbl">1A (Blu)</text>
+        <circle class="pin" cx="0" cy="187" r="3.5" fill="var(--pink)"/><text x="10" y="191" class="lbl">1B (Pnk)</text>
+        <circle class="pin" cx="0" cy="219" r="3.5" fill="var(--orange)"/><text x="10" y="223" class="lbl">VDD (3V3)</text>
+        <circle class="pin" cx="0" cy="251" r="3.5" fill="var(--slate)"/><text x="10" y="255" class="lbl">GND</text>
+        <!-- RIGHT -->
+        <circle class="pin" cx="150" cy="27" r="3.5" fill="var(--pink)"/><text x="140" y="31" text-anchor="end" class="lbl">ENABLE</text>
+        <circle class="pin" cx="150" cy="59" r="3.5" fill="var(--teal)"/><text x="140" y="63" text-anchor="end" class="lbl">MS1</text>
+        <circle class="pin" cx="150" cy="91" r="3.5" fill="#10b981"/><text x="140" y="95" text-anchor="end" class="lbl">MS2</text>
+        <circle class="pin" cx="150" cy="123" r="3.5" fill="var(--purple)"/><text x="140" y="127" text-anchor="end" class="lbl">MS3</text>
+        <circle class="pin" cx="150" cy="155" r="3.5" fill="var(--green)"/><text x="140" y="159" text-anchor="end" class="lbl">RESET</text>
+        <circle class="pin" cx="150" cy="187" r="3.5" fill="var(--green)"/><text x="140" y="191" text-anchor="end" class="lbl">SLEEP</text>
+        <circle class="pin" cx="150" cy="219" r="3.5" fill="var(--purple)"/><text x="140" y="223" text-anchor="end" class="lbl">STEP</text>
+        <circle class="pin" cx="150" cy="251" r="3.5" fill="var(--yellow)"/><text x="140" y="255" text-anchor="end" class="lbl">DIR</text>
+        <text x="75" y="280" text-anchor="middle" fill="#f8fafc" font-size="10" font-weight="700">DRIVER B (Y)</text>
+      </g>
+
+      <!-- ── Motor B [DUAL] ─────────────────────────────── -->
+      <g id="motB" class="D" transform="translate(900,370)">
+        <circle cx="55" cy="80" r="55" fill="url(#gMot)" stroke="var(--slate)" stroke-width="2" filter="url(#sh)"/>
+        <path d="M55,25 L110,55 L110,105 L55,135Z" fill="#334155" stroke="var(--slate)" stroke-width="1.5"/>
+        <circle cx="90" cy="80" r="12" fill="#d97706" stroke="#b45309" stroke-width="2"/>
+        <rect x="87" y="70" width="6" height="20" fill="#92400e"/>
+        <text x="42" y="75" text-anchor="middle" fill="#f8fafc" font-size="9.5" font-weight="700">28BYJ-48</text>
+        <text x="42" y="87" text-anchor="middle" fill="var(--purple)" font-size="7.5" font-weight="600">Y-MIRROR</text>
+        <text x="42" y="98" text-anchor="middle" fill="var(--muted)" font-size="6.5">64:1 Gear</text>
+        <circle cx="0" cy="58" r="3" fill="var(--blue)"/><text x="7" y="62" class="lbl" font-size="8">Blue</text>
+        <circle cx="0" cy="78" r="3" fill="var(--pink)"/><text x="7" y="82" class="lbl" font-size="8">Pink</text>
+        <circle cx="0" cy="98" r="3" fill="var(--yellow)"/><text x="7" y="102" class="lbl" font-size="8">Yellow</text>
+        <circle cx="0" cy="118" r="3" fill="var(--orange)"/><text x="7" y="122" class="lbl" font-size="8">Orange</text>
+        <circle cx="0" cy="138" r="3" fill="var(--red)" stroke="#fff" stroke-dasharray="2 2"/>
+        <text x="7" y="142" class="lbl" font-size="8" fill="var(--red)">Red (CUT)</text>
+      </g>
+    </svg>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════
+     RIGHT — SIDEBAR
+     ════════════════════════════════════════════════════════ -->
+<div class="side">
+
+  <div class="card" style="border-left:3px solid var(--cyan)">
+    <h3>ℹ️ One Firmware, Two Test Modes</h3>
+    <p style="margin-bottom:.4rem"><strong><code>stepper_motor_test.ino</code></strong> is a unified test suite for <em>both</em> Single and Dual stepper testing.</p>
+    <ul>
+      <li><strong>Single Motor:</strong> Wire only Motor A. Run <code>STEP</code>, <code>SPEED</code>, <code>BACKLASH</code>, <code>STALL</code>.</li>
+      <li><strong>Dual Motor:</strong> Add Motor B later. Run <code>DUAL STEP</code>, <code>DUAL CIRCLE</code>, <code>DUAL GOTO</code>.</li>
+    </ul>
+  </div>
+
+  <div class="card" style="border-left:3px solid var(--green)">
+    <h3>⚡ Capacitor Guide</h3>
+    <p><strong>Your stock:</strong> 47 µF (16 V), 470 µF (25 V), 1000 µF (25 V).</p>
+    <div class="hi">
+      <strong>Use the 470 µF 25 V!</strong>
+      <p style="font-size:.72rem;color:#cbd5e1;margin-top:.15rem">4.7× better than 100 µF. Absorbs inductive back-EMF spikes, protecting A4988 FETs. Place within 1–2 cm of VMOT/GND.</p>
     </div>
-  </header>
-
-  <!-- Main Content Layout -->
-  <div class="main-container">
-
-    <!-- Left: SVG Schematic Canvas -->
-    <div class="schematic-card">
-      <div class="schematic-toolbar">
-        <div class="toolbar-title">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2">
-            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
-          </svg>
-          Interactive Circuit Canvas (<span id="canvasModeLabel">Single Motor Bring-Up Mode</span>)
-        </div>
-        <div class="legend-bar">
-          <div class="legend-item"><span class="legend-dot" style="background: var(--wire-step-a);"></span> Step Pulse (A: IO5 / B: IO9)</div>
-          <div class="legend-item"><span class="legend-dot" style="background: var(--wire-dir-a);"></span> Direction (A: IO6 / B: IO10)</div>
-          <div class="legend-item"><span class="legend-dot" style="background: var(--wire-en-a);"></span> Enable (A: IO7 / B: IO11)</div>
-          <div class="legend-item"><span class="legend-dot" style="background: var(--wire-ms1);"></span> MS Bus (IO1, IO2, IO4)</div>
-          <div class="legend-item"><span class="legend-dot" style="background: var(--wire-5v);"></span> 5V VMOT</div>
-          <div class="legend-item"><span class="legend-dot" style="background: var(--wire-3v3);"></span> 3.3V VDD Logic</div>
-          <div class="legend-item"><span class="legend-dot" style="background: var(--wire-gnd);"></span> Common GND</div>
-        </div>
-      </div>
-
-      <div class="svg-wrapper">
-        <svg id="schematicSvg" viewBox="0 0 1250 760">
-          <defs>
-            <!-- Drop Shadow Filter -->
-            <filter id="glowShadow" x="-20%" y="-20%" width="140%" height="140%">
-              <feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="#000" flood-opacity="0.6"/>
-            </filter>
-            <!-- Blue Glow for highlights -->
-            <filter id="neonGlow" x="-30%" y="-30%" width="160%" height="160%">
-              <feGaussianBlur stdDeviation="3" result="blur" />
-              <feMerge>
-                <feMergeNode in="blur" />
-                <feMergeNode in="SourceGraphic" />
-              </feMerge>
-            </filter>
-            <linearGradient id="s3Gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#1e1b4b" />
-              <stop offset="100%" stop-color="#0f172a" />
-            </linearGradient>
-            <linearGradient id="a4988Gradient" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stop-color="#7f1d1d" />
-              <stop offset="100%" stop-color="#450a0a" />
-            </linearGradient>
-            <linearGradient id="motorGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#475569" />
-              <stop offset="50%" stop-color="#334155" />
-              <stop offset="100%" stop-color="#1e293b" />
-            </linearGradient>
-          </defs>
-
-          <!-- ============================================================== -->
-          <!-- 1. WIRES & CONNECTIONS (Rendered behind boards)                 -->
-          <!-- ============================================================== -->
-          <g id="wireLayer">
-
-            <!-- Shared Power: 3.3V Logic Bus (Orange) -->
-            <!-- ESP32 3V3 (left row pin 3, x: 280, y: 190) -> A4988-A VDD (x: 620, y: 390) -->
-            <path id="wire_3v3_A" class="wire wire-pulse" d="M 280 190 L 450 190 L 450 390 L 610 390" stroke="var(--wire-3v3)" stroke-width="2.5" data-title="3.3V Logic Supply (VDD)" data-desc="Provides safe 3.3V logic level power to A4988 logic circuits, perfectly matching ESP32-S3 I/O voltage." />
-            
-            <!-- A4988-B VDD (Dual Mode) -->
-            <path id="wire_3v3_B" class="wire wire-pulse dual-only" d="M 450 390 L 450 670 L 610 670" stroke="var(--wire-3v3)" stroke-width="2.5" data-title="3.3V Logic Supply (VDD - Driver B)" data-desc="Shared 3.3V logic bus feeding Motor B driver VDD." />
-
-            <!-- Shared Power: Common GND Bus (Slate) -->
-            <!-- ESP32 GND (left row pin 2, x: 280, y: 160) -->
-            <path id="wire_gnd_A" class="wire wire-pulse" d="M 280 160 L 470 160 L 470 420 L 610 420" stroke="var(--wire-gnd)" stroke-width="3" data-title="Common Ground (GND)" data-desc="Critical common ground line connecting ESP32-S3 logic ground, A4988 logic ground, and motor DC ground." />
-            <path id="wire_gnd_motA" class="wire" d="M 610 210 L 580 210 L 580 420" stroke="var(--wire-gnd)" stroke-width="3" data-title="Motor GND -> Logic GND Bridge" data-desc="A4988 motor ground tied to common logic ground plane." />
-            <path id="wire_gnd_B" class="wire wire-pulse dual-only" d="M 470 420 L 470 700 L 610 700" stroke="var(--wire-gnd)" stroke-width="3" data-title="Common Ground (Driver B)" data-desc="Common ground connection for Driver B." />
-
-            <!-- 5V Motor Power Bus (Red) -->
-            <!-- ESP32 5V (left row pin 1, x: 280, y: 130) -> 470uF Cap -> VMOT -->
-            <path id="wire_5v_main" class="wire wire-pulse" d="M 280 130 L 520 130 L 520 180" stroke="var(--wire-5v)" stroke-width="3" data-title="5V DC Motor Power Rail (VBUS)" data-desc="Supplies 5V DC from the USB rail. Must pass directly through the 470µF decoupling capacitor before hitting VMOT." />
-            <path id="wire_5v_A" class="wire" d="M 520 180 L 610 180" stroke="var(--wire-5v)" stroke-width="3" data-title="VMOT (Driver A)" data-desc="Motor DC power input (5V). Protected against LC voltage spikes by 470µF capacitor." />
-            <path id="wire_5v_B" class="wire wire-pulse dual-only" d="M 520 180 L 520 460 L 610 460" stroke="var(--wire-5v)" stroke-width="3" data-title="VMOT (Driver B)" data-desc="Motor DC power branch for Driver B." />
-
-            <!-- Cap Connections -->
-            <!-- Cap (+) at (520, 180), Cap (-) at (550, 180) to GND (580, 210) -->
-            <path id="wire_cap_gnd" class="wire" d="M 550 180 L 580 180 L 580 210" stroke="var(--wire-gnd)" stroke-width="2.5" data-title="Capacitor Negative Terminal (-)" data-desc="Negative lead of 470µF capacitor tied directly to common ground." />
-
-            <!-- Control Bus: Motor A (IO5=STEP, IO6=DIR, IO7=EN) -->
-            <!-- IO5 (left row pin 8, x: 280, y: 340) -> A4988-A STEP (x: 770, y: 390) -->
-            <path id="wire_step_A" class="wire wire-pulse" d="M 280 340 L 360 340 L 360 50 L 800 50 L 800 390 L 770 390" stroke="var(--wire-step-a)" stroke-width="2.5" data-title="Motor A STEP Pulse (GPIO 5)" data-desc="Rising-edge pulse advances Motor A rotor by 1 microstep. Up to 25,000 steps/sec supported." />
-            
-            <!-- IO6 (left row pin 9, x: 280, y: 370) -> A4988-A DIR (x: 770, y: 420) -->
-            <path id="wire_dir_A" class="wire" d="M 280 370 L 340 370 L 340 40 L 820 40 L 820 420 L 770 420" stroke="var(--wire-dir-a)" stroke-width="2.5" data-title="Motor A DIR Control (GPIO 6)" data-desc="Sets rotation direction: HIGH = CW (Clockwise), LOW = CCW (Counter-Clockwise)." />
-
-            <!-- IO7 (right row pin 2, x: 120, y: 160) -> A4988-A ENABLE (x: 770, y: 180) -->
-            <path id="wire_en_A" class="wire" d="M 120 160 L 60 160 L 60 30 L 840 30 L 840 180 L 770 180" stroke="var(--wire-en-a)" stroke-width="2.5" data-title="Motor A ENABLE (GPIO 7)" data-desc="Active LOW. LOW = FET outputs energized; HIGH = FET outputs disabled (coils unpowered, cool idle)." />
-
-            <!-- Shared Microstepping Bus: MS1=IO1, MS2=IO2, MS3=IO4 -->
-            <!-- IO1 (left row pin 4, x: 280, y: 220) -> MS1 (x: 770, y: 210) -->
-            <path id="wire_ms1" class="wire" d="M 280 220 L 380 220 L 380 90 L 740 90 L 740 210 L 770 210" stroke="var(--wire-ms1)" stroke-width="2" data-title="MS1 Shared Bus (GPIO 1)" data-desc="Microstepping bit 1. Shared in parallel to both Driver A and Driver B." />
-            
-            <!-- IO2 (left row pin 5, x: 280, y: 250) -> MS2 (x: 770, y: 240) -->
-            <path id="wire_ms2" class="wire" d="M 280 250 L 400 250 L 400 100 L 720 100 L 720 240 L 770 240" stroke="var(--wire-ms2)" stroke-width="2" data-title="MS2 Shared Bus (GPIO 2)" data-desc="Microstepping bit 2. Shared in parallel to both Driver A and Driver B." />
-
-            <!-- IO4 (left row pin 7, x: 280, y: 310) -> MS3 (x: 770, y: 270) -->
-            <path id="wire_ms3" class="wire" d="M 280 310 L 420 310 L 420 110 L 700 110 L 700 270 L 770 270" stroke="var(--wire-ms3)" stroke-width="2" data-title="MS3 Shared Bus (GPIO 4)" data-desc="Microstepping bit 3 (GPIO 4 on breadboard header, NO underside pads!). Shared to both drivers." />
-
-            <!-- A4988-A Jumper: RESET <-> SLEEP (x: 770, y: 300 to x: 770, y: 330) -->
-            <path class="wire" d="M 770 300 C 740 300, 740 330, 770 330" stroke="#22c55e" stroke-width="2.5" data-title="RESET <-> SLEEP Jumper" data-desc="Direct wire bridge required for normal driver operation. Disables sleep mode and keeps logic running." />
-
-            <!-- Motor A Coil Output Wires (A4988-A -> 28BYJ-48 Stepper A) -->
-            <!-- 1A (x: 610, y: 330) -> Motor Blue -->
-            <path class="wire wire-pulse" d="M 610 330 L 930 330 L 930 200 L 990 200" stroke="#3b82f6" stroke-width="3" data-title="Motor A Phase 1A (Blue Wire)" data-desc="Bipolar Coil 1 (+) phase terminal (~100 Ω across Blue & Pink)." />
-            
-            <!-- 1B (x: 610, y: 360) -> Motor Pink -->
-            <path class="wire wire-pulse" d="M 610 360 L 920 360 L 920 220 L 990 220" stroke="#ec4899" stroke-width="3" data-title="Motor A Phase 1B (Pink Wire)" data-desc="Bipolar Coil 1 (-) phase terminal." />
-
-            <!-- 2A (x: 610, y: 270) -> Motor Yellow -->
-            <path class="wire wire-pulse" d="M 610 270 L 920 270 L 920 240 L 990 240" stroke="#eab308" stroke-width="3" data-title="Motor A Phase 2A (Yellow Wire)" data-desc="Bipolar Coil 2 (+) phase terminal (~100 Ω across Yellow & Orange)." />
-
-            <!-- 2B (x: 610, y: 240) -> Motor Orange -->
-            <path class="wire wire-pulse" d="M 610 240 L 930 240 L 930 260 L 990 260" stroke="#f97316" stroke-width="3" data-title="Motor A Phase 2B (Orange Wire)" data-desc="Bipolar Coil 2 (-) phase terminal." />
-
-            <!-- Red Wire Cut Indicator -->
-            <path d="M 990 280 L 1030 280" stroke="#ef4444" stroke-width="2.5" stroke-dasharray="3 3" />
-            <text x="1035" y="284" fill="#ef4444" font-size="9" font-family="'JetBrains Mono', monospace" font-weight="700">RED CUT/NC</text>
-
-
-            <!-- ============================================================== -->
-            <!-- DUAL MODE WIRES (MOTOR B & DRIVER B)                            -->
-            <!-- ============================================================== -->
-            <!-- Control Bus: Motor B (IO9=STEP, IO10=DIR, IO11=EN) -->
-            <!-- IO9 (right row pin 4, x: 120, y: 220) -> A4988-B STEP (x: 770, y: 670) -->
-            <path id="wire_step_B" class="wire wire-pulse dual-only" d="M 120 220 L 50 220 L 50 730 L 800 730 L 800 670 L 770 670" stroke="var(--wire-step-b)" stroke-width="2.5" data-title="Motor B STEP Pulse (GPIO 9)" data-desc="Rising-edge step clock pulse for Y-Axis Motor B." />
-
-            <!-- IO10 (right row pin 5, x: 120, y: 250) -> A4988-B DIR (x: 770, y: 700) -->
-            <path id="wire_dir_B" class="wire dual-only" d="M 120 250 L 40 250 L 40 740 L 820 740 L 820 700 L 770 700" stroke="var(--wire-dir-b)" stroke-width="2.5" data-title="Motor B DIR Control (GPIO 10)" data-desc="Sets rotation direction for Y-Axis Motor B." />
-
-            <!-- IO11 (right row pin 6, x: 120, y: 280) -> A4988-B ENABLE (x: 770, y: 460) -->
-            <path id="wire_en_B" class="wire dual-only" d="M 120 280 L 30 280 L 30 450 L 770 450 L 770 460" stroke="var(--wire-en-b)" stroke-width="2.5" data-title="Motor B ENABLE (GPIO 11)" data-desc="Active LOW enable for Driver B FET outputs." />
-
-            <!-- Shared MS Bus Branches to Driver B -->
-            <path id="wire_ms1_B" class="wire dual-only" d="M 740 210 L 740 490 L 770 490" stroke="var(--wire-ms1)" stroke-width="2" data-title="MS1 (Driver B)" data-desc="Shared microstep bit 1 to Driver B." />
-            <path id="wire_ms2_B" class="wire dual-only" d="M 720 240 L 720 520 L 770 520" stroke="var(--wire-ms2)" stroke-width="2" data-title="MS2 (Driver B)" data-desc="Shared microstep bit 2 to Driver B." />
-            <path id="wire_ms3_B" class="wire dual-only" d="M 700 270 L 700 550 L 770 550" stroke="var(--wire-ms3)" stroke-width="2" data-title="MS3 (Driver B)" data-desc="Shared microstep bit 3 to Driver B." />
-
-            <!-- A4988-B Jumper: RESET <-> SLEEP -->
-            <path class="wire dual-only" d="M 770 580 C 740 580, 740 610, 770 610" stroke="#22c55e" stroke-width="2.5" data-title="Driver B RESET <-> SLEEP Jumper" data-desc="Direct wire bridge disabling sleep mode on Driver B." />
-
-            <!-- Motor B Coil Output Wires (A4988-B -> 28BYJ-48 Stepper B) -->
-            <path class="wire wire-pulse dual-only" d="M 610 610 L 930 610 L 930 480 L 990 480" stroke="#3b82f6" stroke-width="3" data-title="Motor B Phase 1A (Blue Wire)" data-desc="Bipolar Coil 1 (+) phase terminal for Motor B." />
-            <path class="wire wire-pulse dual-only" d="M 610 640 L 920 640 L 920 500 L 990 500" stroke="#ec4899" stroke-width="3" data-title="Motor B Phase 1B (Pink Wire)" data-desc="Bipolar Coil 1 (-) phase terminal for Motor B." />
-            <path class="wire wire-pulse dual-only" d="M 610 550 L 920 550 L 920 520 L 990 520" stroke="#eab308" stroke-width="3" data-title="Motor B Phase 2A (Yellow Wire)" data-desc="Bipolar Coil 2 (+) phase terminal for Motor B." />
-            <path class="wire wire-pulse dual-only" d="M 610 520 L 930 520 L 930 540 L 990 540" stroke="#f97316" stroke-width="3" data-title="Motor B Phase 2B (Orange Wire)" data-desc="Bipolar Coil 2 (-) phase terminal for Motor B." />
-            <path class="dual-only" d="M 990 560 L 1030 560" stroke="#ef4444" stroke-width="2.5" stroke-dasharray="3 3" />
-            <text class="dual-only" x="1035" y="564" fill="#ef4444" font-size="9" font-family="'JetBrains Mono', monospace" font-weight="700">RED CUT/NC</text>
-
-          </g>
-
-
-          <!-- ============================================================== -->
-          <!-- 2. HARDWARE MODULES (Physical board graphics)                   -->
-          <!-- ============================================================== -->
-
-          <!-- MODULE 1: ESP32-S3 SuperMini (Left) -->
-          <g id="esp32Board" transform="translate(100, 70)">
-            <!-- PCB Body -->
-            <rect x="0" y="0" width="200" height="340" rx="12" fill="url(#s3Gradient)" stroke="#4338ca" stroke-width="2" filter="url(#glowShadow)"/>
-            
-            <!-- USB-C Connector (Top) -->
-            <rect x="65" y="-12" width="70" height="24" rx="4" fill="#94a3b8" stroke="#cbd5e1" stroke-width="1.5"/>
-            <text x="100" y="4" text-anchor="middle" fill="#0f172a" font-size="9" font-weight="700" font-family="'JetBrains Mono', monospace">USB-C</text>
-
-            <!-- ESP32-S3 IC / RF Shield -->
-            <rect x="40" y="50" width="120" height="110" rx="6" fill="#1e293b" stroke="#334155" stroke-width="1"/>
-            <text x="100" y="95" text-anchor="middle" fill="#f8fafc" font-size="12" font-weight="700">ESP32-S3</text>
-            <text x="100" y="112" text-anchor="middle" fill="#38bdf8" font-size="10" font-weight="600">SuperMini</text>
-            <text x="100" y="130" text-anchor="middle" fill="#64748b" font-size="8">Xtensa Dual-Core 240MHz</text>
-
-            <!-- Buttons: BOOT (IO0) and RST -->
-            <circle cx="60" cy="185" r="8" fill="#334155" stroke="#64748b" stroke-width="1.5" />
-            <circle cx="60" cy="185" r="4" fill="#0284c7" />
-            <text x="60" y="205" text-anchor="middle" fill="#94a3b8" font-size="8">BOOT</text>
-
-            <circle cx="140" cy="185" r="8" fill="#334155" stroke="#64748b" stroke-width="1.5" />
-            <circle cx="140" cy="185" r="4" fill="#ef4444" />
-            <text x="140" y="205" text-anchor="middle" fill="#94a3b8" font-size="8">RESET</text>
-
-            <!-- Onboard Status LED (GPIO 13) -->
-            <rect x="92" y="220" width="16" height="10" rx="2" fill="#10b981" stroke="#34d399" stroke-width="1" filter="url(#neonGlow)"/>
-            <text x="100" y="244" text-anchor="middle" fill="#34d399" font-size="8" font-weight="600">LED (IO13)</text>
-
-            <!-- Pin Header LEFT (Power & Low GPIOs) -->
-            <!-- 9 Pins: 5V, GND, 3V3, IO1, IO2, IO3, IO4, IO5, IO6 -->
-            <!-- Offset relative to board: x: 180, y values spaced 30px from y=60 -->
-            <!-- Pin 1: 5V -->
-            <circle class="pin-circle" cx="180" cy="60" r="4.5" fill="#ef4444" data-title="5V (VBUS)" data-desc="5V power from USB rail. Feeds VMOT motor rail via capacitor." />
-            <text class="pin-label" x="170" y="64" text-anchor="end">5V</text>
-
-            <!-- Pin 2: GND -->
-            <circle class="pin-circle" cx="180" cy="90" r="4.5" fill="#64748b" data-title="GND" data-desc="Common ground reference for power and logic." />
-            <text class="pin-label" x="170" y="94" text-anchor="end">GND</text>
-
-            <!-- Pin 3: 3V3 -->
-            <circle class="pin-circle" cx="180" cy="120" r="4.5" fill="#f97316" data-title="3V3 (3.3V Logic)" data-desc="Regulated 3.3V output from onboard LDO. Feeds A4988 VDD." />
-            <text class="pin-label" x="170" y="124" text-anchor="end">3V3</text>
-
-            <!-- Pin 4: IO1 (MS1) -->
-            <circle class="pin-circle" cx="180" cy="150" r="4.5" fill="var(--wire-ms1)" data-title="GPIO 1 (MS1)" data-desc="Microstep Select 1 output line. Shared to both drivers." />
-            <text class="pin-label" x="170" y="154" text-anchor="end">IO1 (MS1)</text>
-
-            <!-- Pin 5: IO2 (MS2) -->
-            <circle class="pin-circle" cx="180" cy="180" r="4.5" fill="var(--wire-ms2)" data-title="GPIO 2 (MS2)" data-desc="Microstep Select 2 output line. Shared to both drivers." />
-            <text class="pin-label" x="170" y="184" text-anchor="end">IO2 (MS2)</text>
-
-            <!-- Pin 6: IO3 -->
-            <circle class="pin-circle" cx="180" cy="210" r="4.5" fill="#475569" data-title="GPIO 3 (NC)" data-desc="Strapping pin (JTAG select). Left unconnected for safety." />
-            <text class="pin-label" x="170" y="214" text-anchor="end">IO3</text>
-
-            <!-- Pin 7: IO4 (MS3) -->
-            <circle class="pin-circle" cx="180" cy="240" r="4.5" fill="var(--wire-ms3)" data-title="GPIO 4 (MS3)" data-desc="Microstep Select 3 output line. Outer header pin, eliminates need for underside soldering!" />
-            <text class="pin-label" x="170" y="244" text-anchor="end">IO4 (MS3)</text>
-
-            <!-- Pin 8: IO5 (STEP_A) -->
-            <circle class="pin-circle" cx="180" cy="270" r="4.5" fill="var(--wire-step-a)" data-title="GPIO 5 (STEP_A)" data-desc="Step pulse output for Motor A (X-Axis)." />
-            <text class="pin-label" x="170" y="274" text-anchor="end">IO5 (STEP_A)</text>
-
-            <!-- Pin 9: IO6 (DIR_A) -->
-            <circle class="pin-circle" cx="180" cy="300" r="4.5" fill="var(--wire-dir-a)" data-title="GPIO 6 (DIR_A)" data-desc="Direction output for Motor A (X-Axis)." />
-            <text class="pin-label" x="170" y="304" text-anchor="end">IO6 (DIR_A)</text>
-
-
-            <!-- Pin Header RIGHT (High GPIOs & Control) -->
-            <!-- 9 Pins: GND, IO7, IO8, IO9, IO10, IO11, IO12, IO13, IO14/TX -->
-            <!-- Pin 1: GND -->
-            <circle class="pin-circle" cx="20" cy="60" r="4.5" fill="#64748b" data-title="GND" data-desc="Secondary ground pin." />
-            <text class="pin-label" x="30" y="64" text-anchor="start">GND</text>
-
-            <!-- Pin 2: IO7 (EN_A) -->
-            <circle class="pin-circle" cx="20" cy="90" r="4.5" fill="var(--wire-en-a)" data-title="GPIO 7 (EN_A)" data-desc="Enable line for Motor A driver (Active LOW)." />
-            <text class="pin-label" x="30" y="94" text-anchor="start">IO7 (EN_A)</text>
-
-            <!-- Pin 3: IO8 -->
-            <circle class="pin-circle" cx="20" cy="120" r="4.5" fill="#475569" data-title="GPIO 8 (NC)" data-desc="Unused general GPIO." />
-            <text class="pin-label" x="30" y="124" text-anchor="start">IO8</text>
-
-            <!-- Pin 4: IO9 (STEP_B) -->
-            <circle class="pin-circle" cx="20" cy="150" r="4.5" fill="var(--wire-step-b)" data-title="GPIO 9 (STEP_B)" data-desc="Step pulse output for Motor B (Y-Axis)." />
-            <text class="pin-label" x="30" y="154" text-anchor="start">IO9 (STEP_B)</text>
-
-            <!-- Pin 5: IO10 (DIR_B) -->
-            <circle class="pin-circle" cx="20" cy="180" r="4.5" fill="var(--wire-dir-b)" data-title="GPIO 10 (DIR_B)" data-desc="Direction output for Motor B (Y-Axis)." />
-            <text class="pin-label" x="30" y="184" text-anchor="start">IO10 (DIR_B)</text>
-
-            <!-- Pin 6: IO11 (EN_B) -->
-            <circle class="pin-circle" cx="20" cy="210" r="4.5" fill="var(--wire-en-b)" data-title="GPIO 11 (EN_B)" data-desc="Enable line for Motor B driver (Active LOW)." />
-            <text class="pin-label" x="30" y="214" text-anchor="start">IO11 (EN_B)</text>
-
-            <!-- Pin 7: IO12 -->
-            <circle class="pin-circle" cx="20" cy="240" r="4.5" fill="#475569" data-title="GPIO 12 (NC)" data-desc="Unused general GPIO." />
-            <text class="pin-label" x="30" y="244" text-anchor="start">IO12</text>
-
-            <!-- Pin 8: IO13 (LED) -->
-            <circle class="pin-circle" cx="20" cy="270" r="4.5" fill="#10b981" data-title="GPIO 13 (Status LED)" data-desc="Onboard status LED toggle pin." />
-            <text class="pin-label" x="30" y="274" text-anchor="start">IO13 (LED)</text>
-
-            <!-- Pin 9: IO43 / TX -->
-            <circle class="pin-circle" cx="20" cy="300" r="4.5" fill="#3b82f6" data-title="GPIO 43 (TX0)" data-desc="Hardware UART TX for 115200 baud serial monitor." />
-            <text class="pin-label" x="30" y="304" text-anchor="start">TX0 (Debug)</text>
-          </g>
-
-
-          <!-- MODULE 2: Decoupling Capacitor (470uF 25V) -->
-          <g id="decouplingCap" transform="translate(515, 145)">
-            <rect x="0" y="0" width="45" height="70" rx="6" fill="#1e293b" stroke="#64748b" stroke-width="1.5" filter="url(#glowShadow)"/>
-            <!-- Top metallic score -->
-            <circle cx="22.5" cy="8" r="5" fill="none" stroke="#94a3b8" stroke-width="1"/>
-            <line x1="19" y1="8" x2="26" y2="8" stroke="#94a3b8"/>
-            <line x1="22.5" y1="4.5" x2="22.5" y2="11.5" stroke="#94a3b8"/>
-            <!-- Negative Stripe -->
-            <rect x="28" y="16" width="12" height="50" fill="#0f172a" />
-            <text x="34" y="32" fill="#94a3b8" font-size="9" font-weight="700" text-anchor="middle">-</text>
-            <text x="34" y="46" fill="#94a3b8" font-size="9" font-weight="700" text-anchor="middle">-</text>
-            <text x="34" y="60" fill="#94a3b8" font-size="9" font-weight="700" text-anchor="middle">-</text>
-            <!-- Label -->
-            <text x="14" y="36" fill="#f8fafc" font-size="8" font-weight="700">470µF</text>
-            <text x="14" y="48" fill="#38bdf8" font-size="7" font-weight="600">25V</text>
-          </g>
-
-
-          <!-- MODULE 3: A4988 Driver Module A (Motor A - X Axis) -->
-          <g id="driverA" transform="translate(610, 150)">
-            <!-- PCB Carrier -->
-            <rect x="0" y="0" width="160" height="290" rx="8" fill="url(#a4988Gradient)" stroke="#dc2626" stroke-width="2" filter="url(#glowShadow)"/>
-            
-            <!-- Trimpot VREF -->
-            <circle cx="80" cy="40" r="14" fill="#cbd5e1" stroke="#475569" stroke-width="2"/>
-            <line x1="72" y1="40" x2="88" y2="40" stroke="#1e293b" stroke-width="3"/>
-            <text x="80" y="65" text-anchor="middle" fill="#fca5a5" font-size="8" font-weight="700">VREF POT (0.43V)</text>
-
-            <!-- A4988 Chip -->
-            <rect x="50" y="110" width="60" height="60" rx="4" fill="#0f172a" stroke="#334155" stroke-width="1.5"/>
-            <text x="80" y="145" text-anchor="middle" fill="#f8fafc" font-size="10" font-weight="700">A4988</text>
-
-            <!-- Header Labels & Pins (Left: Power & Coils) -->
-            <!-- VMOT (y=30), GND (y=60), 2B (y=90), 2A (y=120), 1A (y=150), 1B (y=180), VDD (y=210), GND (y=240) -->
-            <circle class="pin-circle" cx="0" cy="30" r="4" fill="#ef4444" data-title="VMOT (Motor Supply)" data-desc="5V DC Motor Power Input from decoupling capacitor." />
-            <text class="pin-label" x="12" y="34">VMOT</text>
-
-            <circle class="pin-circle" cx="0" cy="60" r="4" fill="#64748b" data-title="GND (Motor Power Ground)" data-desc="High-current motor coil return path." />
-            <text class="pin-label" x="12" y="64">GND</text>
-
-            <circle class="pin-circle" cx="0" cy="90" r="4" fill="#f97316" data-title="2B (Coil Phase B-)" data-desc="Connected to Orange wire of 28BYJ-48." />
-            <text class="pin-label" x="12" y="94">2B (Org)</text>
-
-            <circle class="pin-circle" cx="0" cy="120" r="4" fill="#eab308" data-title="2A (Coil Phase B+)" data-desc="Connected to Yellow wire of 28BYJ-48." />
-            <text class="pin-label" x="12" y="124">2A (Yel)</text>
-
-            <circle class="pin-circle" cx="0" cy="150" r="4" fill="#3b82f6" data-title="1A (Coil Phase A+)" data-desc="Connected to Blue wire of 28BYJ-48." />
-            <text class="pin-label" x="12" y="154">1A (Blu)</text>
-
-            <circle class="pin-circle" cx="0" cy="180" r="4" fill="#ec4899" data-title="1B (Coil Phase A-)" data-desc="Connected to Pink wire of 28BYJ-48." />
-            <text class="pin-label" x="12" y="184">1B (Pnk)</text>
-
-            <circle class="pin-circle" cx="0" cy="210" r="4" fill="#f97316" data-title="VDD (Logic Supply)" data-desc="3.3V Logic Supply from ESP32." />
-            <text class="pin-label" x="12" y="214">VDD (3V3)</text>
-
-            <circle class="pin-circle" cx="0" cy="240" r="4" fill="#64748b" data-title="GND (Logic Ground)" data-desc="Logic Ground tied to common bus." />
-            <text class="pin-label" x="12" y="244">GND</text>
-
-            <!-- Header Labels & Pins (Right: Control Lines) -->
-            <!-- ENABLE (y=30), MS1 (y=60), MS2 (y=90), MS3 (y=120), RESET (y=150), SLEEP (y=180), STEP (y=210), DIR (y=240) -->
-            <circle class="pin-circle" cx="160" cy="30" r="4" fill="var(--wire-en-a)" data-title="ENABLE" data-desc="Active LOW enable. Controlled by ESP32 GPIO 7." />
-            <text class="pin-label" x="148" y="34" text-anchor="end">ENABLE</text>
-
-            <circle class="pin-circle" cx="160" cy="60" r="4" fill="var(--wire-ms1)" data-title="MS1" data-desc="Microstep bit 1 (GPIO 1)." />
-            <text class="pin-label" x="148" y="64" text-anchor="end">MS1</text>
-
-            <circle class="pin-circle" cx="160" cy="90" r="4" fill="var(--wire-ms2)" data-title="MS2" data-desc="Microstep bit 2 (GPIO 2)." />
-            <text class="pin-label" x="148" y="94" text-anchor="end">MS2</text>
-
-            <circle class="pin-circle" cx="160" cy="120" r="4" fill="var(--wire-ms3)" data-title="MS3" data-desc="Microstep bit 3 (GPIO 4)." />
-            <text class="pin-label" x="148" y="124" text-anchor="end">MS3</text>
-
-            <circle class="pin-circle" cx="160" cy="150" r="4" fill="#22c55e" data-title="RESET" data-desc="Tied to SLEEP for continuous operation." />
-            <text class="pin-label" x="148" y="154" text-anchor="end">RESET</text>
-
-            <circle class="pin-circle" cx="160" cy="180" r="4" fill="#22c55e" data-title="SLEEP" data-desc="Tied to RESET to keep driver awake." />
-            <text class="pin-label" x="148" y="184" text-anchor="end">SLEEP</text>
-
-            <circle class="pin-circle" cx="160" cy="210" r="4" fill="var(--wire-step-a)" data-title="STEP" data-desc="Step pulse clock (GPIO 5)." />
-            <text class="pin-label" x="148" y="214" text-anchor="end">STEP</text>
-
-            <circle class="pin-circle" cx="160" cy="240" r="4" fill="var(--wire-dir-a)" data-title="DIR" data-desc="Direction control (GPIO 6)." />
-            <text class="pin-label" x="148" y="244" text-anchor="end">DIR</text>
-
-            <text x="80" y="275" text-anchor="middle" fill="#f8fafc" font-size="11" font-weight="700">DRIVER A (X-AXIS)</text>
-          </g>
-
-
-          <!-- MODULE 4: 28BYJ-48 Stepper Motor A (Top Right) -->
-          <g id="motorA" transform="translate(990, 160)">
-            <!-- Motor Can -->
-            <circle cx="70" cy="70" r="60" fill="url(#motorGradient)" stroke="#64748b" stroke-width="2" filter="url(#glowShadow)"/>
-            <!-- Teardrop Gearbox protrusion -->
-            <path d="M 70 10 L 130 50 L 130 90 L 70 130 Z" fill="#334155" stroke="#64748b" stroke-width="1.5" />
-            <!-- Shaft -->
-            <circle cx="105" cy="70" r="14" fill="#d97706" stroke="#b45309" stroke-width="2"/>
-            <rect x="102" y="58" width="6" height="24" fill="#92400e" />
-            <!-- Label -->
-            <text x="55" y="65" text-anchor="middle" fill="#f8fafc" font-size="10" font-weight="700">28BYJ-48</text>
-            <text x="55" y="78" text-anchor="middle" fill="#22c55e" font-size="8" font-weight="600">BIPOLAR</text>
-            <text x="55" y="90" text-anchor="middle" fill="#94a3b8" font-size="7">64:1 Gearbox</text>
-
-            <!-- Wire Terminals on motor (Blue, Pink, Yellow, Orange, Red) -->
-            <!-- Spaced at y = 40, 60, 80, 100, 120 -->
-            <circle cx="0" cy="40" r="3.5" fill="#3b82f6" />
-            <text class="pin-label" x="8" y="44">Blue</text>
-
-            <circle cx="0" cy="60" r="3.5" fill="#ec4899" />
-            <text class="pin-label" x="8" y="64">Pink</text>
-
-            <circle cx="0" cy="80" r="3.5" fill="#eab308" />
-            <text class="pin-label" x="8" y="84">Yellow</text>
-
-            <circle cx="0" cy="100" r="3.5" fill="#f97316" />
-            <text class="pin-label" x="8" y="104">Orange</text>
-
-            <circle cx="0" cy="120" r="3.5" fill="#ef4444" stroke="#fff" stroke-dasharray="2 2"/>
-            <text class="pin-label" x="8" y="124" fill="#ef4444">Red (CUT)</text>
-          </g>
-
-
-          <!-- MODULE 5: A4988 Driver Module B (Motor B - Y Axis) [DUAL MODE] -->
-          <g id="driverB" class="dual-only" transform="translate(610, 430)">
-            <rect x="0" y="0" width="160" height="290" rx="8" fill="url(#a4988Gradient)" stroke="#9333ea" stroke-width="2" filter="url(#glowShadow)"/>
-            
-            <circle cx="80" cy="40" r="14" fill="#cbd5e1" stroke="#475569" stroke-width="2"/>
-            <line x1="72" y1="40" x2="88" y2="40" stroke="#1e293b" stroke-width="3"/>
-            <text x="80" y="65" text-anchor="middle" fill="#d8b4fe" font-size="8" font-weight="700">VREF POT (0.43V)</text>
-
-            <rect x="50" y="110" width="60" height="60" rx="4" fill="#0f172a" stroke="#334155" stroke-width="1.5"/>
-            <text x="80" y="145" text-anchor="middle" fill="#f8fafc" font-size="10" font-weight="700">A4988</text>
-
-            <!-- Left Pins -->
-            <circle class="pin-circle" cx="0" cy="30" r="4" fill="#ef4444" />
-            <text class="pin-label" x="12" y="34">VMOT</text>
-
-            <circle class="pin-circle" cx="0" cy="60" r="4" fill="#64748b" />
-            <text class="pin-label" x="12" y="64">GND</text>
-
-            <circle class="pin-circle" cx="0" cy="90" r="4" fill="#f97316" />
-            <text class="pin-label" x="12" y="94">2B (Org)</text>
-
-            <circle class="pin-circle" cx="0" cy="120" r="4" fill="#eab308" />
-            <text class="pin-label" x="12" y="124">2A (Yel)</text>
-
-            <circle class="pin-circle" cx="0" cy="150" r="4" fill="#3b82f6" />
-            <text class="pin-label" x="12" y="154">1A (Blu)</text>
-
-            <circle class="pin-circle" cx="0" cy="180" r="4" fill="#ec4899" />
-            <text class="pin-label" x="12" y="184">1B (Pnk)</text>
-
-            <circle class="pin-circle" cx="0" cy="210" r="4" fill="#f97316" />
-            <text class="pin-label" x="12" y="214">VDD (3V3)</text>
-
-            <circle class="pin-circle" cx="0" cy="240" r="4" fill="#64748b" />
-            <text class="pin-label" x="12" y="244">GND</text>
-
-            <!-- Right Pins -->
-            <circle class="pin-circle" cx="160" cy="30" r="4" fill="var(--wire-en-b)" />
-            <text class="pin-label" x="148" y="34" text-anchor="end">ENABLE</text>
-
-            <circle class="pin-circle" cx="160" cy="60" r="4" fill="var(--wire-ms1)" />
-            <text class="pin-label" x="148" y="64" text-anchor="end">MS1</text>
-
-            <circle class="pin-circle" cx="160" cy="90" r="4" fill="var(--wire-ms2)" />
-            <text class="pin-label" x="148" y="94" text-anchor="end">MS2</text>
-
-            <circle class="pin-circle" cx="160" cy="120" r="4" fill="var(--wire-ms3)" />
-            <text class="pin-label" x="148" y="124" text-anchor="end">MS3</text>
-
-            <circle class="pin-circle" cx="160" cy="150" r="4" fill="#22c55e" />
-            <text class="pin-label" x="148" y="154" text-anchor="end">RESET</text>
-
-            <circle class="pin-circle" cx="160" cy="180" r="4" fill="#22c55e" />
-            <text class="pin-label" x="148" y="184" text-anchor="end">SLEEP</text>
-
-            <circle class="pin-circle" cx="160" cy="210" r="4" fill="var(--wire-step-b)" />
-            <text class="pin-label" x="148" y="214" text-anchor="end">STEP</text>
-
-            <circle class="pin-circle" cx="160" cy="240" r="4" fill="var(--wire-dir-b)" />
-            <text class="pin-label" x="148" y="244" text-anchor="end">DIR</text>
-
-            <text x="80" y="275" text-anchor="middle" fill="#f8fafc" font-size="11" font-weight="700">DRIVER B (Y-AXIS)</text>
-          </g>
-
-
-          <!-- MODULE 6: 28BYJ-48 Stepper Motor B (Bottom Right) [DUAL MODE] -->
-          <g id="motorB" class="dual-only" transform="translate(990, 440)">
-            <circle cx="70" cy="70" r="60" fill="url(#motorGradient)" stroke="#64748b" stroke-width="2" filter="url(#glowShadow)"/>
-            <path d="M 70 10 L 130 50 L 130 90 L 70 130 Z" fill="#334155" stroke="#64748b" stroke-width="1.5" />
-            <circle cx="105" cy="70" r="14" fill="#d97706" stroke="#b45309" stroke-width="2"/>
-            <rect x="102" y="58" width="6" height="24" fill="#92400e" />
-            
-            <text x="55" y="65" text-anchor="middle" fill="#f8fafc" font-size="10" font-weight="700">28BYJ-48</text>
-            <text x="55" y="78" text-anchor="middle" fill="#a855f7" font-size="8" font-weight="600">Y-MIRROR</text>
-            <text x="55" y="90" text-anchor="middle" fill="#94a3b8" font-size="7">64:1 Gearbox</text>
-
-            <circle cx="0" cy="40" r="3.5" fill="#3b82f6" />
-            <text class="pin-label" x="8" y="44">Blue</text>
-
-            <circle cx="0" cy="60" r="3.5" fill="#ec4899" />
-            <text class="pin-label" x="8" y="64">Pink</text>
-
-            <circle cx="0" cy="80" r="3.5" fill="#eab308" />
-            <text class="pin-label" x="8" y="84">Yellow</text>
-
-            <circle cx="0" cy="100" r="3.5" fill="#f97316" />
-            <text class="pin-label" x="8" y="104">Orange</text>
-
-            <circle cx="0" cy="120" r="3.5" fill="#ef4444" stroke="#fff" stroke-dasharray="2 2"/>
-            <text class="pin-label" x="8" y="124" fill="#ef4444">Red (CUT)</text>
-          </g>
-
-        </svg>
-      </div>
+  </div>
+
+  <div class="card">
+    <h3>📌 Pin Mapping Table</h3>
+    <table class="tbl">
+      <thead><tr><th>Pin</th><th>Function</th><th>Target</th></tr></thead>
+      <tbody>
+        <tr><td style="color:var(--red)">5V</td><td>USB 5V</td><td>Cap (+) → VMOT</td></tr>
+        <tr><td style="color:var(--orange)">3V3</td><td>3.3V Logic</td><td>A4988 VDD</td></tr>
+        <tr><td style="color:var(--slate)">GND</td><td>Common Bus</td><td>Cap (−) / GND</td></tr>
+        <tr><td style="color:var(--teal)">GPIO 1</td><td>MS1</td><td>A4988 MS1 (Shared)</td></tr>
+        <tr><td style="color:#10b981">GPIO 2</td><td>MS2</td><td>A4988 MS2 (Shared)</td></tr>
+        <tr><td style="color:var(--purple)">GPIO 4</td><td>MS3</td><td>A4988 MS3 (Outer!)</td></tr>
+        <tr><td style="color:var(--cyan)">GPIO 5</td><td>STEP (X)</td><td>Driver A STEP</td></tr>
+        <tr><td style="color:var(--amber)">GPIO 6</td><td>DIR (X)</td><td>Driver A DIR</td></tr>
+        <tr><td style="color:var(--red)">GPIO 7</td><td>EN (X)</td><td>Driver A ENABLE</td></tr>
+        <tr><td style="color:var(--purple)">GPIO 9</td><td>STEP (Y)</td><td>Driver B STEP</td></tr>
+        <tr><td style="color:var(--yellow)">GPIO 10</td><td>DIR (Y)</td><td>Driver B DIR</td></tr>
+        <tr><td style="color:var(--pink)">GPIO 11</td><td>EN (Y)</td><td>Driver B ENABLE</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>▶ Command Simulator</h3>
+    <p style="font-size:.72rem;margin-bottom:.3rem">Click to preview firmware responses:</p>
+    <div>
+      <span class="chip" onclick="sim('STEP 2048')">STEP 2048</span>
+      <span class="chip" onclick="sim('SPEED 800')">SPEED 800</span>
+      <span class="chip" onclick="sim('MICRO 8')">MICRO 8</span>
+      <span class="chip" onclick="sim('REV 1')">REV 1</span>
+      <span class="chip" onclick="sim('DUAL STEP 2048 2048')">DUAL STEP</span>
+      <span class="chip" onclick="sim('DUAL CIRCLE 2000')">DUAL CIRCLE</span>
+      <span class="chip" onclick="sim('STATUS')">STATUS</span>
     </div>
-
-    <!-- Right: Informative Sidebar & Diagnostics -->
-    <div class="info-panel">
-
-      <!-- Single vs Dual Architecture Clarification Card -->
-      <div class="info-card" style="border-left: 3px solid #38bdf8;">
-        <h3>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-          Why Only 1 Test Firmware File?
-        </h3>
-        <p style="margin-bottom: 0.5rem;">
-          <strong>Yes! <code>stepper_motor_test.ino</code> is an ALL-IN-ONE unified test suite for both Single Stepper and Dual Stepper bench testing.</strong>
-        </p>
-        <ul>
-          <li><strong>Single Motor Mode:</strong> When only Motor A is wired, Motor B's pins remain disabled. Run commands like <code>STEP 2048</code>, <code>SPEED 800</code>, <code>BACKLASH</code> without errors.</li>
-          <li><strong>Dual Motor Mode:</strong> Wire Motor B when ready. Run coordinated vector commands: <code>DUAL GOTO 2000 2000</code>, <code>DUAL CIRCLE 1500</code>.</li>
-        </ul>
-      </div>
-
-      <!-- Capacitor Recommendation Card -->
-      <div class="info-card" style="border-left: 3px solid #22c55e;">
-        <h3>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-          Capacitor Selection Guide
-        </h3>
-        <p><strong>Your Capacitors:</strong> 47µF (16V), 470µF (25V), 1000µF (25V).</p>
-        <div style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 6px; padding: 0.5rem; margin: 0.5rem 0;">
-          <strong style="color: #4ade80;">Recommendation: Use the 470µF 25V!</strong>
-          <p style="font-size: 0.75rem; color: #cbd5e1; margin-top: 0.2rem;">
-            It is <strong>even better and safer</strong> than a 100µF capacitor! It absorbs inductive Back-EMF spikes when coils switch, shielding the A4988 FETs from voltage blowouts.
-          </p>
-        </div>
-      </div>
-
-      <!-- ESP32-S3 SuperMini Outer Pinout Mapping Table -->
-      <div class="info-card">
-        <h3>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
-          SuperMini Outer Pin Mapping
-        </h3>
-        <table class="pin-table">
-          <thead>
-            <tr><th>SuperMini Pin</th><th>Function</th><th>Target</th></tr>
-          </thead>
-          <tbody>
-            <tr><td style="color:#ef4444;">5V</td><td>USB 5V Out</td><td>Cap (+) / VMOT</td></tr>
-            <tr><td style="color:#f97316;">3V3</td><td>3.3V Logic</td><td>A4988 VDD</td></tr>
-            <tr><td style="color:#64748b;">GND</td><td>Common Bus</td><td>Cap (-) / GND</td></tr>
-            <tr><td style="color:var(--wire-ms1);">GPIO 1</td><td>MS1 Bit</td><td>A4988 MS1 (Shared)</td></tr>
-            <tr><td style="color:var(--wire-ms2);">GPIO 2</td><td>MS2 Bit</td><td>A4988 MS2 (Shared)</td></tr>
-            <tr><td style="color:var(--wire-ms3);">GPIO 4</td><td>MS3 Bit</td><td>A4988 MS3 (Outer Pin!)</td></tr>
-            <tr><td style="color:var(--wire-step-a);">GPIO 5</td><td>STEP (X)</td><td>Driver A STEP</td></tr>
-            <tr><td style="color:var(--wire-dir-a);">GPIO 6</td><td>DIR (X)</td><td>Driver A DIR</td></tr>
-            <tr><td style="color:var(--wire-en-a);">GPIO 7</td><td>EN (X)</td><td>Driver A ENABLE</td></tr>
-            <tr><td style="color:var(--wire-step-b);">GPIO 9</td><td>STEP (Y)</td><td>Driver B STEP</td></tr>
-            <tr><td style="color:var(--wire-dir-b);">GPIO 10</td><td>DIR (Y)</td><td>Driver B DIR</td></tr>
-            <tr><td style="color:var(--wire-en-b);">GPIO 11</td><td>EN (Y)</td><td>Driver B ENABLE</td></tr>
-          </tbody>
-        </table>
-      </div>
-
-      <!-- Live Serial Monitor Command Tester -->
-      <div class="info-card">
-        <h3>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
-          Interactive Command Simulator
-        </h3>
-        <p style="font-size: 0.75rem; margin-bottom: 0.4rem;">Click a command to simulate firmware response:</p>
-        
-        <div>
-          <span class="cmd-chip" onclick="simCmd('STEP 2048')">STEP 2048</span>
-          <span class="cmd-chip" onclick="simCmd('SPEED 800')">SPEED 800</span>
-          <span class="cmd-chip" onclick="simCmd('MICRO 8')">MICRO 8</span>
-          <span class="cmd-chip" onclick="simCmd('REV 1')">REV 1</span>
-          <span class="cmd-chip" onclick="simCmd('DUAL STEP 2048 2048')">DUAL STEP</span>
-          <span class="cmd-chip" onclick="simCmd('DUAL CIRCLE 2000')">DUAL CIRCLE</span>
-          <span class="cmd-chip" onclick="simCmd('STATUS')">STATUS</span>
-        </div>
-
-        <div class="terminal-box" id="termOutput">[BOOT] ESP32-S3 SuperMini Stepper Test Ready.
+    <div class="term" id="out">[BOOT] ESP32-S3 SuperMini Stepper Test Ready.
 [INFO] Baud: 115200 | Motors Disabled (Cold Start).
-Type or click commands above...</div>
-      </div>
-
-    </div>
+Type or click commands above…</div>
   </div>
 
-  <!-- Dynamic Tooltip -->
-  <div id="tooltip">
-    <div class="tt-title" id="ttTitle">Pin Info</div>
-    <div class="tt-desc" id="ttDesc">Details...</div>
-  </div>
+</div>
+</div>
 
-  <script>
-    let currentMode = 'single';
-    let pulseActive = true;
+<!-- Tooltip -->
+<div id="tip"><b id="tT"></b><span id="tD"></span></div>
 
-    function setMode(mode) {
-      currentMode = mode;
-      const btnSingle = document.getElementById('btnModeSingle');
-      const btnDual = document.getElementById('btnModeDual');
-      const dualElements = document.querySelectorAll('.dual-only');
-      const label = document.getElementById('canvasModeLabel');
+<script>
+// ── Mode switching ────────────────────────────────────────
+function mode(m){
+  const dual=document.querySelectorAll('.D');
+  const lbl=document.getElementById('modeLbl');
+  if(m==='s'){
+    document.getElementById('bSingle').classList.add('on');
+    document.getElementById('bDual').classList.remove('on');
+    lbl.textContent='Single Motor Bring-Up';
+    dual.forEach(e=>e.classList.add('faded'));
+  }else{
+    document.getElementById('bDual').classList.add('on');
+    document.getElementById('bSingle').classList.remove('on');
+    lbl.textContent='Dual Motor Full Mode';
+    dual.forEach(e=>e.classList.remove('faded'));
+  }
+}
 
-      if (mode === 'single') {
-        btnSingle.classList.add('active');
-        btnDual.classList.remove('active');
-        label.textContent = "Single Motor Bring-Up Mode (Motor A Only)";
-        dualElements.forEach(el => el.classList.add('component-faded'));
-      } else {
-        btnDual.classList.add('active');
-        btnSingle.classList.remove('active');
-        label.textContent = "Dual Motor Full Mode (Motor A + Motor B)";
-        dualElements.forEach(el => el.classList.remove('component-faded'));
-      }
-    }
+// ── Signal pulse toggle ───────────────────────────────────
+let pOn=true;
+function pulse(){
+  pOn=!pOn;
+  document.getElementById('pTxt').textContent=pOn?'ON':'OFF';
+  document.querySelectorAll('.dash').forEach(w=>w.style.animationPlayState=pOn?'running':'paused');
+}
 
-    function togglePulse() {
-      pulseActive = !pulseActive;
-      const statusText = document.getElementById('pulseStatus');
-      const wires = document.querySelectorAll('.wire-pulse');
-      
-      if (pulseActive) {
-        statusText.textContent = "ON";
-        wires.forEach(w => w.style.animationPlayState = 'running');
-      } else {
-        statusText.textContent = "OFF";
-        wires.forEach(w => w.style.animationPlayState = 'paused');
-      }
-    }
+// ── Tooltip ───────────────────────────────────────────────
+const tip=document.getElementById('tip'),tT=document.getElementById('tT'),tD=document.getElementById('tD');
+document.querySelectorAll('[data-t]').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{tT.textContent=el.getAttribute('data-t');tD.textContent=el.getAttribute('data-d')||'';tip.style.display='block'});
+  el.addEventListener('mousemove',e=>{tip.style.left=(e.clientX+14)+'px';tip.style.top=(e.clientY+14)+'px'});
+  el.addEventListener('mouseleave',()=>{tip.style.display='none'});
+});
 
-    // Interactive Tooltip Setup
-    const tooltip = document.getElementById('tooltip');
-    const ttTitle = document.getElementById('ttTitle');
-    const ttDesc = document.getElementById('ttDesc');
+// ── Command simulator ─────────────────────────────────────
+function sim(c){
+  const o=document.getElementById('out');
+  const r={
+    'STEP 2048':'> STEP 2048\n[OK] Stepping Motor A +2048 steps (~360.0°)…\n[DONE] Position A: 2048 | Time: 4.10 s',
+    'SPEED 800':'> SPEED 800\n[OK] Motor A speed set to 800 steps/sec (23.4 RPM).',
+    'MICRO 8':'> MICRO 8\n[OK] Microstep mode 1/8 (16 384 steps/rev). MS1=HIGH MS2=HIGH MS3=LOW.',
+    'REV 1':'> REV 1\n[OK] 1 full output revolution (2048 steps)… Complete!',
+    'DUAL STEP 2048 2048':'> DUAL STEP 2048 2048\n[OK] Bresenham move: A(+2048) B(+2048).',
+    'DUAL CIRCLE 2000':'> DUAL CIRCLE 2000\n[OK] 72-segment circular trajectory (R=2000)… Smooth XY!',
+    'STATUS':'> STATUS\n+=============================================+\n| Drivers: YES | Mode: 1/1 (2048 steps/rev)  |\n| MS [1,2,4]: [0,0,0] | Pos A:0 | Pos B:0   |\n+=============================================+'
+  };
+  o.textContent+='\n\n'+(r[c]||'> '+c+'\n[?] Unknown command');
+  o.scrollTop=o.scrollHeight;
+}
 
-    document.querySelectorAll('[data-title]').forEach(item => {
-      item.addEventListener('mouseenter', (e) => {
-        ttTitle.textContent = item.getAttribute('data-title');
-        ttDesc.textContent = item.getAttribute('data-desc');
-        tooltip.style.display = 'block';
-      });
-
-      item.addEventListener('mousemove', (e) => {
-        tooltip.style.left = (e.pageX + 15) + 'px';
-        tooltip.style.top = (e.pageY + 15) + 'px';
-      });
-
-      item.addEventListener('mouseleave', () => {
-        tooltip.style.display = 'none';
-      });
-    });
-
-    // Simulated Terminal Commands
-    function simCmd(cmd) {
-      const term = document.getElementById('termOutput');
-      let response = "";
-      
-      if (cmd === 'STEP 2048') {
-        response = `> STEP 2048\n[OK] Stepping Motor A +2048 steps (~360.0 deg output shaft)...\n[DONE] Position A: 2048 | Time: 4.10s`;
-      } else if (cmd === 'SPEED 800') {
-        response = `> SPEED 800\n[OK] Motor A speed set to 800 steps/sec (23.4 RPM).`;
-      } else if (cmd === 'MICRO 8') {
-        response = `> MICRO 8\n[OK] Microstep mode set to 1/8 (16,384 steps/rev). MS1=HIGH, MS2=HIGH, MS3=LOW.`;
-      } else if (cmd === 'REV 1') {
-        response = `> REV 1\n[OK] Stepping 1 full output revolution (2048 steps)... Complete!`;
-      } else if (cmd === 'DUAL STEP 2048 2048') {
-        response = `> DUAL STEP 2048 2048\n[OK] Coordinated Bresenham move: Motor A (+2048), Motor B (+2048).`;
-      } else if (cmd === 'DUAL CIRCLE 2000') {
-        response = `> DUAL CIRCLE 2000\n[OK] Generating 72-segment circular interpolation trajectory (R=2000 steps)... Smooth XY!`;
-      } else if (cmd === 'STATUS') {
-        response = `> STATUS\n+======================================================+\n| Drivers Enabled: YES | Mode: 1/1 (2048 steps/rev)  |\n| MS Pins [1, 2, 4]: [0, 0, 0] | Pos A: 0 | Pos B: 0   |\n+======================================================+`;
-      }
-
-      term.textContent = term.textContent + "\n\n" + response;
-      term.scrollTop = term.scrollHeight;
-    }
-
-    // Default to Single Mode on initial render
-    setMode('single');
-  </script>
+// Default to single mode
+mode('s');
+</script>
 </body>
 </html>

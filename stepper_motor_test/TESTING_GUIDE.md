@@ -14,9 +14,11 @@
 1. [System Architecture & Block Diagram](#1-system-architecture--block-diagram)
 2. [28BYJ-48 Bipolar Conversion Guide](#2-28byj-48-bipolar-conversion-guide)
 3. [A4988 Driver Specifics & Vref Current Calibration](#3-a4988-driver-specifics--vref-current-calibration)
-4. [Circuit Wiring Diagrams](#4-circuit-wiring-diagrams)
+4. [Circuit Wiring Diagrams & Detailed Component Schematics](#4-circuit-wiring-diagrams--detailed-component-schematics)
    - [Single Motor Test Wiring (Motor A Only)](#41-single-motor-test-wiring-motor-a-only)
    - [Dual Motor Test Wiring (Motor A + Motor B)](#42-dual-motor-test-wiring-motor-a--motor-b)
+   - [Capacitor Selection Analysis (Addressing Your Inventory)](#43-capacitor-selection-analysis-addressing-your-inventory)
+   - [Step-by-Step Written Wiring Instructions (Foolproof Breadboard Guide)](#44-step-by-step-written-wiring-instructions-foolproof-breadboard-guide)
 5. [Microstepping Resolution & Kinematics Table](#5-microstepping-resolution--kinematics-table)
 6. [Arduino IDE & Board Configuration](#6-arduino-ide--board-configuration)
 7. [Phase-by-Phase Testing Roadmap](#7-phase-by-phase-testing-roadmap)
@@ -458,9 +460,177 @@ You asked whether the **100 µF capacitor is mandatory** and noted that you have
 #### Installation Rules:
 1. **Polarity:** Always connect the negative lead (marked with a white stripe and minus symbols `-`) to **GND**, and the positive lead (longer leg) to **VMOT**.
 2. **Proximity:** Position the capacitor as close as physically possible to the A4988 `VMOT` and `GND` pins on the breadboard (within 1 to 2 cm) to minimize wire inductance.
-3. **Dedicated Cap per Driver:** If running both motors, placing one 470 µF capacitor near Driver A and one 470 µF (or 47 µF) near Driver B is far better than a single capacitor placed far away.
+---
+
+### 4.4 Step-by-Step Written Wiring Instructions (Foolproof Breadboard Guide)
+
+Follow these step-by-step written instructions carefully when assembling your test setup on a solderless breadboard. This guide eliminates all guesswork regarding pin orientations, wire paths, jumper links, and safety precautions.
 
 ---
+
+#### 4.4.1 Breadboard Layout & Component Placement
+
+1. **Place the ESP32-S3 SuperMini:**
+   - Mount the ESP32-S3 SuperMini straddling the center divider groove on one side of the breadboard, with the **USB-C connector pointing towards the top edge**.
+   - Note the two 9-pin rows:
+     - **Left Row (Pins 1–9, top to bottom):** `5V`, `GND`, `3V3`, `IO1`, `IO2`, `IO3`, `IO4`, `IO5`, `IO6`.
+     - **Right Row (Pins 1–9, top to bottom):** `GND`, `IO7`, `IO8`, `IO9`, `IO10`, `IO11`, `IO12`, `IO13`, `TX0` (GPIO 43).
+2. **Place A4988 Driver Module A (X-Axis):**
+   - Insert Driver Module A into the breadboard straddling the center divider groove.
+   - **Crucial Orientation Check:** Ensure the small metal potentiometer (trimpot) is facing **UP (towards the same side as the USB-C connector)**.
+   - In this orientation:
+     - **Left Pin Column (top to bottom):** `ENABLE`, `MS1`, `MS2`, `MS3`, `RESET`, `SLEEP`, `STEP`, `DIR`.
+     - **Right Pin Column (top to bottom):** `VMOT`, `GND`, `2B`, `2A`, `1A`, `1B`, `VDD`, `GND`.
+3. **Set Up Common Power Rails:**
+   - Designate the breadboard's outer bus rails:
+     - **Red Bus Rail (+):** 5V DC Motor & Board Power (`VBUS`).
+     - **Blue/Black Bus Rail (-):** Common System Ground (`GND`).
+
+---
+
+#### 4.4.2 Phase 1: Single Motor (Motor A) Assembly Sequence
+
+Follow this exact sequential order to build the circuit safely:
+
+##### Step 1: Connect Master Power & Common Ground
+* Connect ESP32-S3 SuperMini **Pin 1 (Left Row, `5V`)** to the breadboard **Red Bus Rail (+)** with a red jumper wire.
+* Connect ESP32-S3 SuperMini **Pin 2 (Left Row, `GND`)** to the breadboard **Blue/Black Bus Rail (-)** with a black jumper wire.
+* *(Note: All components in this circuit must share this single common ground rail).*
+
+##### Step 2: Install Decoupling Capacitor (470 µF 25V)
+* Take your **470 µF 25V electrolytic capacitor** (from your inventory).
+* **Observe Polarity:** Locate the negative side marked with a thick white or silver band and minus signs (`-`). The shorter lead is negative; the longer lead is positive (`+`).
+* Insert the **Negative Lead (-)** into the breadboard row connected to the Ground Rail (`GND`).
+* Insert the **Positive Lead (+)** into the breadboard row directly connected to A4988 **Pin 1 (Right Column, `VMOT`)**.
+* **Proximity Rule:** Ensure the capacitor legs sit within **1 to 2 cm** of A4988 `VMOT` and `GND`. This absorbs destructive LC inductive kickback voltage spikes from the stepper coils.
+
+##### Step 3: Wire A4988 Power & Ground Pins
+* Connect A4988 **Pin 1 (Right Column, `VMOT`)** to the breadboard **Red Bus Rail (+5V)**.
+* Connect A4988 **Pin 2 (Right Column, Motor `GND`)** to the breadboard **Ground Rail (-)**.
+* Connect ESP32-S3 SuperMini **Pin 3 (Left Row, `3V3`)** directly to A4988 **Pin 7 (Right Column, `VDD`)** with an orange jumper wire. This provides regulated 3.3V logic power matching ESP32 GPIO logic thresholds.
+* Connect A4988 **Pin 8 (Right Column, Logic `GND`)** to the breadboard **Ground Rail (-)** with a black wire.
+
+##### Step 4: Hardware Jumper Strapping (RESET ↔ SLEEP)
+* Insert a short U-shaped jumper wire directly between A4988 **Pin 5 (Left Column, `RESET`)** and A4988 **Pin 6 (Left Column, `SLEEP`)**.
+* *Why this is mandatory:* Both pins are active-low inputs. Tying them together pulls `RESET` high through `SLEEP`'s internal pull-up, enabling the internal translator logic. Without this link, the driver remains in perpetual reset and the motor will never move.
+
+##### Step 5: Connect 28BYJ-48 Stepper Motor Wires (Motor A)
+* Ensure your 28BYJ-48 has been modified to 4-wire bipolar (center PCB red trace cut, as described in Section 2).
+* Cut or insulate the **Red wire** with electrical tape or heat shrink. It must **not** connect to anything.
+* Connect the four coil wires to A4988 motor output pins:
+  1. **Phase A (+) :** Connect **Blue Wire** to A4988 **Pin 5 (Right Column, `1A`)**.
+  2. **Phase A (-) :** Connect **Pink Wire** to A4988 **Pin 6 (Right Column, `1B`)**.
+  3. **Phase B (+) :** Connect **Yellow Wire** to A4988 **Pin 4 (Right Column, `2A`)**.
+  4. **Phase B (-) :** Connect **Orange Wire** to A4988 **Pin 3 (Right Column, `2B`)**.
+
+##### Step 6: Wire Motor A Control Lines
+* **STEP Pulse:** Connect ESP32-S3 SuperMini **Pin 8 (Left Row, `IO5`)** to A4988 **Pin 7 (Left Column, `STEP`)**.
+* **DIR Direction:** Connect ESP32-S3 SuperMini **Pin 9 (Left Row, `IO6`)** to A4988 **Pin 8 (Left Column, `DIR`)**.
+* **ENABLE Control:** Connect ESP32-S3 SuperMini **Pin 2 (Right Row, `IO7`)** to A4988 **Pin 1 (Left Column, `ENABLE`)**.
+
+##### Step 7: Wire Shared Microstepping Bus (MS1, MS2, MS3)
+* **MS1 Line:** Connect ESP32-S3 SuperMini **Pin 4 (Left Row, `IO1`)** to A4988 **Pin 2 (Left Column, `MS1`)**.
+* **MS2 Line:** Connect ESP32-S3 SuperMini **Pin 5 (Left Row, `IO2`)** to A4988 **Pin 3 (Left Column, `MS2`)**.
+* **MS3 Line:** Connect ESP32-S3 SuperMini **Pin 7 (Left Row, `IO4`)** to A4988 **Pin 4 (Left Column, `MS3`)**.
+  > [!IMPORTANT]
+  > **No Underside Soldering Required:** GPIO 4 sits conveniently on the outer breadboard DIP header of the ESP32-S3 SuperMini. Leaving GPIO 3 unconnected avoids boot strapping conflicts.
+
+---
+
+#### 4.4.3 Phase 2: Adding Motor B for Dual Motor Testing
+
+Once Motor A is verified and rotating smoothly, add Motor B (Y-Axis) to achieve coordinated 2D beam steering:
+
+##### Step 1: Mount Driver B & Second Capacitor
+* Insert the second A4988 module (Driver B) adjacent to Driver A with its trimpot facing **UP**.
+* Install your second capacitor (e.g. 470 µF 25V or 47 µF 16V/25V) across Driver B's `VMOT` and `GND` pins (observing polarity: `-` band to GND, `+` to VMOT).
+
+##### Step 2: Wire Power & Strapping for Driver B
+* Connect Driver B **`VMOT`** to the breadboard **Red 5V Rail**.
+* Connect Driver B **Motor `GND`** and **Logic `GND`** to the breadboard **Ground Rail**.
+* Connect Driver B **`VDD`** to the **3.3V Logic Rail** (or directly to ESP32 Pin 3 `3V3`).
+* Insert a short jumper between Driver B **`RESET`** and **`SLEEP`**.
+
+##### Step 3: Daisy-Chain the Shared Microstepping Bus
+* Connect a jumper from Driver A **`MS1`** to Driver B **`MS1`** (both controlled by `GPIO 1`).
+* Connect a jumper from Driver A **`MS2`** to Driver B **`MS2`** (both controlled by `GPIO 2`).
+* Connect a jumper from Driver A **`MS3`** to Driver B **`MS3`** (both controlled by `GPIO 4`).
+* *(Both drivers will now switch microstep resolutions synchronously from a single serial command!)*
+
+##### Step 4: Wire Motor B Independent Control Lines
+* **STEP Pulse B:** Connect ESP32-S3 SuperMini **Pin 4 (Right Row, `IO9`)** to Driver B **`STEP`**.
+* **DIR Direction B:** Connect ESP32-S3 SuperMini **Pin 5 (Right Row, `IO10`)** to Driver B **`DIR`**.
+* **ENABLE Control B:** Connect ESP32-S3 SuperMini **Pin 6 (Right Row, `IO11`)** to Driver B **`ENABLE`**.
+
+##### Step 5: Connect Motor B Coil Wires
+* Connect Motor B's 4-wire modded bipolar cable:
+  - **Blue Wire** $\to$ Driver B `1A`
+  - **Pink Wire** $\to$ Driver B `1B`
+  - **Yellow Wire** $\to$ Driver B `2A`
+  - **Orange Wire** $\to$ Driver B `2B`
+  - **Red Wire** $\to$ Cut / Not Connected
+
+---
+
+#### 4.4.4 Complete Master Pin Wiring Interconnection Matrix
+
+Use this master lookup table to double-check every wire on your breadboard before applying power:
+
+| Signal / Net Name | ESP32-S3 SuperMini Physical Pin | A4988 Driver A Pin | A4988 Driver B Pin | Target / Destination | Wire Color Suggestion |
+|---|---|---|---|---|---|
+| **5V Motor Power** | Pin 1 (Left Row, `5V`) | Pin 1 Right (`VMOT`) | Pin 1 Right (`VMOT`) | Cap (+) $\to$ Breadboard 5V Rail | **Red** |
+| **Common Ground** | Pin 2 (Left Row, `GND`) | Pin 2 & 8 Right (`GND`) | Pin 2 & 8 Right (`GND`) | Cap (-) $\to$ Ground Rail | **Black / Grey** |
+| **3.3V Logic Supply** | Pin 3 (Left Row, `3V3`) | Pin 7 Right (`VDD`) | Pin 7 Right (`VDD`) | Driver Logic Power | **Orange** |
+| **Microstep Bit 1** | Pin 4 (Left Row, `IO1`) | Pin 2 Left (`MS1`) | Pin 2 Left (`MS1`) | Shared Microstep Bus | **Cyan / Blue** |
+| **Microstep Bit 2** | Pin 5 (Left Row, `IO2`) | Pin 3 Left (`MS2`) | Pin 3 Left (`MS2`) | Shared Microstep Bus | **Green** |
+| **Microstep Bit 3** | Pin 7 (Left Row, `IO4`) | Pin 4 Left (`MS3`) | Pin 4 Left (`MS3`) | Shared Microstep Bus | **Purple** |
+| **Motor A STEP** | Pin 8 (Left Row, `IO5`) | Pin 7 Left (`STEP`) | — (Not connected) | Driver A Step Trigger | **Yellow** |
+| **Motor A DIR** | Pin 9 (Left Row, `IO6`) | Pin 8 Left (`DIR`) | — (Not connected) | Driver A Direction | **White** |
+| **Motor A ENABLE** | Pin 2 (Right Row, `IO7`) | Pin 1 Left (`ENABLE`) | — (Not connected) | Driver A Active LOW Enable | **Brown** |
+| **Motor B STEP** | Pin 4 (Right Row, `IO9`) | — (Not connected) | Pin 7 Left (`STEP`) | Driver B Step Trigger | **Yellow** |
+| **Motor B DIR** | Pin 5 (Right Row, `IO10`)| — (Not connected) | Pin 8 Left (`DIR`) | Driver B Direction | **White** |
+| **Motor B ENABLE** | Pin 6 (Right Row, `IO11`)| — (Not connected) | Pin 1 Left (`ENABLE`) | Driver B Active LOW Enable | **Brown** |
+| **Driver A Sleep** | — | Pin 6 Left (`SLEEP`) | — | Jumper to Driver A `RESET` | **Short wire** |
+| **Driver A Reset** | — | Pin 5 Left (`RESET`) | — | Jumper to Driver A `SLEEP` | **Short wire** |
+| **Driver B Sleep** | — | — | Pin 6 Left (`SLEEP`) | Jumper to Driver B `RESET` | **Short wire** |
+| **Driver B Reset** | — | — | Pin 5 Left (`RESET`) | Jumper to Driver B `SLEEP` | **Short wire** |
+| **Motor A Coil 1A** | — | Pin 5 Right (`1A`) | — | Motor A Blue Wire | **Blue** |
+| **Motor A Coil 1B** | — | Pin 6 Right (`1B`) | — | Motor A Pink Wire | **Pink** |
+| **Motor A Coil 2A** | — | Pin 4 Right (`2A`) | — | Motor A Yellow Wire | **Yellow** |
+| **Motor A Coil 2B** | — | Pin 3 Right (`2B`) | — | Motor A Orange Wire | **Orange** |
+| **Motor B Coil 1A** | — | — | Pin 5 Right (`1A`) | Motor B Blue Wire | **Blue** |
+| **Motor B Coil 1B** | — | — | Pin 6 Right (`1B`) | Motor B Pink Wire | **Pink** |
+| **Motor B Coil 2A** | — | — | Pin 4 Right (`2A`) | Motor B Yellow Wire | **Yellow** |
+| **Motor B Coil 2B** | — | — | Pin 3 Right (`2B`) | Motor B Orange Wire | **Orange** |
+
+---
+
+#### 4.4.5 Critical Pre-Power Safety Checklist & Multimeter Validation
+
+Before plugging in your USB-C cable or powering the system, perform these **five mandatory multimeter tests**:
+
+1. **Test 1: Power-to-Ground Short Circuit Test**
+   - Set your multimeter to **Continuity Beep / Resistance ($\Omega$) mode**.
+   - Place the black probe on the breadboard **GND Rail** and the red probe on the **5V Red Rail**.
+   - **Expected Result:** The meter must **not** continuously beep. The resistance reading should start low as the 470 µF capacitor charges from the meter's test voltage, then climb steadily into hundreds of kilo-ohms ($\text{k}\Omega$) or mega-ohms ($\text{M}\Omega$). If it reads $0.0\,\Omega$, STOP immediately and locate the short circuit before plugging in USB!
+2. **Test 2: Capacitor Polarity Verification**
+   - Visually check that the negative stripe (`-`) of the 470 µF capacitor is firmly inserted into the **GND** rail, and the positive lead connects to `VMOT`. Reversing electrolytic capacitor polarity will cause the capacitor to overheat or pop!
+3. **Test 3: Motor Coil Resistance Verification**
+   - Measure resistance across the pairs of motor wires:
+     - Probe **Blue** and **Pink**: Must measure $\approx 90\text{–}110\,\Omega$ (Phase A healthy).
+     - Probe **Yellow** and **Orange**: Must measure $\approx 90\text{–}110\,\Omega$ (Phase B healthy).
+     - Probe **Blue** and **Yellow**: Must read **Infinite / Open Loop (`OL`)** (Phases are fully isolated).
+     - Probe **Red** (cut wire) to any color: Must read **Infinite / Open Loop (`OL`)**.
+4. **Test 4: Vref Current Adjustment**
+   - Plug the ESP32-S3 SuperMini into USB.
+   - Attach your multimeter black probe to GND.
+   - Gently touch the red probe to the metal screw of the A4988 trimpot.
+   - Measure DC millivolts: adjust the trimpot with an insulated screwdriver until it reads **`120 mV` (0.12 V)**.
+5. **Test 5: Never Hot-Plug Stepper Motors**
+   - **GOLDEN RULE:** NEVER plug in or unplug a stepper motor connector while the 5V power is connected or the driver is energized. The collapsing magnetic field in the coil produces a massive flyback inductive spike that will permanently destroy the A4988 output MOSFETs in microseconds! Always disconnect USB power before touching motor wires.
+
+---
+
 ## 5. Microstepping Resolution & Kinematics Table
 
 The 28BYJ-48 features a 4-stage internal spur reduction gearbox. 

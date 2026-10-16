@@ -16,6 +16,7 @@
    - [ESP32-S3 SuperMini Pin Layout](#esp32-s3-supermini-pin-layout)
    - [ASCII Wiring Diagram — Single & Dual Sensors](#ascii-wiring-diagram)
    - [Voltage Safety & Optional Divider Analysis](#voltage-safety--optional-divider-analysis)
+   - [Step-by-Step Written Wiring Instructions (Foolproof Breadboard Guide)](#step-by-step-written-wiring-instructions-foolproof-breadboard-guide)
 3. [Arduino IDE & Board Setup](#3-arduino-ide--board-setup)
 4. [Phase-by-Phase Testing Roadmap](#4-phase-by-phase-testing-roadmap)
    - [Phase 1: Basic Connectivity & Power Check](#phase-1-basic-connectivity--power-check)
@@ -149,22 +150,22 @@ flowchart TD
 <a id="esp32-s3-supermini-pin-layout"></a>
 ### ESP32-S3 SuperMini Pin Layout
 
+*(Castellated 18-pin DIP footprint: 9 pins Left, 9 pins Right, USB-C at Top)*
 ```
-                        ESP32-S3 Super Mini
+                        ESP32-S3 SuperMini
                        ┌─────────────────────┐
-                       │ 3.3V            GND │◄─── Common Ground
-                       │ 3.3V            GND │
-                       │ RST              5V │◄─── 5V from USB Rail
-                       │ GPIO 4          5V  │
- IR Sensor X OUT ─────►│ GPIO 5         GPIO 43 (TX0)
- IR Sensor Y OUT ─────►│ GPIO 6         GPIO 44 (RX0)
-                       │ GPIO 7         GPIO 1  │
-                       │ GPIO 8         GPIO 2  │
-                       │ GPIO 9         GPIO 42 │
-                       │ GPIO 10        GPIO 41 │
-                       │ GPIO 11        GPIO 40 │
-                       │ GPIO 12        GPIO 39 │
- Status LED Mirrored ──│ GPIO 13        GPIO 38 │
+                       │   [ USB-C PORT ]    │
+                       │                     │
+        5V Power (VBUS)│ [5V]          [GND] │ Ground (Common Bus)
+            Ground Bus │ [GND]         [IO7] │ (Available)
+            3.3V Logic │ [3V3]         [IO8] │ (Available)
+                       │ [IO1]         [IO9] │ (Available)
+                       │ [IO2]        [IO10] │ (Available)
+                       │ [IO3]        [IO11] │ (Available)
+                       │ [IO4]        [IO12] │ (Available)
+      Sensor X OUT ───►│ [IO5]        [IO13] │ Onboard Status LED (Mirrored)
+      Sensor Y OUT ───►│ [IO6]         [TX0] │ Debug UART TX (GPIO 43)
+                       │                     │
                        └─────────────────────┘
 ```
 
@@ -236,9 +237,138 @@ If you ever use a generic clone sensor that does NOT have the indicator LED in t
                                   │
                                  GND
 
-  Voltage Calculation:
-  V_out = 5.0V * (20kΩ / (10kΩ + 20kΩ)) = 3.33V (100% ESP32 safe)
-```
+---
+
+<a id="step-by-step-written-wiring-instructions-foolproof-breadboard-guide"></a>
+### Step-by-Step Written Wiring Instructions (Foolproof Breadboard Guide)
+
+Follow these step-by-step written instructions carefully when assembling your IR obstacle avoidance homing sensor circuit on a solderless breadboard. This guide eliminates all ambiguity regarding module pins, voltage levels, breadboard rails, and optical calibration.
+
+---
+
+#### 1. FC-51 / KY-032 Module Hardware Overview
+
+Before connecting any wires, inspect your IR sensor module:
+* **Pin Header (3-Pin or 4-Pin):**
+  - **`VCC` (Pin 1):** Module DC power input (+5V from USB VBUS).
+  - **`GND` (Pin 2):** Power and signal ground (connects to common system GND).
+  - **`OUT` (Pin 3):** Active-LOW digital output signal:
+    - **Path Clear (No Obstacle):** Output is **HIGH (~3.0V–3.2V)**. Green detection LED is **OFF**.
+    - **Obstacle Detected:** Output pulls **LOW (0V)**. Green detection LED illuminates **ON**.
+  - **`EN` (Optional 4th Pin on some variants):** Enable pin. If present, it usually has a jumper installed to tie it permanently to ground/active state; leave the jumper intact.
+* **Onboard Indicators:**
+  - **Power LED (Red):** Illuminates continuously when 5V is supplied.
+  - **Detection / Signal LED (Green):** Turns ON when an object reflects sufficient IR light back into the phototransistor.
+* **10kΩ Trimpot:** Small blue rectangular potentiometer with a brass screw on top, used to set the detection distance threshold (2 mm to 30 mm).
+* **Optical Transducers (Front Edge):**
+  - **Clear 5mm Bulb:** 940 nm Infrared Emitter LED.
+  - **Dark / Black 5mm Bulb:** 940 nm Phototransistor Receiver (dark epoxy filters out ambient visible light).
+
+---
+
+#### 2. Breadboard Setup & Power Rail Distribution
+
+1. **Mount the ESP32-S3 SuperMini:**
+   - Insert the ESP32-S3 SuperMini straddling the center divider of your breadboard, with the **USB-C connector pointing towards the top edge**.
+   - Review your physical pin locations:
+     - **Left Column (Pins 1–9, top to bottom):** `5V`, `GND`, `3V3`, `IO1`, `IO2`, `IO3`, `IO4`, `IO5`, `IO6`.
+     - **Right Column (Pins 1–9, top to bottom):** `GND`, `IO7`, `IO8`, `IO9`, `IO10`, `IO11`, `IO12`, `IO13`, `TX0` (GPIO 43).
+2. **Establish Common Power & Ground Rails:**
+   - **5V Red Rail (+):** Connect ESP32-S3 SuperMini **Pin 1 (Left Row, `5V`)** to the breadboard **Red (+) Bus Rail** using a red jumper wire.
+   - **GND Black Rail (-):** Connect ESP32-S3 SuperMini **Pin 2 (Left Row, `GND`)** to the breadboard **Blue/Black (-) Bus Rail** using a black jumper wire.
+
+---
+
+#### 3. Phase 1: Single Sensor Setup (X-Axis Homing Test)
+
+Assemble the primary X-axis homing endstop first to verify sensor functionality and signal timing:
+
+* **Step 1 (Sensor Power):** Connect a red jumper wire from the breadboard **Red 5V Rail** to the **`VCC`** pin of Sensor X.
+* **Step 2 (Sensor Ground):** Connect a black jumper wire from the breadboard **Black/Blue GND Rail** to the **`GND`** pin of Sensor X.
+* **Step 3 (Digital Signal Line):** Connect a jumper wire (e.g. Yellow or Green) from Sensor X **`OUT`** directly to ESP32-S3 SuperMini **Pin 8 (Left Row, `IO5`)**.
+* **Step 4 (Status LED):** The firmware automatically mirrors the detection state onto the onboard LED on **Pin 8 (Right Row, `IO13`)**. When an obstacle is detected, `IO13` illuminates.
+
+---
+
+#### 4. Phase 2: Dual Sensor Setup (X-Axis & Y-Axis Complete Homing)
+
+When ready to test both axes simultaneously:
+
+* **Step 1 (Sensor Y Power):** Connect a red jumper wire from the breadboard **Red 5V Rail** to the **`VCC`** pin of Sensor Y.
+* **Step 2 (Sensor Y Ground):** Connect a black jumper wire from the breadboard **Black/Blue GND Rail** to the **`GND`** pin of Sensor Y.
+* **Step 3 (Sensor Y Signal Line):** Connect a jumper wire (e.g. Blue or White) from Sensor Y **`OUT`** directly to ESP32-S3 SuperMini **Pin 9 (Left Row, `IO6`)**.
+
+---
+
+#### 5. Master Breadboard Pin Interconnection Table
+
+| Component & Pin | Net / Signal Name | ESP32-S3 SuperMini Physical Header Pin | Electrical Characteristics | Wire Color Suggestion |
+|---|---|---|---|---|
+| **ESP32 5V** | 5V Rail (`VBUS`) | **Pin 1 (Left Row, `5V`)** | +5V DC from USB | **Red** |
+| **ESP32 GND** | Common GND Rail | **Pin 2 (Left Row, `GND`)** | 0V Common Ground | **Black** |
+| **Sensor X VCC** | Sensor X Power | Connected to 5V Rail | +5V DC | **Red** |
+| **Sensor X GND** | Sensor X Ground | Connected to GND Rail | 0V Ground | **Black** |
+| **Sensor X OUT** | X Endstop Signal | **Pin 8 (Left Row, `IO5`)** | 0V (Detected) / ~3.0V (Clear) | **Yellow / Green** |
+| **Sensor Y VCC** | Sensor Y Power | Connected to 5V Rail | +5V DC | **Red** |
+| **Sensor Y GND** | Sensor Y Ground | Connected to GND Rail | 0V Ground | **Black** |
+| **Sensor Y OUT** | Y Endstop Signal | **Pin 9 (Left Row, `IO6`)** | 0V (Detected) / ~3.0V (Clear) | **Blue / White** |
+| **Onboard Status LED** | Endstop Indicator | **Pin 8 (Right Row, `IO13`)** | Active HIGH drive | Built-in SMD LED |
+| **Serial Debug TX** | 115200 Baud Console | **Pin 9 (Right Row, `TX0` / GPIO 43)** | 3.3V UART Output | USB-CDC / Serial |
+
+---
+
+#### 6. Step-by-Step Distance & Sensitivity Calibration Procedure
+
+The FC-51 sensor's precision as an optical endstop depends on accurately tuning its comparator threshold trimpot:
+
+1. **Power Up the Circuit:**
+   - Plug the ESP32-S3 SuperMini into your computer via USB-C.
+   - The red Power LED on both the ESP32 and the FC-51 sensor module should light up steadily.
+2. **Clear Field Calibration (Baseline Setting):**
+   - Ensure the front optical bulbs have an unobstructed view (> 15 cm of clear space ahead).
+   - If the green detection LED is currently ON, take a miniature flathead screwdriver and rotate the small brass trimpot screw **counter-clockwise** until the green LED just turns **OFF**.
+   - Turn it an additional 1/4 turn counter-clockwise past the threshold to create an adequate noise margin against ambient light.
+3. **Obstacle Homing Distance Setting (~5 mm to 10 mm):**
+   - Position your intended homing flag (e.g. the 3D-printed mirror bracket edge, a small plastic tab, or a piece of matte dark cardstock) exactly at the desired trigger distance (**5 mm to 8 mm** in front of the IR diodes).
+   - Slowly rotate the trimpot screw **clockwise** until the green detection LED **snaps ON**.
+   - Note: The onboard LED on the ESP32-S3 (`IO13`) should turn ON simultaneously!
+4. **Hysteresis & Repeatability Verification:**
+   - Pull the obstacle back by 2 mm; the green LED and onboard LED must cleanly turn **OFF**.
+   - Move the obstacle forward by 2 mm; the LEDs must snap cleanly **ON**.
+   - Repeat 10 times to verify consistent trigger behavior.
+
+---
+
+#### 7. Optical Endstop Design & Environmental Precautions
+
+* **Flag Surface Finish:** 
+  - For maximum homing repeatability ($< 50\,\mu\text{m}$ error), use a **matte black or dark grey 3D-printed plastic tab** (PLA or PETG).
+  - Avoid glossy white, polished acrylic, or shiny metallic surfaces directly perpendicular to the sensor, as specular glare can cause premature triggering at excessive distances.
+* **Interference Shielding:**
+  - Keep the sensor shielded from direct, unfiltered sunlight or high-intensity halogen/incandescent desk lamps. These incandescent sources emit broadband IR radiation that can saturate the phototransistor. Standard household LED or fluorescent lighting will not interfere.
+* **Module Mounting:**
+  - Fasten the sensor PCB securely using its M3 mounting hole. Any physical wobble in the PCB directly degrades homing repeatability!
+
+---
+
+#### 8. First Power-On Functional Verification via Serial Monitor
+
+1. Open Arduino IDE Serial Monitor (or your preferred terminal like PuTTY / minicom) set to **115200 baud**, with **Newline (`\n`)** line ending.
+2. Press the `RESET` button on the ESP32-S3 SuperMini. You will see the initialization banner:
+   ```text
+   ==================================================
+     ESP32-S3 SuperMini IR Sensor Test Firmware
+   ==================================================
+   [INIT] Sensor X Pin : GPIO 5 (Input Pull-up)
+   [INIT] Sensor Y Pin : GPIO 6 (Input Pull-up)
+   [INIT] Status LED   : GPIO 13
+   [INIT] Ready. Type HELP for command list.
+   ```
+3. Type `STATUS` and press Enter:
+   - When no obstacle is present: `Sensor X: CLEAR (HIGH, 1) | Sensor Y: CLEAR (HIGH, 1)`.
+   - Place an object in front of Sensor X and type `STATUS`: `Sensor X: TRIGGERED (LOW, 0)`.
+4. Type `STREAM 100` to start real-time 100 ms polling. Move your flag in and out of the beam to verify clean, responsive triggering without glitching. Send `STOP` to halt the stream.
+5. Type `CAL` to enter interactive calibration mode with live millisecond transition timestamps.
 
 ---
 
