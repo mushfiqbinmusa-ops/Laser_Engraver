@@ -6,7 +6,7 @@ This is just one of many sources for the parts or something similar listed here.
 * Jumper wire https://www.digikey.com/short/qqzm31
 * Gikfun USB Nano V3.0 ATmega328 CH340G 5V 16M Micro-controller board For Arduino http://a.co/0FXSMdG
 * Elegoo 5 sets 28BYJ-48 ULN2003 5V Stepper Motor + ULN2003 Driver Board for Arduino http://a.co/cguFvhZ
-* Small snap action lever switch https://www.digikey.com/short/qqzmc1
+* Infrared Obstacle Avoidance IR Sensor Module (FC-51 / TCRT5000 with LM393 comparator) - Qty: 2 (X and Y homing)
 * Yosoo 12V TTL 1W/1.6W/2W/445nm/450nm Laser Diode LD Driver Power Supply Board http://a.co/54FHMMQ
 * 2W 445nm M140 Blue Diode in Copper Module W/Leads & Three Element Glass Lens http://a.co/2WCPIwy
 * AixiZ aluminum mount and heat sink for 12mm modules http://a.co/9MI4BEu

@@ -612,40 +612,40 @@ The TTL modulation port allows high-speed electronic blanking. Connecting the TT
 
 <a id="46-endstop-switch-topology-active-low-pullups-debouncing-and-hysteresis"></a>
 <a id="sec-4-6-endstop-topology"></a>
-### 4.6 Endstop Switch Topology (Active-Low Pullups, Debouncing, and Hysteresis)
-The project utilizes sub-miniature snap-action lever microswitches wired between the Arduino input pins and Ground:
+### 4.6 Optical Endstop Architecture: IR Obstacle Avoidance Modules (Active-LOW, LM393 Comparator)
+The project utilizes active optical reflection modules (**FC-51 / TCRT5000 style IR Obstacle Avoidance Sensors**) to replace fragile mechanical lever microswitches. These modules integrate an infrared emitter diode, an infrared phototransistor receiver, an LM393 dual voltage comparator, and a sensitivity multi-turn trim-pot.
 
 ```
-        Arduino 5V
-            │
-          [ ~30k Internal Pullup ]
-            │
-            ├──────────────────────> Arduino Input (D10 / D11)
-            │
-           [o] Normally Open (NO) Terminal
-            │
-            \  Snap Action Lever
-            │
-           [o] Common (COM) Terminal
-            │
-           GND
+       +5V / +3.3V Power Rail ──────────────────────────────+
+                                                            │
+                                                  +---------+---------+
+                                                  |   VCC             |
+   [ IR Emitter LED ] ──(IR Light)──>             |                   |
+                                      [ Reflector |   LM393           |
+   [ IR Photodiode  ] <──(Bounce)─────  Mirror /  |   Comparator      |
+                                        Flag ]    |                   |
+                                                  |   OUT             |───> MCU GPIO (Input)
+                                                  |   GND             |     (Active LOW on detect)
+                                                  +---------+---------+
+                                                            │
+       System Ground (GND) ─────────────────────────────────+
 ```
 
-#### Circuit Analysis:
-- **Default State (Switch Open):** The internal pullup resistor holds the input at +5V (`HIGH`).
-- **Triggered State (Switch Closed):** The lever arm depresses, connecting the pin directly to ground (`LOW`).
-- **Mechanical Contact Bounce:** Snap-action leaf springs bounce repeatedly for 2 ms - 5 ms upon initial closure.
-  In the repository's `xStepperHome()` function:
-  ```cpp
-  while (hMinVal == LOW) {
-    stepperX.moveTo(4096);
-    stepperX.run();
-    hMinVal = digitalRead(xMin);
-  }
-  ```
-  Because the loop samples `digitalRead(xMin)` during every half-step calculation without software debouncing or low-pass RC filtering, mechanical switch vibration can prematurely trigger or glitch the homing loop. Adding a 100 nF ceramic capacitor across the switch contacts or implementing a 10 ms firmware debounce delay significantly improves homing repeatability.
+#### Sensor Physics and Operating Mechanics:
+1. **Infrared Triangulation / Reflectance:** The IR diode emits an invisible beam (~850nm - 950nm). When the mirror mount or physical flag passes within the tuned distance (typically 2 mm – 15 mm), the photodiode receives the reflected IR intensity.
+2. **Comparator Switching:** An onboard LM393 differential comparator contrasts the photodiode's analog voltage drop against a reference threshold voltage configured via the onboard trim-potentiometer:
+   - **No Obstacle (Open beam):** The comparator output transistor remains OFF, pulled up to the supply rail -> Logic **HIGH** (~3.0V - 3.3V).
+   - **Obstacle Detected (Homed state):** The received IR reflection crosses the threshold, pulling the output down to Ground -> Logic **LOW** (~0.1V - 0.2V).
+   - An onboard SMD indicator LED illuminates upon obstacle detection for instant visual verification.
+3. **Key Advantages over Mechanical Microswitches:**
+   - **Zero Physical Contact / No Mechanical Wear:** Eliminates lever fatigue, plastic tab snap, and switch contact degradation.
+   - **No Mechanical Contact Bounce:** While mechanical springs oscillate for 2 ms – 5 ms, the LM393 transitions cleanly within microseconds ($t_{\\text{resp}} < 50\\,\\mu\\text{s}$). Minor firmware debouncing (5 ms window) prevents optical noise or hysteresis jitter.
+   - **High Optical Reflectivity of Aluminum Mirrors:** The first-surface aluminum mirrors provide exceptionally strong IR reflection, providing high contrast and clean, repeatable trip points ($\\sigma < \\pm 1$ step).
+4. **Electrical Interfacing Considerations (ESP32-S3 3.3V GPIO Protection):**
+   - When powered from 5V, the sensor's open-collector / internal pull-up network typically outputs a clamped voltage below 3.3V (as verified empirically). If high-voltage output occurs on specific module variants, a simple two-resistor voltage divider ($10\\,\\text{k}\\Omega / 20\\,\\text{k}\\Omega$) or direct 3.3V rail power guarantees safe operation with the ESP32-S3 SuperMini's 3.3V GPIO inputs.
 
 ---
+
 
 <a id="5-laser-radiation-physics-photobiology-and-rigorous-safety-engineering"></a>
 <a id="sec-5-laser-safety"></a>
@@ -763,7 +763,7 @@ The original repository BOM lists the essential components, but lacks parametric
 | **Controller** | Microcontroller Board | Arduino Nano V3.0 (ATmega328P, CH340G) | 1 | 5V logic, 16 MHz, Mini-USB / Type-C | $4.00 | $4.00 | Amazon / AliExpress / DigiKey |
 | **Actuators** | Unipolar Stepper Motors | 28BYJ-48 5V Stepper Motor | 2 | 5V DC, 64:1 reduction, 4-phase unipolar | $1.75 | $3.50 | Elegoo / Amazon / AliExpress |
 | **Motor Drivers** | Darlington Transistor Array | ULN2003A Driver Board | 2 | 5V-12V, 500mA/ch, LED phase indicators | $1.00 | $2.00 | Included in 28BYJ-48 kit |
-| **Endstops** | Micro Lever Limit Switches | Omron SS-5GL or generic subminiature | 2 | SPDT, snap-action, 1A 125VAC, lever arm | $0.75 | $1.50 | DigiKey (qqzmc1) / Amazon |
+| **Endstops** | IR Obstacle Avoidance Modules | FC-51 / TCRT5000 IR reflection sensor | 2 | 3.3V-5V DC, LM393 comparator, trimpot adjust | $0.85 | $1.70 | AliExpress / Amazon |
 | **Laser Emitter** | 445nm Blue Laser Diode | Nichia M140 2W in 12mm Copper Module | 1 | 2.0W CW, 445nm, 3-element glass lens | $38.00 | $38.00 | DTR Laser Shop / AixiZ |
 | **Thermal** | Laser Heatsink & Mount | AixiZ 12mm Aluminum Mount/Heatsink | 1 | Finned aluminum, clamping set screw | $8.50 | $8.50 | AixiZ / eBay / Amazon |
 | **Laser Driver** | Constant Current LD Driver | Yosoo 12V TTL LD Buck Driver Board | 1 | 12V in, 1.8A out, TTL modulation port | $9.00 | $9.00 | Amazon / AliExpress |
@@ -837,11 +837,11 @@ Follow this precise sequential mechanical assembly protocol:
    - Locate the X-axis stepper motor mount (horizontal mount closest to the laser aperture).
    - Insert the 28BYJ-48 stepper motor so that its output shaft faces upward and is centered along the optical axis. Secure using two M3 x 8mm screws and nuts through the motor's stamped mounting ears.
    - Locate the Y-axis stepper motor mount (elevated 90-degree mount). Insert the second 28BYJ-48 motor with its shaft horizontal and perpendicular to the X-axis. Secure with two M3 x 8mm screws.
-3. **Endstop Microswitch Mounting:**
-   - Position the X and Y snap-action lever switches into their respective chassis alignment recesses.
-   - Ensure the microswitch lever arm is positioned parallel to the mirror plane at the extreme limit of travel.
-   - Affix each switch securely using a small drop of medium-viscosity cyanoacrylate (CA glue) or 5-minute epoxy. Verify that depressing the lever generates an audible, distinct "click" before the mirror or shaft hits the hard physical plastic stop.
-4. **Mirror Attachment to Stepper Shafts:**
+3. **IR Optical Endstop Sensor Mounting:**
+   - Position the X and Y IR obstacle avoidance sensor modules into their respective chassis alignment recesses near the mirror rotational sweeps.
+   - Align the IR emitter and photodetector pair facing toward the back or side edge of the mirror bracket / flag collar.
+   - Adjust the onboard multi-turn sensitivity trim-pot with a precision screwdriver so that the onboard indicator LED turns ON only when the mirror or flag reaches the intended home boundary (~3 mm - 8 mm distance).
+   - Secure the sensor modules using M3 hardware or standoffs, ensuring direct line-of-sight is maintained without mechanical obstruction.
    - The 28BYJ-48 motor shaft features a dual-flat "D-shaft" profile (5mm diameter with two 3mm flats).
    - Clean the flat surfaces of the motor shafts and the back glass faces of the mirrors with IPA.
    - Apply a small drop of high-shear structural cyanoacrylate (e.g., Loctite 380 Black Max or two-part optical epoxy) to the shaft mounting face.
@@ -890,11 +890,12 @@ Follow this systematic wiring sequence to avoid ground loops and inductive spike
    - Connect the Arduino Nano USB port to your PC (or power via +5V bus to Nano 5V pin).
    - Connect Arduino pins D2, D3, D4, D5 to ULN2003 #1 inputs IN1, IN2, IN3, IN4 (X-axis).
    - Connect Arduino pins D6, D7, D8, D9 to ULN2003 #2 inputs IN1, IN2, IN3, IN4 (Y-axis).
-3. **Endstop Wiring:**
-   - Connect the Common (COM) pin of Switch X to Arduino GND.
-   - Connect the Normally Open (NO) pin of Switch X to Arduino pin D10.
-   - Connect the Common (COM) pin of Switch Y to Arduino GND.
-   - Connect the Normally Open (NO) pin of Switch Y to Arduino pin D11.
+3. **IR Optical Sensor Wiring:**
+   - Connect VCC on both IR sensor modules to the 5V power bus (or ESP32 3.3V rail).
+   - Connect GND on both IR sensor modules to the common system Ground.
+   - Connect the digital OUT pin of IR Sensor X to the MCU X-endstop GPIO.
+   - Connect the digital OUT pin of IR Sensor Y to the MCU Y-endstop GPIO.
+   - (Optional Voltage Divider): If powered at 5V and module outputs full rail voltage, insert a 10k/20k divider to limit signal to 3.3V before feeding into the ESP32 GPIO.
 4. **Laser Driver Connections:**
    - Connect the 12V DC power supply positive (+) directly to the laser driver's 12V VCC input.
    - Connect the laser driver's LD+ and LD- terminal blocks to the Nichia M140 diode leads (observing strict polarity: Red = Anode +, Black = Cathode -).

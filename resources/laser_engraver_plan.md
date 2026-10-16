@@ -147,8 +147,8 @@ The Super Mini exposes 14 usable GPIOs on its breakout headers. Below is the com
 | GPIO 42 | STEP_Y_IN3 | ULN2003A-Y IN3 | Stepper Y coil C |
 | GPIO 9 | STEP_Y_IN4 | ULN2003A-Y IN4 | Stepper Y coil D |
 | GPIO 10 | LASER_PWM | Laser driver PWM in | LEDC channel 0, 5 kHz, 12-bit |
-| GPIO 11 | ENDSTOP_X | X limit switch (NC) | Active-LOW, internal pull-up |
-| GPIO 12 | ENDSTOP_Y | Y limit switch (NC) | Active-LOW, internal pull-up |
+| GPIO 11 | ENDSTOP_X | X IR obstacle sensor (Active-LOW) | Active-LOW, internal pull-up |
+| GPIO 12 | ENDSTOP_Y | Y IR obstacle sensor (Active-LOW) | Active-LOW, internal pull-up |
 | GPIO 43 | USB_TX | Raspberry Pi RX / USB host | UART0 / USB-CDC |
 | GPIO 44 | USB_RX | Raspberry Pi TX / USB host | UART0 / USB-CDC |
 | GPIO 13 | STATUS_LED | Onboard LED (blue) | Job active / error blink |
@@ -389,8 +389,8 @@ laser-engraver-firmware/
 #define LASER_MAX_DUTY   4095
 
 // ── Endstops ───────────────────────────────────────────────
-#define ENDSTOP_X_PIN  11        // Active LOW (NC switch)
-#define ENDSTOP_Y_PIN  12        // Active LOW (NC switch)
+#define ENDSTOP_X_PIN  11        // Active LOW (IR obstacle sensor OUT)
+#define ENDSTOP_Y_PIN  12        // Active LOW (IR obstacle sensor OUT)
 
 // ── Motion ─────────────────────────────────────────────────
 #define STEPS_PER_REV     4096   // 28BYJ-48 in half-step mode
