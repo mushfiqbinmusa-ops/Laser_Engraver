@@ -27,7 +27,7 @@
 // Microstepping Mode Selection (Shared MS1, MS2, MS3 pins for both A4988s)
 #define MS1_PIN           1         // Microstep select bit 1
 #define MS2_PIN           2         // Microstep select bit 2
-#define MS3_PIN           38        // Microstep select bit 3
+#define MS3_PIN           4         // Microstep select bit 3 (GPIO 4 on SuperMini outer header)
 
 // Status Indicator LED
 #define STATUS_LED_PIN    13        // Built-in / on-board status LED
@@ -1102,7 +1102,7 @@ void printStatus() {
                  driversEnabled ? "YES (Active Low GND)" : "NO  (Outputs High-Z)");
   Serial.printf( "|  Microstepping Mode  : 1/%-2d (%5u steps/rev)       |\n",
                  microstepMode, stepsPerRev);
-  Serial.printf( "|  MS Pins [1, 2, 38]  : [%d, %d, %d]                     |\n",
+  Serial.printf( "|  MS Pins [1, 2, 4]   : [%d, %d, %d]                     |\n",
                  digitalRead(MS1_PIN), digitalRead(MS2_PIN), digitalRead(MS3_PIN));
   Serial.printf( "|  Motor A Position    : %+8ld steps (%+6.1f deg)    |\n", posA, degA);
   Serial.printf( "|  Motor B Position    : %+8ld steps (%+6.1f deg)    |\n", posB, degB);
@@ -1189,7 +1189,7 @@ void printBanner() {
   Serial.println("+==================================================+");
   Serial.printf( "|  Motor A (X) : STEP=IO5, DIR=IO6, EN=IO7         |\n");
   Serial.printf( "|  Motor B (Y) : STEP=IO9, DIR=IO10, EN=IO11       |\n");
-  Serial.printf( "|  Microstep   : MS1=IO1, MS2=IO2, MS3=IO38        |\n");
+  Serial.printf( "|  Microstep   : MS1=IO1, MS2=IO2, MS3=IO4         |\n");
   Serial.printf( "|  Status LED  : GPIO 13                           |\n");
   Serial.printf( "|  Base Steps  : %lu full steps/rev (64:1 gear)    |\n", (unsigned long)BASE_STEPS_PER_REV);
   Serial.printf( "|  Resolution  : 1/1 Full-step (%lu steps/rev)     |\n", (unsigned long)stepsPerRev);

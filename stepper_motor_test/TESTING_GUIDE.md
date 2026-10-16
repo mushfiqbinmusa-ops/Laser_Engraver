@@ -51,7 +51,7 @@ flowchart TD
         IO9["GPIO 9 (STEP_B)"]
         IO10["GPIO 10 (DIR_B)"]
         IO11["GPIO 11 (EN_B)"]
-        MS_BUS["Shared Microstep Bus\nGPIO 1 (MS1)\nGPIO 2 (MS2)\nGPIO 38 (MS3)"]
+        MS_BUS["Shared Microstep Bus\nGPIO 1 (MS1)\nGPIO 2 (MS2)\nGPIO 4 (MS3)"]
         IO13["GPIO 13 (Status LED)"]
     end
 
@@ -197,33 +197,42 @@ $$V_{ref} = I_{max} \times 8 \times R_s = I_{max} \times 0.8$$
 
 ## 4. Circuit Wiring Diagrams & Detailed Component Schematics
 
-This section presents the full component pinouts, followed by complete step-by-step schematics for both **Single Motor** and **Dual Motor** bench testing.
+> [!TIP]
+> ### 🌟 Interactive Dynamic HTML Schematic Available!
+> For an animated, interactive visual schematic with signal pulsing, pin tooltips, and a **Single Motor vs Dual Motor toggle**, open:  
+> **👉 [`stepper_motor_test/circuit_diagram.html`](file:///home/mushfiq/Desktop/Laser-XY-Scanner/stepper_motor_test/circuit_diagram.html)** directly in your web browser!
+
+> [!NOTE]
+> ### 💡 Is `stepper_motor_test.ino` for both Single and Dual Stepper Testing?
+> **YES!** `stepper_motor_test.ino` is a unified, all-in-one test suite designed for both stages:
+> 1. **Phase 1 (Single Stepper Bring-Up):** Wire only **Motor A (X-Axis)**. Motor B's pins are held inactive. You can run all single-axis commands (`STEP <n>`, `SPEED <sps>`, `RUN <sps>`, `STOP`, `REV <n>`, `BACKLASH`, `RAMP`, `STALL`).
+> 2. **Phase 2 (Dual Stepper Coordinated Testing):** Add **Motor B (Y-Axis)** when ready. You can test both motors together with vector interpolation commands (`DUAL STEP <nA> <nB>`, `DUAL GOTO <xA> <yB>`, `DUAL CIRCLE <r>`, `DUAL SQUARE <s>`).
+>
+> You do **not** need a separate sketch—the single firmware safely accommodates both wiring states!
 
 ---
 
 ### 4.0 Component Pinout References
 
-#### 1. ESP32-S3 SuperMini Pinout (Top View)
+#### 1. ESP32-S3 SuperMini Physical Header Pinout (Top View)
+*(Castellated 18-pin DIP footprint: 9 pins Left, 9 pins Right, USB-C at Top)*
 ```
                   ┌────────────────────────┐
                   │      [ USB-C PORT ]    │
                   │                        │
-       3.3V Power │ [3V3]            [GND] │ Ground (Common Bus)
-       3.3V Power │ [3V3]            [GND] │ Ground (Common Bus)
-            Reset │ [RST]             [5V] │ 5V (USB VBUS output)
-      Unused GPIO │ [IO4]             [5V] │ 5V (USB VBUS output)
-       Motor A EN │ [IO5]            [TX0] │ UART TX / GPIO 43 (Debug)
-      Motor A DIR │ [IO6]            [RX0] │ UART RX / GPIO 44 (Debug)
-     Motor A STEP │ [IO7]            [IO1] │ MS1 (Shared Microstep Bus)
-      Unused GPIO │ [IO8]            [IO2] │ MS2 (Shared Microstep Bus)
-     Motor B STEP │ [IO9]           [IO42] │ Unused GPIO
-      Motor B DIR │ [IO10]          [IO41] │ Unused GPIO
-       Motor B EN │ [IO11]          [IO40] │ Unused GPIO
-      Unused GPIO │ [IO12]          [IO39] │ Unused GPIO
-       Status LED │ [IO13]          [IO38] │ MS3 (Shared Microstep Bus)
+       5V Power   │ [5V]             [GND] │ Ground (Common Bus)
+       Ground Bus │ [GND]            [IO7] │ Motor A EN (Active LOW)
+       3.3V Logic │ [3V3]            [IO8] │ Unused GPIO
+ MS1 Shared Bus   │ [IO1]            [IO9] │ Motor B STEP Pulse
+ MS2 Shared Bus   │ [IO2]           [IO10] │ Motor B DIR Direction
+ Unused / Strap   │ [IO3]           [IO11] │ Motor B EN (Active LOW)
+ MS3 Shared Bus   │ [IO4]           [IO12] │ Unused GPIO
+ Motor A STEP     │ [IO5]           [IO13] │ Onboard Status LED
+ Motor A DIR      │ [IO6]           [TX0]  │ Debug UART TX (GPIO 43)
                   │                        │
                   └────────────────────────┘
 ```
+*(Notice: **GPIO 4** is utilized for MS3 because it is physically exposed on the outer breadboard header, completely avoiding the need to solder to underside castellated pads!)*
 
 #### 2. Allegro A4988 Module Physical Pinout (Top View)
 ```
@@ -286,9 +295,8 @@ For initial bring-up, current calibration, and single-axis speed tuning:
        |            │                       | │     │     │                 │
        |   [IO1] ───┼─────────────────┐     | │     │     │                 │
        |   [IO2] ───┼───────────┐     │     | │     │     │                 │
-       |   [IO38] ──┼─────┐     │     │     | │     │     │                 │
+       |   [IO4] ───┼─────┐     │     │     | │     │     │                 │
        +------------+-----│-----│-----│-----+ │     │     │                 │
-                          │     │     │       │     │     │                 │
                           │     │     │       │     │     │                 │
                           │     │     │       v     v     v                 v
                        +--┴─────┴─────┴───────┴─────┴─────┴─────────────────┴----+
@@ -321,7 +329,7 @@ For initial bring-up, current calibration, and single-axis speed tuning:
        +------------------------------------+                        │       │
                                                                      │       │
        +------------------------------------+                        │       │
-       |        5V MOTOR POWER SUPPLY       |                        │       │
+       |   ESP32 5V PIN OR 5V BENCH SUPPLY  |                        │       │
        |                                    |                        │       │
        |   [+5V Output] ────────────────────┼────────────────────────┼───────┘
        |                                    |                        │
@@ -331,7 +339,7 @@ For initial bring-up, current calibration, and single-axis speed tuning:
                          │           +───────────[ - ]──┴─────────────────+
                          │           |  ELECTROLYTIC FILTER CAPACITOR     |
                          │           |  47uF, 470uF, or 1000uF (16V / 25V)|
-                         │           |  (470uF 16V/25V Recommended)       |
+                         │           |  (470uF 25V Recommended)           |
                          │           +───────────[ + ]──┬─────────────────+
                          │                              │
                          +──────────────────────────────┴──────────────────> Ties to VMOT
@@ -353,19 +361,15 @@ This schematic connects both Motor A (X-Mirror) and Motor B (Y-Mirror) to the ES
 
                                              ESP32-S3 SuperMini
                                      ┌─────────────────────────────────┐
-               Common 3.3V Logic Bus │ [3V3]                     [GND] ├─── Common System GND
-                                     │ [3V3]                     [GND] ├─── Common System GND
-                                     │ [RST]                      [5V] │
-                                     │ [IO4]                      [5V] │
-                      Motor A Enable │ [IO5]                     [TX0] │
-                   Motor A Direction │ [IO6]                     [RX0] │
-                        Motor A Step │ [IO7]                     [IO1] ├─── MS1 Shared Bus
-                                     │ [IO8]                     [IO2] ├─── MS2 Shared Bus
-                        Motor B Step │ [IO9]                    [IO42] │
-                   Motor B Direction │ [IO10]                   [IO41] │
-                      Motor B Enable │ [IO11]                   [IO40] │
-                                     │ [IO12]                   [IO39] │
-                 Onboard Status LED  │ [IO13]                   [IO38] ├─── MS3 Shared Bus
+                       USB 5V Supply │ [5V]                      [GND] ├─── Common System GND
+               Common System GND Bus │ [GND]                     [IO7] ├─── Motor A EN (GPIO 7)
+               Common 3.3V Logic Bus │ [3V3]                     [IO8] │
+                      MS1 Shared Bus │ [IO1]                     [IO9] ├─── Motor B STEP (GPIO 9)
+                      MS2 Shared Bus │ [IO2]                    [IO10] ├─── Motor B DIR (GPIO 10)
+                      Unused / Strap │ [IO3]                    [IO11] ├─── Motor B EN (GPIO 11)
+                      MS3 Shared Bus │ [IO4]                    [IO12] │
+                  Motor A STEP Pulse │ [IO5]                    [IO13] ├─── Status LED
+               Motor A DIR Direction │ [IO6]                     [TX0] │    (Debug Serial)
                                      └─────────────────────────────────┘
                                         │   │   │   │   │   │   │   │
                      ┌──────────────────┘   │   │   │   │   │   │   └───────────────────────────────┐
