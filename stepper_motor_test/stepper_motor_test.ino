@@ -483,10 +483,17 @@ void handleCommand(String cmd) {
                    speedA, curRpmA);
     Serial.printf( "|  Motor B Configured Speed : %5u sps -> %6.2f RPM    |\n",
                    speedB, curRpmB);
-    if (continuousRunning) {
-      float runRpm = (float)abs(continuousSpeedSps) * 60.0f / stepsPerRev;
-      Serial.printf( "|  Continuous Rotation      : ACTIVE  -> %6.2f RPM (%s) |\n",
-                     runRpm, continuousDir ? "CW" : "CCW");
+    if (contRunningA || contRunningB) {
+      if (contRunningA) {
+        float runRpmA = (float)abs(contSpeedA) * 60.0f / stepsPerRev;
+        Serial.printf( "|  Continuous Rotation (A)  : ACTIVE  -> %6.2f RPM (%s) |\n",
+                       runRpmA, contDirA ? "CW" : "CCW");
+      }
+      if (contRunningB) {
+        float runRpmB = (float)abs(contSpeedB) * 60.0f / stepsPerRev;
+        Serial.printf( "|  Continuous Rotation (B)  : ACTIVE  -> %6.2f RPM (%s) |\n",
+                       runRpmB, contDirB ? "CW" : "CCW");
+      }
     } else {
       Serial.println("|  Continuous Rotation      : IDLE / STOPPED           |");
     }
@@ -627,7 +634,8 @@ void handleCommand(String cmd) {
 
   // ── RESET ──────────────────────────────────────────────────────────────────
   } else if (upper == "RESET") {
-    continuousRunning = false;
+    contRunningA = false;
+    contRunningB = false;
     setDriversEnabled(false);
     setMicrostepping(1);
     speedA = DEFAULT_SPEED_SPS;
