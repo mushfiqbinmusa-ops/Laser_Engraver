@@ -76,12 +76,21 @@ bool     dirInvertB         = false;
 // Driver enable state
 bool     driversEnabled     = false;
 
-// Continuous motion state (Single Motor A)
-bool     continuousRunning  = false;
-int32_t  continuousSpeedSps = 0;
-uint32_t continuousIntervalUs = 0;
-uint32_t lastContinuousStepUs = 0;
-bool     continuousDir      = true;
+// Continuous motion state for independent motors A and B
+bool     contRunningA       = false;
+int32_t  contSpeedA         = 0;
+uint32_t contIntervalUsA    = 0;
+uint32_t lastContStepUsA    = 0;
+bool     contDirA           = true;
+
+bool     contRunningB       = false;
+int32_t  contSpeedB         = 0;
+uint32_t contIntervalUsB    = 0;
+uint32_t lastContStepUsB    = 0;
+bool     contDirB           = true;
+
+// Legacy alias for status checks
+#define continuousRunning (contRunningA || contRunningB)
 
 // Safety and idle power management
 bool     autoDisableEnabled = true;
@@ -160,28 +169,48 @@ void setup() {
 // =============================================================================
 void loop() {
   // ── Handle Non-Blocking Continuous Motion (Motor A) ────────────────────────
-  if (continuousRunning && continuousIntervalUs > 0) {
+  if (contRunningA && contIntervalUsA > 0) {
     uint32_t nowUs = micros();
-    if ((nowUs - lastContinuousStepUs) >= continuousIntervalUs) {
-      lastContinuousStepUs = nowUs;
+    if ((nowUs - lastContStepUsA) >= contIntervalUsA) {
+      lastContStepUsA = nowUs;
 
-      // Assert direction
-      bool physicalDir = continuousDir;
+      bool physicalDir = contDirA;
       if (dirInvertA) physicalDir = !physicalDir;
       digitalWrite(MOT_A_DIR_PIN, physicalDir ? DIR_CW : DIR_CCW);
       delayMicroseconds(1);
 
-      // Step pulse
       digitalWrite(MOT_A_STEP_PIN, HIGH);
       delayMicroseconds(STEP_PULSE_WIDTH_US);
       digitalWrite(MOT_A_STEP_PIN, LOW);
 
-      // Update position tracker
-      posA += continuousDir ? 1 : -1;
+      posA += contDirA ? 1 : -1;
       lastMotionMillis = millis();
 
-      // Quick visual blink on LED (toggle every 256 steps)
       if ((abs(posA) & 0xFF) == 0) {
+        digitalWrite(STATUS_LED_PIN, !digitalRead(STATUS_LED_PIN));
+      }
+    }
+  }
+
+  // ── Handle Non-Blocking Continuous Motion (Motor B) ────────────────────────
+  if (contRunningB && contIntervalUsB > 0) {
+    uint32_t nowUs = micros();
+    if ((nowUs - lastContStepUsB) >= contIntervalUsB) {
+      lastContStepUsB = nowUs;
+
+      bool physicalDir = contDirB;
+      if (dirInvertB) physicalDir = !physicalDir;
+      digitalWrite(MOT_B_DIR_PIN, physicalDir ? DIR_CW : DIR_CCW);
+      delayMicroseconds(1);
+
+      digitalWrite(MOT_B_STEP_PIN, HIGH);
+      delayMicroseconds(STEP_PULSE_WIDTH_US);
+      digitalWrite(MOT_B_STEP_PIN, LOW);
+
+      posB += contDirB ? 1 : -1;
+      lastMotionMillis = millis();
+
+      if ((abs(posB) & 0xFF) == 0) {
         digitalWrite(STATUS_LED_PIN, !digitalRead(STATUS_LED_PIN));
       }
     }
@@ -220,9 +249,10 @@ void handleCommand(String cmd) {
 
   // ── Quick Abort Key ('X', 'x', '!') ────────────────────────────────────────
   if (upper == "X" || upper == "!") {
-    continuousRunning = false;
+    contRunningA = false;
+    contRunningB = false;
     digitalWrite(STATUS_LED_PIN, LOW);
-    Serial.println("[ABORT] Motion stopped immediately.");
+    Serial.println("[ABORT] All motion stopped immediately.");
     return;
   }
 
@@ -243,9 +273,73 @@ void handleCommand(String cmd) {
     Serial.println("[ENABLE] A4988 driver outputs ENABLED (coils energized).");
 
   } else if (upper == "DISABLE") {
-    continuousRunning = false;
+    contRunningA = false;
+    contRunningB = false;
     setDriversEnabled(false);
     Serial.println("[DISABLE] A4988 driver outputs DISABLED (coils de-energized, motors free).");
+
+  // ── START <A|B|BOTH> [sps] Continuous Rotation Command ───────────────────────
+  } else if (upper.startsWith("START")) {
+    String arg = upper.substring(5);
+    arg.trim();
+
+    char motorTarget = 'A';
+    int sps = 100; // default safe speed 100 steps/sec
+
+    if (arg.length() > 0) {
+      char targetStr[16] = "";
+      int parsedSps = 0;
+      int count = sscanf(arg.c_str(), "%15s %d", targetStr, &parsedSps);
+      String tUpper = String(targetStr);
+      tUpper.toUpperCase();
+
+      if (tUpper == "B" || tUpper == "Y") {
+        motorTarget = 'B';
+      } else if (tUpper == "BOTH" || tUpper == "ALL" || tUpper == "AB") {
+        motorTarget = '+'; // both
+      } else if (tUpper == "A" || tUpper == "X") {
+        motorTarget = 'A';
+      } else if (count == 1 && (targetStr[0] == '-' || isdigit(targetStr[0]))) {
+        // User typed: START 100
+        motorTarget = 'A';
+        parsedSps = atoi(targetStr);
+      }
+
+      if (parsedSps != 0) {
+        sps = parsedSps;
+      }
+    }
+
+    if (abs(sps) < (int)MIN_SPEED_SPS) sps = 100;
+    if ((uint32_t)abs(sps) > MAX_SPEED_SPS) {
+      sps = (sps > 0) ? MAX_SPEED_SPS : -(int)MAX_SPEED_SPS;
+    }
+
+    setDriversEnabled(true);
+    lastMotionMillis = millis();
+
+    if (motorTarget == 'A' || motorTarget == '+') {
+      speedA = (uint32_t)abs(sps);
+      contSpeedA = sps;
+      contDirA = (sps >= 0);
+      contIntervalUsA = 1000000UL / speedA;
+      lastContStepUsA = micros();
+      contRunningA = true;
+      Serial.printf("[START] Motor A running continuously at %+d sps (%.2f RPM, %s).\n",
+                    sps, (float)speedA * 60.0f / stepsPerRev, contDirA ? "CW" : "CCW");
+    }
+
+    if (motorTarget == 'B' || motorTarget == '+') {
+      speedB = (uint32_t)abs(sps);
+      contSpeedB = sps;
+      contDirB = (sps >= 0);
+      contIntervalUsB = 1000000UL / speedB;
+      lastContStepUsB = micros();
+      contRunningB = true;
+      Serial.printf("[START] Motor B running continuously at %+d sps (%.2f RPM, %s).\n",
+                    sps, (float)speedB * 60.0f / stepsPerRev, contDirB ? "CW" : "CCW");
+    }
+    Serial.println("        Send STOP (or STOP A / STOP B / 'X') to halt.");
 
   // ── Single Motor A: STEP <n> ───────────────────────────────────────────────
   } else if (upper.startsWith("STEP")) {
@@ -280,24 +374,35 @@ void handleCommand(String cmd) {
     }
 
     speedA = (uint32_t)abs(sps);
-    continuousSpeedSps = sps;
-    continuousDir = (sps >= 0);
-    continuousIntervalUs = 1000000UL / speedA;
-    lastContinuousStepUs = micros();
+    contSpeedA = sps;
+    contDirA = (sps >= 0);
+    contIntervalUsA = 1000000UL / speedA;
+    lastContStepUsA = micros();
     setDriversEnabled(true);
-    continuousRunning = true;
+    contRunningA = true;
     lastMotionMillis = millis();
 
     float rpm = (float)speedA * 60.0f / stepsPerRev;
     Serial.printf("[SPEED] Running Motor A continuously at %+d sps (%.2f RPM, %s). Type STOP to halt.\n",
-                  sps, rpm, continuousDir ? "CW" : "CCW");
+                  sps, rpm, contDirA ? "CW" : "CCW");
 
-  // ── STOP ───────────────────────────────────────────────────────────────────
-  } else if (upper == "STOP") {
-    continuousRunning = false;
-    digitalWrite(STATUS_LED_PIN, LOW);
+  // ── STOP [A|B|ALL] ─────────────────────────────────────────────────────────
+  } else if (upper.startsWith("STOP")) {
+    String arg = upper.substring(4);
+    arg.trim();
+    if (arg == "A" || arg == "X") {
+      contRunningA = false;
+      Serial.printf("[STOP] Motor A halted. Position: %ld\n", posA);
+    } else if (arg == "B" || arg == "Y") {
+      contRunningB = false;
+      Serial.printf("[STOP] Motor B halted. Position: %ld\n", posB);
+    } else {
+      contRunningA = false;
+      contRunningB = false;
+      digitalWrite(STATUS_LED_PIN, LOW);
+      Serial.printf("[STOP] All continuous motion halted. Positions: A=%ld, B=%ld\n", posA, posB);
+    }
     lastMotionMillis = millis();
-    Serial.printf("[STOP] Continuous motion halted. Motor A position: %ld\n", posA);
 
   // ── GOTO <pos> ─────────────────────────────────────────────────────────────
   } else if (upper.startsWith("GOTO")) {
@@ -1115,8 +1220,10 @@ void printStatus() {
                  dirInvertA ? "INVERTED (CCW Default)" : "NORMAL (CW Default)");
   Serial.printf( "|  Direction Logic (B) : %-29s|\n",
                  dirInvertB ? "INVERTED (CCW Default)" : "NORMAL (CW Default)");
-  if (continuousRunning) {
-    Serial.printf( "|  Continuous Motion   : RUNNING (%+d sps)          |\n", continuousSpeedSps);
+  if (contRunningA || contRunningB) {
+    Serial.printf( "|  Continuous A / B    : A=%s (%+d) | B=%s (%+d) |\n",
+                   contRunningA ? "RUN" : "IDLE", contSpeedA,
+                   contRunningB ? "RUN" : "IDLE", contSpeedB);
   } else {
     Serial.printf( "|  Continuous Motion   : STOPPED                       |\n");
   }
@@ -1136,10 +1243,11 @@ void printHelp() {
   Serial.println("\n+------------------------------------------------------+");
   Serial.println("|       STEPPER MOTOR TEST -- COMMAND REFERENCE        |");
   Serial.println("+------------------+-----------------------------------+");
-  Serial.println("| MOTOR A CONTROL  |                                   |");
+  Serial.println("| MOTOR RUN & MOVE |                                   |");
+  Serial.println("|  START <A|B|BOTH>| Run motor continuously (e.g. START B 100)|");
+  Serial.println("|  STOP [A|B]      | Stop continuous motion (A, B, or all)|");
   Serial.println("|  STEP <n>        | Step Motor A (+ forward, - rev)   |");
-  Serial.println("|  SPEED <sps>     | Run A continuously at sps (rate)  |");
-  Serial.println("|  STOP            | Stop continuous rotation          |");
+  Serial.println("|  SPEED <sps>     | Run A continuously at sps         |");
   Serial.println("|  GOTO <pos>      | Move Motor A to absolute position |");
   Serial.println("|  POS             | Report current positions & angles |");
   Serial.println("|  ZERO            | Reset current position to zero    |");
