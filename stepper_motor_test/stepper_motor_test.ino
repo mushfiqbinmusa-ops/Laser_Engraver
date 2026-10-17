@@ -47,7 +47,7 @@
 #define BASE_STEPS_PER_REV  2048UL
 
 // Default motion parameters
-#define DEFAULT_SPEED_SPS   500     // Default stepping speed (steps per second)
+#define DEFAULT_SPEED_SPS   100     // Default stepping speed (safe 100 sps for 28BYJ-48)
 #define MIN_SPEED_SPS       1       // Minimum valid step rate
 #define MAX_SPEED_SPS       25000   // Maximum pulse generator rate (steps/s)
 #define DEFAULT_ACCEL_SPS2  2000    // Default acceleration (steps/sec^2)
@@ -341,50 +341,123 @@ void handleCommand(String cmd) {
     }
     Serial.println("        Send STOP (or STOP A / STOP B / 'X') to halt.");
 
-  // ── Single Motor A: STEP <n> ───────────────────────────────────────────────
+  // ── STEP [A|B|BOTH] <n> [sps] ─────────────────────────────────────────────
   } else if (upper.startsWith("STEP")) {
-    // If command is "STEP", default to 1 step. Otherwise parse integer.
     String arg = upper.substring(4);
     arg.trim();
-    long steps = 1;
-    if (arg.length() > 0) {
-      steps = arg.toInt();
-    }
-    Serial.printf("[STEP] Moving Motor A by %ld microsteps at %u sps...\n", steps, speedA);
-    stepMotorA(steps, speedA);
-    Serial.printf("[STEP] Motor A position now: %ld microsteps (%.2f deg, %.3f rev)\n",
-                  posA, (float)posA * 360.0f / stepsPerRev, (float)posA / stepsPerRev);
 
-  // ── Continuous Speed: SPEED <steps_per_sec> ────────────────────────────────
+    char motorTarget = 'A';
+    long steps = 100;
+    uint32_t sps = 0;
+
+    if (arg.length() > 0) {
+      char p1[16] = "", p2[16] = "", p3[16] = "";
+      int count = sscanf(arg.c_str(), "%15s %15s %15s", p1, p2, p3);
+
+      String s1 = String(p1);
+      s1.toUpperCase();
+
+      if (s1 == "B" || s1 == "Y") {
+        motorTarget = 'B';
+        if (count >= 2) steps = atol(p2);
+        if (count >= 3) sps = atoi(p3);
+      } else if (s1 == "BOTH" || s1 == "ALL" || s1 == "AB") {
+        motorTarget = '+';
+        if (count >= 2) steps = atol(p2);
+        if (count >= 3) sps = atoi(p3);
+      } else if (s1 == "A" || s1 == "X") {
+        motorTarget = 'A';
+        if (count >= 2) steps = atol(p2);
+        if (count >= 3) sps = atoi(p3);
+      } else {
+        // Form: STEP <steps> [sps]  (defaults to Motor A)
+        motorTarget = 'A';
+        steps = atol(p1);
+        if (count >= 2) sps = atoi(p2);
+      }
+    }
+
+    if (motorTarget == 'A') {
+      uint32_t curSpeed = (sps > 0) ? sps : speedA;
+      Serial.printf("[STEP] Moving Motor A by %ld steps at %u sps...\n", steps, curSpeed);
+      stepMotorA(steps, curSpeed);
+      Serial.printf("[STEP] Motor A position now: %ld (%.2f deg, %.3f rev)\n",
+                    posA, (float)posA * 360.0f / stepsPerRev, (float)posA / stepsPerRev);
+    } else if (motorTarget == 'B') {
+      uint32_t curSpeed = (sps > 0) ? sps : speedB;
+      Serial.printf("[STEP] Moving Motor B by %ld steps at %u sps...\n", steps, curSpeed);
+      stepMotorB(steps, curSpeed);
+      Serial.printf("[STEP] Motor B position now: %ld (%.2f deg, %.3f rev)\n",
+                    posB, (float)posB * 360.0f / stepsPerRev, (float)posB / stepsPerRev);
+    } else { // BOTH
+      uint32_t curSpeed = (sps > 0) ? sps : max(speedA, speedB);
+      Serial.printf("[STEP] Moving BOTH motors by %ld steps at %u sps...\n", steps, curSpeed);
+      dualStep(steps, steps, curSpeed);
+      Serial.printf("[STEP] Positions now: A=%ld, B=%ld\n", posA, posB);
+    }
+
+  // ── SPEED [A|B|BOTH] <steps_per_sec> ───────────────────────────────────────
   } else if (upper.startsWith("SPEED")) {
     String arg = upper.substring(5);
     arg.trim();
+
     if (arg.length() == 0) {
-      Serial.printf("[SPEED] Motor A speed: %u sps | Motor B speed: %u sps\n", speedA, speedB);
+      Serial.printf("[SPEED] Motor A configured speed: %u sps | Motor B configured speed: %u sps\n",
+                    speedA, speedB);
       return;
     }
-    int sps = arg.toInt();
-    if (abs(sps) < (int)MIN_SPEED_SPS) {
-      Serial.printf("[ERROR] Speed must be at least %d steps/sec.\n", MIN_SPEED_SPS);
-      return;
+
+    char motorTarget = 'A';
+    int sps = 100;
+
+    char p1[16] = "", p2[16] = "";
+    int count = sscanf(arg.c_str(), "%15s %15s", p1, p2);
+    String s1 = String(p1);
+    s1.toUpperCase();
+
+    if (s1 == "B" || s1 == "Y") {
+      motorTarget = 'B';
+      sps = (count >= 2) ? atoi(p2) : 100;
+    } else if (s1 == "BOTH" || s1 == "ALL" || s1 == "AB") {
+      motorTarget = '+';
+      sps = (count >= 2) ? atoi(p2) : 100;
+    } else if (s1 == "A" || s1 == "X") {
+      motorTarget = 'A';
+      sps = (count >= 2) ? atoi(p2) : 100;
+    } else {
+      motorTarget = 'A';
+      sps = atoi(p1);
     }
+
+    if (abs(sps) < (int)MIN_SPEED_SPS) sps = 100;
     if ((uint32_t)abs(sps) > MAX_SPEED_SPS) {
-      Serial.printf("[WARN] Clamping speed to maximum safe limit (%u sps).\n", MAX_SPEED_SPS);
       sps = (sps > 0) ? MAX_SPEED_SPS : -(int)MAX_SPEED_SPS;
     }
 
-    speedA = (uint32_t)abs(sps);
-    contSpeedA = sps;
-    contDirA = (sps >= 0);
-    contIntervalUsA = 1000000UL / speedA;
-    lastContStepUsA = micros();
     setDriversEnabled(true);
-    contRunningA = true;
     lastMotionMillis = millis();
 
-    float rpm = (float)speedA * 60.0f / stepsPerRev;
-    Serial.printf("[SPEED] Running Motor A continuously at %+d sps (%.2f RPM, %s). Type STOP to halt.\n",
-                  sps, rpm, contDirA ? "CW" : "CCW");
+    if (motorTarget == 'A' || motorTarget == '+') {
+      speedA = (uint32_t)abs(sps);
+      contSpeedA = sps;
+      contDirA = (sps >= 0);
+      contIntervalUsA = 1000000UL / speedA;
+      lastContStepUsA = micros();
+      contRunningA = true;
+      Serial.printf("[SPEED] Running Motor A at %+d sps (%.2f RPM, %s).\n",
+                    sps, (float)speedA * 60.0f / stepsPerRev, contDirA ? "CW" : "CCW");
+    }
+
+    if (motorTarget == 'B' || motorTarget == '+') {
+      speedB = (uint32_t)abs(sps);
+      contSpeedB = sps;
+      contDirB = (sps >= 0);
+      contIntervalUsB = 1000000UL / speedB;
+      lastContStepUsB = micros();
+      contRunningB = true;
+      Serial.printf("[SPEED] Running Motor B at %+d sps (%.2f RPM, %s).\n",
+                    sps, (float)speedB * 60.0f / stepsPerRev, contDirB ? "CW" : "CCW");
+    }
 
   // ── STOP [A|B|ALL] ─────────────────────────────────────────────────────────
   } else if (upper.startsWith("STOP")) {
@@ -404,20 +477,53 @@ void handleCommand(String cmd) {
     }
     lastMotionMillis = millis();
 
-  // ── GOTO <pos> ─────────────────────────────────────────────────────────────
+  // ── GOTO [A|B] <pos> [sps] ─────────────────────────────────────────────────
   } else if (upper.startsWith("GOTO")) {
     String arg = upper.substring(4);
     arg.trim();
     if (arg.length() == 0) {
-      Serial.println("[ERROR] Usage: GOTO <target_position>");
+      Serial.println("[ERROR] Usage: GOTO [A|B] <target_position> [sps]");
       return;
     }
-    long target = arg.toInt();
-    long delta = target - posA;
-    Serial.printf("[GOTO] Moving Motor A from %ld to target %ld (delta %ld steps)...\n",
-                  posA, target, delta);
-    stepMotorA(delta, speedA);
-    Serial.printf("[GOTO] Motor A reached position: %ld\n", posA);
+
+    char motorTarget = 'A';
+    long target = 0;
+    uint32_t sps = 0;
+
+    char p1[16] = "", p2[16] = "", p3[16] = "";
+    int count = sscanf(arg.c_str(), "%15s %15s %15s", p1, p2, p3);
+    String s1 = String(p1);
+    s1.toUpperCase();
+
+    if (s1 == "B" || s1 == "Y") {
+      motorTarget = 'B';
+      target = (count >= 2) ? atol(p2) : 0;
+      if (count >= 3) sps = atoi(p3);
+    } else if (s1 == "A" || s1 == "X") {
+      motorTarget = 'A';
+      target = (count >= 2) ? atol(p2) : 0;
+      if (count >= 3) sps = atoi(p3);
+    } else {
+      motorTarget = 'A';
+      target = atol(p1);
+      if (count >= 2) sps = atoi(p2);
+    }
+
+    if (motorTarget == 'A') {
+      uint32_t curSpeed = (sps > 0) ? sps : speedA;
+      long delta = target - posA;
+      Serial.printf("[GOTO] Moving Motor A from %ld to %ld (delta %+ld steps) at %u sps...\n",
+                    posA, target, delta, curSpeed);
+      stepMotorA(delta, curSpeed);
+      Serial.printf("[GOTO] Motor A reached position: %ld\n", posA);
+    } else {
+      uint32_t curSpeed = (sps > 0) ? sps : speedB;
+      long delta = target - posB;
+      Serial.printf("[GOTO] Moving Motor B from %ld to %ld (delta %+ld steps) at %u sps...\n",
+                    posB, target, delta, curSpeed);
+      stepMotorB(delta, curSpeed);
+      Serial.printf("[GOTO] Motor B reached position: %ld\n", posB);
+    }
 
   // ── POS ────────────────────────────────────────────────────────────────────
   } else if (upper == "POS") {
@@ -485,20 +591,63 @@ void handleCommand(String cmd) {
                     dirInvertB ? "INVERTED (CCW)" : "NORMAL (CW)");
     }
 
-  // ── REV <n> (Move N full revolutions) ──────────────────────────────────────
+  // ── REV [A|B|BOTH] <n> [sps] ──────────────────────────────────────────────
   } else if (upper.startsWith("REV")) {
     String arg = upper.substring(3);
     arg.trim();
     if (arg.length() == 0) {
-      Serial.println("[ERROR] Usage: REV <number_of_revolutions>  e.g. REV 1, REV -2, REV 0.5");
+      Serial.println("[ERROR] Usage: REV [A|B] <revolutions> [sps]  e.g. REV A 1, REV B -2, REV 0.5");
       return;
     }
-    float revs = arg.toFloat();
+
+    char motorTarget = 'A';
+    float revs = 1.0f;
+    uint32_t sps = 0;
+
+    char p1[16] = "", p2[16] = "", p3[16] = "";
+    int count = sscanf(arg.c_str(), "%15s %15s %15s", p1, p2, p3);
+    String s1 = String(p1);
+    s1.toUpperCase();
+
+    if (s1 == "B" || s1 == "Y") {
+      motorTarget = 'B';
+      if (count >= 2) revs = atof(p2);
+      if (count >= 3) sps = atoi(p3);
+    } else if (s1 == "BOTH" || s1 == "ALL" || s1 == "AB") {
+      motorTarget = '+';
+      if (count >= 2) revs = atof(p2);
+      if (count >= 3) sps = atoi(p3);
+    } else if (s1 == "A" || s1 == "X") {
+      motorTarget = 'A';
+      if (count >= 2) revs = atof(p2);
+      if (count >= 3) sps = atoi(p3);
+    } else {
+      motorTarget = 'A';
+      revs = atof(p1);
+      if (count >= 2) sps = atoi(p2);
+    }
+
     long totalSteps = (long)round(revs * (float)stepsPerRev);
-    Serial.printf("[REV] Moving Motor A by %.3f revolutions (%ld steps at 1/%d mode)...\n",
-                  revs, totalSteps, microstepMode);
-    stepMotorA(totalSteps, speedA);
-    Serial.printf("[REV] Move complete. Motor A pos: %ld\n", posA);
+
+    if (motorTarget == 'A') {
+      uint32_t curSpeed = (sps > 0) ? sps : speedA;
+      Serial.printf("[REV] Moving Motor A by %.3f revs (%ld steps) at %u sps...\n",
+                    revs, totalSteps, curSpeed);
+      stepMotorA(totalSteps, curSpeed);
+      Serial.printf("[REV] Motor A move complete. Position: %ld\n", posA);
+    } else if (motorTarget == 'B') {
+      uint32_t curSpeed = (sps > 0) ? sps : speedB;
+      Serial.printf("[REV] Moving Motor B by %.3f revs (%ld steps) at %u sps...\n",
+                    revs, totalSteps, curSpeed);
+      stepMotorB(totalSteps, curSpeed);
+      Serial.printf("[REV] Motor B move complete. Position: %ld\n", posB);
+    } else {
+      uint32_t curSpeed = (sps > 0) ? sps : max(speedA, speedB);
+      Serial.printf("[REV] Moving BOTH motors by %.3f revs (%ld steps) at %u sps...\n",
+                    revs, totalSteps, curSpeed);
+      dualStep(totalSteps, totalSteps, curSpeed);
+      Serial.printf("[REV] Dual move complete. Positions: A=%ld, B=%ld\n", posA, posB);
+    }
 
   // ── RPM ────────────────────────────────────────────────────────────────────
   } else if (upper == "RPM") {
@@ -1279,16 +1428,16 @@ void printHelp() {
   Serial.println("\n+------------------------------------------------------+");
   Serial.println("|       STEPPER MOTOR TEST -- COMMAND REFERENCE        |");
   Serial.println("+------------------+-----------------------------------+");
-  Serial.println("| MOTOR RUN & MOVE |                                   |");
-  Serial.println("|  START <A|B|BOTH>| Run motor continuously (e.g. START B 100)|");
+  Serial.println("| MOTOR RUN & MOVE | (Supports A, B, or BOTH)          |");
+  Serial.println("|  START [A|B] sps | Run motor continuously (e.g. START B 100)|");
   Serial.println("|  STOP [A|B]      | Stop continuous motion (A, B, or all)|");
-  Serial.println("|  STEP <n>        | Step Motor A (+ forward, - rev)   |");
-  Serial.println("|  SPEED <sps>     | Run A continuously at sps         |");
-  Serial.println("|  GOTO <pos>      | Move Motor A to absolute position |");
+  Serial.println("|  STEP [A|B] n sps| Step motor N steps (e.g. STEP B 200 100)|");
+  Serial.println("|  SPEED [A|B] sps | Set speed & run cont (e.g. SPEED B 100)|");
+  Serial.println("|  GOTO [A|B] pos  | Move motor to absolute target pos |");
+  Serial.println("|  REV [A|B] n sps | Move motor by N full revolutions  |");
+  Serial.println("|  DIR [A|B] CW/CCW| Invert/set motor direction logic  |");
   Serial.println("|  POS             | Report current positions & angles |");
   Serial.println("|  ZERO            | Reset current position to zero    |");
-  Serial.println("|  DIR <CW|CCW>    | Set Motor A default direction     |");
-  Serial.println("|  REV <n>         | Move Motor A by N revolutions     |");
   Serial.println("|  RPM             | Report current RPM calculations   |");
   Serial.println("|  MICRO <1-16>    | Microstep: 1, 2, 4, 8, or 16      |");
   Serial.println("|  ENABLE          | Enable A4988 driver outputs (LOW) |");
