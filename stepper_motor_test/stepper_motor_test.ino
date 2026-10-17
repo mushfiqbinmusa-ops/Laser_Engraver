@@ -177,7 +177,7 @@ void loop() {
       bool physicalDir = contDirA;
       if (dirInvertA) physicalDir = !physicalDir;
       digitalWrite(MOT_A_DIR_PIN, physicalDir ? DIR_CW : DIR_CCW);
-      delayMicroseconds(1);
+      delayMicroseconds(5);
 
       digitalWrite(MOT_A_STEP_PIN, HIGH);
       delayMicroseconds(STEP_PULSE_WIDTH_US);
@@ -201,7 +201,7 @@ void loop() {
       bool physicalDir = contDirB;
       if (dirInvertB) physicalDir = !physicalDir;
       digitalWrite(MOT_B_DIR_PIN, physicalDir ? DIR_CW : DIR_CCW);
-      delayMicroseconds(1);
+      delayMicroseconds(5);
 
       digitalWrite(MOT_B_STEP_PIN, HIGH);
       delayMicroseconds(STEP_PULSE_WIDTH_US);
@@ -442,19 +442,47 @@ void handleCommand(String cmd) {
     posB = 0;
     Serial.println("[ZERO] Position registers for Motor A and Motor B reset to 0 (Home).");
 
-  // ── DIR <CW|CCW> ───────────────────────────────────────────────────────────
+  // ── DIR [A|B] <CW|CCW> ─────────────────────────────────────────────────────
   } else if (upper.startsWith("DIR")) {
     String arg = upper.substring(3);
     arg.trim();
-    if (arg == "CW" || arg == "FORWARD" || arg == "1" || arg == "+") {
-      dirInvertA = false;
-      Serial.println("[DIR] Motor A default direction set to NORMAL (CW).");
-    } else if (arg == "CCW" || arg == "REVERSE" || arg == "-1" || arg == "-") {
-      dirInvertA = true;
-      Serial.println("[DIR] Motor A default direction set to INVERTED (CCW).");
+
+    char motorTarget = 'A';
+    String dirStr = "";
+
+    char part1[16] = "", part2[16] = "";
+    int count = sscanf(arg.c_str(), "%15s %15s", part1, part2);
+    String p1 = String(part1);
+    p1.toUpperCase();
+
+    if (count == 2) {
+      if (p1 == "B" || p1 == "Y") motorTarget = 'B';
+      else if (p1 == "BOTH" || p1 == "ALL") motorTarget = '+';
+      else motorTarget = 'A';
+      dirStr = String(part2);
+      dirStr.toUpperCase();
+    } else if (count == 1) {
+      if (p1 == "CW" || p1 == "CCW" || p1 == "FORWARD" || p1 == "REVERSE") {
+        motorTarget = 'A';
+        dirStr = p1;
+      } else {
+        if (p1 == "B" || p1 == "Y") motorTarget = 'B';
+        else motorTarget = 'A';
+      }
+    }
+
+    if (dirStr == "CW" || dirStr == "FORWARD" || dirStr == "1" || dirStr == "+") {
+      if (motorTarget == 'A' || motorTarget == '+') dirInvertA = false;
+      if (motorTarget == 'B' || motorTarget == '+') dirInvertB = false;
+      Serial.printf("[DIR] Motor %c direction logic set to NORMAL (CW).\n", motorTarget == '+' ? ' ' : motorTarget);
+    } else if (dirStr == "CCW" || dirStr == "REVERSE" || dirStr == "-1" || dirStr == "-") {
+      if (motorTarget == 'A' || motorTarget == '+') dirInvertA = true;
+      if (motorTarget == 'B' || motorTarget == '+') dirInvertB = true;
+      Serial.printf("[DIR] Motor %c direction logic set to INVERTED (CCW).\n", motorTarget == '+' ? ' ' : motorTarget);
     } else {
-      Serial.printf("[DIR] Current Motor A direction logic: %s. Usage: DIR CW or DIR CCW\n",
-                    dirInvertA ? "INVERTED (CCW)" : "NORMAL (CW)");
+      Serial.printf("[DIR] Current: Motor A=%s | Motor B=%s. Usage: DIR [A|B] CW or DIR [A|B] CCW\n",
+                    dirInvertA ? "INVERTED (CCW)" : "NORMAL (CW)",
+                    dirInvertB ? "INVERTED (CCW)" : "NORMAL (CW)");
     }
 
   // ── REV <n> (Move N full revolutions) ──────────────────────────────────────
