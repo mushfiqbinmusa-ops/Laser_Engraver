@@ -135,6 +135,14 @@ By converting the motor to a **4-wire bipolar configuration**, both phases are d
 > [!TIP]
 > If a motor rotates in reverse of your desired direction, you can either issue the firmware command `DIR B CCW` or simply swap the two wires of one coil (e.g. swap Blue and Yellow).
 
+> [!NOTE]
+> **Verified Hardware Note (Bipolar Coil Pairing):**
+> On this project's converted 28BYJ-48 motors, the true internal coil pairs after cutting the center tap are:
+> - **Coil Pair 1:** Blue & Yellow $\to$ A4988 `1A` & `1B`
+> - **Coil Pair 2:** Pink & Orange $\to$ A4988 `2A` & `2B`
+> 
+> *Fix confirmed:* If paired incorrectly (e.g. Blue/Pink and Yellow/Orange), the motor will only spin in a single direction regardless of `DIR` voltage. Wiring according to the verified pairs above completely resolves the bidirectional rotation issue.
+
 ---
 
 ## 3. A4988 Driver Specifics & Vref Current Calibration
