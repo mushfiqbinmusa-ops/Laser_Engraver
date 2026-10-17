@@ -69,8 +69,8 @@ flowchart TD
     end
 
     subgraph Motors["28BYJ-48 Steppers (Bipolar Mod)"]
-        MOT_A["Motor A (X Steering Mirror)\nCoil 1: Blue/Pink\nCoil 2: Orange/Yellow"]
-        MOT_B["Motor B (Y Steering Mirror)\nCoil 1: Blue/Pink\nCoil 2: Orange/Yellow"]
+        MOT_A["Motor A (X Steering Mirror)\nCoil 1: Blue/Yellow\nCoil 2: Pink/Orange"]
+        MOT_B["Motor B (Y Steering Mirror)\nCoil 1: Blue/Yellow\nCoil 2: Pink/Orange"]
     end
 
     IO5 --> DRV_A
@@ -117,23 +117,23 @@ By converting the motor to a **4-wire bipolar configuration**, both phases are d
    - Snip the red wire flush at the PCB, or heat shrink its free end. It will **not** be connected to the A4988.
 
 5. **Verify with a Multimeter (DMM):**
-   - Measure resistance between **Blue** and **Pink**: Should measure approximately **95 Ω to 105 Ω** (Phase A).
-   - Measure resistance between **Orange** and **Yellow**: Should measure approximately **95 Ω to 105 Ω** (Phase B).
+   - Measure resistance between **Blue** and **Yellow**: Should measure approximately **30 Ω to 50 Ω** (or ~95–105 Ω depending on model) (**Phase 1**).
+   - Measure resistance between **Pink** and **Orange**: Should measure approximately **30 Ω to 50 Ω** (or ~95–105 Ω) (**Phase 2**).
    - Measure resistance between **Red** and **any other wire**: Must read **infinite (open circuit / OL)**.
-   - Measure resistance between **Blue** and **Yellow**: Must read **infinite (isolated phases)**.
+   - Measure resistance between **Blue** and **Pink**: Must read **infinite (isolated phases)**.
 
 ### Wiring Assignment to A4988
 
 | Motor Wire Color | Motor Phase | A4988 Pin |
 |---|---|---|
-| **Blue** | Phase A (+) | **1A** |
-| **Pink** | Phase A (-) | **1B** |
-| **Yellow** | Phase B (+) | **2A** |
-| **Orange** | Phase B (-) | **2B** |
+| **Blue** | Phase 1 (+) | **1A** |
+| **Yellow** | Phase 1 (-) | **1B** |
+| **Pink** | Phase 2 (+) | **2A** |
+| **Orange** | Phase 2 (-) | **2B** |
 | **Red** | Cut Center Tap | **NC (Disconnected)** |
 
 > [!TIP]
-> If a motor rotates in reverse of your desired direction, you can either issue the firmware command `DIR CCW` or simply swap the two wires of one coil (e.g. swap Blue and Pink).
+> If a motor rotates in reverse of your desired direction, you can either issue the firmware command `DIR B CCW` or simply swap the two wires of one coil (e.g. swap Blue and Yellow).
 
 ---
 
@@ -242,10 +242,10 @@ $$V_{ref} = I_{max} \times 8 \times R_s = I_{max} \times 0.8$$
                      │   [TRIMPOT VREF] │
        Enable (LOW)  │ [ENABLE]  [VMOT] │ Motor DC Supply (5V)
     Microstep Bit 1  │ [MS1]      [GND] │ Motor Ground
-    Microstep Bit 2  │ [MS2]       [2B] │ Coil B (-)  --> Orange Wire
-    Microstep Bit 3  │ [MS3]       [2A] │ Coil B (+)  --> Yellow Wire
-       Reset Input   │ [RESET]     [1A] │ Coil A (+)  --> Blue Wire
-       Sleep Input   │ [SLEEP]     [1B] │ Coil A (-)  --> Pink Wire
+    Microstep Bit 2  │ [MS2]       [2B] │ Coil 2 (-)  --> Orange Wire
+    Microstep Bit 3  │ [MS3]       [2A] │ Coil 2 (+)  --> Pink Wire
+       Reset Input   │ [RESET]     [1A] │ Coil 1 (+)  --> Blue Wire
+       Sleep Input   │ [SLEEP]     [1B] │ Coil 1 (-)  --> Yellow Wire
          Step Pulse  │ [STEP]     [VDD] │ Logic Power (3.3V from ESP32)
     Direction Logic  │ [DIR]      [GND] │ Logic Ground (Common GND)
                      └──────────────────┘
@@ -257,12 +257,12 @@ $$V_{ref} = I_{max} \times 8 \times R_s = I_{max} \times 0.8$$
                 │     28BYJ-48 Stepper Motor        │
                 │        (Bipolar Modded)           │
                 │                                   │
-                │   [Coil Phase A (~100 Ω)]         │
+                │   [Coil Phase 1 (~50-100 Ω)]      │
                 │   • Blue Wire   ──────> A4988 1A  │
-                │   • Pink Wire   ──────> A4988 1B  │
+                │   • Yellow Wire ──────> A4988 1B  │
                 │                                   │
-                │   [Coil Phase B (~100 Ω)]         │
-                │   • Yellow Wire ──────> A4988 2A  │
+                │   [Coil Phase 2 (~50-100 Ω)]      │
+                │   • Pink Wire   ──────> A4988 2A  │
                 │   • Orange Wire ──────> A4988 2B  │
                 │                                   │
                 │   [Cut Center Tap]                │
@@ -313,16 +313,16 @@ For initial bring-up, current calibration, and single-axis speed tuning:
               +-------------------------------+     │     │     │    │       │
               | Orange Wire                         │     │     │    │       │
               |        +----------------------------+     │     │    │       │
-              |        | Yellow Wire                      │     │    │       │
+              |        | Pink Wire                        │     │    │       │
               |        |        +-------------------------+     │    │       │
               |        |        | Blue Wire                     │    │       │
               |        |        |        +----------------------+    │       │
-              |        |        |        | Pink Wire                 │       │
+              |        |        |        | Yellow Wire               │       │
               v        v        v        v                           │       │
        +------------------------------------+                        │       │
        |       28BYJ-48 Stepper Motor       |                        │       │
-       |       Phase B        Phase A       |                        │       │
-       |   [Orange/Yellow]  [Blue/Pink]     |                        │       │
+       |       Phase 2        Phase 1       |                        │       │
+       |    [Pink/Orange]  [Blue/Yellow]    |                        │       │
        |                                    |                        │       │
        |    Red Wire (Center-Tap): CUT / NC |                        │       │
        +------------------------------------+                        │       │
@@ -407,12 +407,12 @@ This schematic connects both Motor A (X-Mirror) and Motor B (Y-Mirror) to the ES
                     │  │  │  │  │
                     │  │  │  │  │   +-------------------------+     +-------------------------+
                     │  │  │  │  │   | 28BYJ-48 MOTOR A (X)    |     | 28BYJ-48 MOTOR B (Y)    |
-                    │  │  │  │  │   |   Coil A:               |     |   Coil A:               |
-                    │  │  │  │  └───┤     • 1B -> Pink        |     |     • 1B -> Pink        ├─────┐
+                    │  │  │  │  │   |   Coil 1:               |     |   Coil 1:               |
+                    │  │  │  │  └───┤     • 1B -> Yellow      |     |     • 1B -> Yellow      ├─────┐
                     │  │  │  └──────┤     • 1A -> Blue        |     |     • 1A -> Blue        ├──┐  │
-                    │  │  └─────────┤   Coil B:               |     |   Coil B:               |  │  │
-                    │  └────────────┤     • 2A -> Yellow      |     |     • 2A -> Yellow      ├┐ │  │
-                    └───────────────┤     • 2B -> Orange      |     |     • 2B -> Orange      ├┼─┘  │
+                    │  │  └─────────┤   Coil 2:               |     |   Coil 2:               |  │  │
+                    │  └────────────┤     • 2A -> Pink        |     |     • 2A -> Pink        ├┐ │  │
+                    │  └────────────┤     • 2B -> Orange      |     |     • 2B -> Orange      ├┼─┘  │
                                     |                         |     |                         |│ │  │
                                     |   Red Wire: Cut / NC    |     |   Red Wire: Cut / NC    |│ │  │
                                     +-------------------------+     +-------------------------+│ │  │
@@ -451,8 +451,8 @@ You asked whether the **100 µF capacitor is mandatory** and noted that you have
 #### Voltage Rating Verification:
 - **Your Supply:** 5V DC VMOT.
 - **Capacitor Ratings:** 16V and 25V.
-- **Rule of Thumb:** Working voltage should be $\ge 1.5 	imes V_{	ext{rail}}$ (i.e. $\ge 7.5\,	ext{V}$).
-- **Result:** Both **16V** ($3.2	imes$ safety margin) and **25V** ($5	imes$ safety margin) have massive headroom and will never suffer overvoltage breakdown.
+- **Rule of Thumb:** Working voltage should be $\ge 1.5 \times V_{\text{rail}}$ (i.e. $\ge 7.5\,\text{V}$).
+- **Result:** Both **16V** ($3.2\times$ safety margin) and **25V** ($5\times$ safety margin) have massive headroom and will never suffer overvoltage breakdown.
 
 #### Installation Rules:
 1. **Polarity:** Always connect the negative lead (marked with a white stripe and minus symbols `-`) to **GND**, and the positive lead (longer leg) to **VMOT**.
@@ -514,11 +514,11 @@ Follow this exact sequential order to build the circuit safely:
 ##### Step 5: Connect 28BYJ-48 Stepper Motor Wires (Motor A)
 * Ensure your 28BYJ-48 has been modified to 4-wire bipolar (center PCB red trace cut, as described in Section 2).
 * Cut or insulate the **Red wire** with electrical tape or heat shrink. It must **not** connect to anything.
-* Connect the four coil wires to A4988 motor output pins:
-  1. **Phase A (+) :** Connect **Blue Wire** to A4988 **Pin 5 (Right Column, `1A`)**.
-  2. **Phase A (-) :** Connect **Pink Wire** to A4988 **Pin 6 (Right Column, `1B`)**.
-  3. **Phase B (+) :** Connect **Yellow Wire** to A4988 **Pin 4 (Right Column, `2A`)**.
-  4. **Phase B (-) :** Connect **Orange Wire** to A4988 **Pin 3 (Right Column, `2B`)**.
+* Connect the four coil wires to A4988 motor output pins according to measured coil pairs:
+  1. **Phase 1 (+) :** Connect **Blue Wire** to A4988 **Pin 5 (Right Column, `1A`)**.
+  2. **Phase 1 (-) :** Connect **Yellow Wire** to A4988 **Pin 6 (Right Column, `1B`)**.
+  3. **Phase 2 (+) :** Connect **Pink Wire** to A4988 **Pin 4 (Right Column, `2A`)**.
+  4. **Phase 2 (-) :** Connect **Orange Wire** to A4988 **Pin 3 (Right Column, `2B`)**.
 
 ##### Step 6: Wire Motor A Control Lines
 * **STEP Pulse:** Connect ESP32-S3 SuperMini **Pin 1 (Right Row, `5` / GPIO 5)** to A4988 **Pin 7 (Left Column, `STEP`)**.
@@ -560,10 +560,10 @@ Once Motor A is verified and rotating smoothly, add Motor B (Y-Axis) to achieve 
 * **ENABLE Control B:** Connect ESP32-S3 SuperMini **Pin 7 (Right Row, `11` / GPIO 11)** to Driver B **`ENABLE`**.
 
 ##### Step 5: Connect Motor B Coil Wires
-* Connect Motor B's 4-wire modded bipolar cable:
+* Connect Motor B's 4-wire modded bipolar cable according to measured coil pairs:
   - **Blue Wire** $\to$ Driver B `1A`
-  - **Pink Wire** $\to$ Driver B `1B`
-  - **Yellow Wire** $\to$ Driver B `2A`
+  - **Yellow Wire** $\to$ Driver B `1B`
+  - **Pink Wire** $\to$ Driver B `2A`
   - **Orange Wire** $\to$ Driver B `2B`
   - **Red Wire** $\to$ Cut / Not Connected
 
@@ -595,12 +595,12 @@ Use this master lookup table to double-check every wire on your breadboard befor
 | **Driver B Sleep** | — | — | Pin 6 Left (`SLEEP`) | Jumper to Driver B `RESET` | **Short wire** |
 | **Driver B Reset** | — | — | Pin 5 Left (`RESET`) | Jumper to Driver B `SLEEP` | **Short wire** |
 | **Motor A Coil 1A** | — | Pin 5 Right (`1A`) | — | Motor A Blue Wire | **Blue** |
-| **Motor A Coil 1B** | — | Pin 6 Right (`1B`) | — | Motor A Pink Wire | **Pink** |
-| **Motor A Coil 2A** | — | Pin 4 Right (`2A`) | — | Motor A Yellow Wire | **Yellow** |
+| **Motor A Coil 1B** | — | Pin 6 Right (`1B`) | — | Motor A Yellow Wire | **Yellow** |
+| **Motor A Coil 2A** | — | Pin 4 Right (`2A`) | — | Motor A Pink Wire | **Pink** |
 | **Motor A Coil 2B** | — | Pin 3 Right (`2B`) | — | Motor A Orange Wire | **Orange** |
 | **Motor B Coil 1A** | — | — | Pin 5 Right (`1A`) | Motor B Blue Wire | **Blue** |
-| **Motor B Coil 1B** | — | — | Pin 6 Right (`1B`) | Motor B Pink Wire | **Pink** |
-| **Motor B Coil 2A** | — | — | Pin 4 Right (`2A`) | Motor B Yellow Wire | **Yellow** |
+| **Motor B Coil 1B** | — | — | Pin 6 Right (`1B`) | Motor B Yellow Wire | **Yellow** |
+| **Motor B Coil 2A** | — | — | Pin 4 Right (`2A`) | Motor B Pink Wire | **Pink** |
 | **Motor B Coil 2B** | — | — | Pin 3 Right (`2B`) | Motor B Orange Wire | **Orange** |
 
 ---

@@ -236,16 +236,16 @@
         <!-- MOTOR A COIL WIRES (Driver A Right side -> Motor A) -->
         <!-- 2B: 710,136 -> Orange (920,168) -->
         <path class="wire dash" d="M710,136 H740 L880,168 H920" stroke="var(--orange)" stroke-width="2.6"
-          data-t="Coil 2B → Orange" data-d="Phase B (−). ~100 Ω across Orange &amp; Yellow."/>
-        <!-- 2A: 710,168 -> Yellow (920,148) -->
-        <path class="wire dash" d="M710,168 H740 L880,148 H920" stroke="var(--yellow)" stroke-width="2.6"
-          data-t="Coil 2A → Yellow" data-d="Phase B (+). ~100 Ω across Yellow &amp; Orange."/>
+          data-t="Coil 2B → Orange" data-d="Phase 2 (−). ~50-100 Ω across Orange &amp; Pink."/>
+        <!-- 2A: 710,168 -> Pink (920,148) -->
+        <path class="wire dash" d="M710,168 H740 L880,148 H920" stroke="var(--pink)" stroke-width="2.6"
+          data-t="Coil 2A → Pink" data-d="Phase 2 (+). ~50-100 Ω across Pink &amp; Orange."/>
         <!-- 1A: 710,200 -> Blue (920,108) -->
         <path class="wire dash" d="M710,200 H740 L880,108 H920" stroke="var(--blue)" stroke-width="2.6"
-          data-t="Coil 1A → Blue" data-d="Phase A (+). ~100 Ω across Blue &amp; Pink."/>
-        <!-- 1B: 710,232 -> Pink (920,128) -->
-        <path class="wire dash" d="M710,232 H740 L880,128 H920" stroke="var(--pink)" stroke-width="2.6"
-          data-t="Coil 1B → Pink" data-d="Phase A (−). ~100 Ω across Pink &amp; Blue."/>
+          data-t="Coil 1A → Blue" data-d="Phase 1 (+). ~50-100 Ω across Blue &amp; Yellow."/>
+        <!-- 1B: 710,232 -> Yellow (920,128) -->
+        <path class="wire dash" d="M710,232 H740 L880,128 H920" stroke="var(--yellow)" stroke-width="2.6"
+          data-t="Coil 1B → Yellow" data-d="Phase 1 (−). ~50-100 Ω across Yellow &amp; Blue."/>
         <!-- Red Cut wire on Motor A -->
         <line x1="920" y1="188" x2="960" y2="188" stroke="var(--red)" stroke-width="2" stroke-dasharray="3 3"/>
         <text x="965" y="192" class="lbl" fill="var(--red)" font-size="8" font-weight="700">RED CUT / NC</text>
@@ -267,13 +267,13 @@
 
         <!-- MOTOR B COIL WIRES -->
         <path class="wire dash D" d="M710,466 H740 L880,498 H920" stroke="var(--orange)" stroke-width="2.6"
-          data-t="Motor B 2B → Orange" data-d="Phase B (−) for Motor B."/>
-        <path class="wire dash D" d="M710,498 H740 L880,478 H920" stroke="var(--yellow)" stroke-width="2.6"
-          data-t="Motor B 2A → Yellow" data-d="Phase B (+) for Motor B."/>
+          data-t="Motor B 2B → Orange" data-d="Phase 2 (−) for Motor B (~50-100 Ω with Pink)."/>
+        <path class="wire dash D" d="M710,498 H740 L880,478 H920" stroke="var(--pink)" stroke-width="2.6"
+          data-t="Motor B 2A → Pink" data-d="Phase 2 (+) for Motor B (~50-100 Ω with Orange)."/>
         <path class="wire dash D" d="M710,530 H740 L880,438 H920" stroke="var(--blue)" stroke-width="2.6"
-          data-t="Motor B 1A → Blue" data-d="Phase A (+) for Motor B."/>
-        <path class="wire dash D" d="M710,562 H740 L880,458 H920" stroke="var(--pink)" stroke-width="2.6"
-          data-t="Motor B 1B → Pink" data-d="Phase A (−) for Motor B."/>
+          data-t="Motor B 1A → Blue" data-d="Phase 1 (+) for Motor B (~50-100 Ω with Yellow)."/>
+        <path class="wire dash D" d="M710,562 H740 L880,458 H920" stroke="var(--yellow)" stroke-width="2.6"
+          data-t="Motor B 1B → Yellow" data-d="Phase 1 (−) for Motor B (~50-100 Ω with Blue)."/>
         <line class="D" x1="920" y1="518" x2="960" y2="518" stroke="var(--red)" stroke-width="2" stroke-dasharray="3 3"/>
         <text class="D lbl" x="965" y="522" fill="var(--red)" font-size="8" font-weight="700">RED CUT / NC</text>
 
@@ -400,17 +400,17 @@
         <circle class="pin" cx="160" cy="59" r="3.5" fill="var(--slate)" data-t="GND (motor)" data-d="High-current motor ground."/>
         <text x="150" y="63" text-anchor="end" class="lbl">GND</text>
 
-        <circle class="pin" cx="160" cy="91" r="3.5" fill="var(--orange)" data-t="2B" data-d="Coil Phase B (−) → Orange wire."/>
+        <circle class="pin" cx="160" cy="91" r="3.5" fill="var(--orange)" data-t="2B" data-d="Coil Phase 2 (−) → Orange wire."/>
         <text x="150" y="95" text-anchor="end" class="lbl">2B (Org)</text>
 
-        <circle class="pin" cx="160" cy="123" r="3.5" fill="var(--yellow)" data-t="2A" data-d="Coil Phase B (+) → Yellow wire."/>
-        <text x="150" y="127" text-anchor="end" class="lbl">2A (Yel)</text>
+        <circle class="pin" cx="160" cy="123" r="3.5" fill="var(--pink)" data-t="2A" data-d="Coil Phase 2 (+) → Pink wire."/>
+        <text x="150" y="127" text-anchor="end" class="lbl">2A (Pnk)</text>
 
-        <circle class="pin" cx="160" cy="155" r="3.5" fill="var(--blue)" data-t="1A" data-d="Coil Phase A (+) → Blue wire."/>
+        <circle class="pin" cx="160" cy="155" r="3.5" fill="var(--blue)" data-t="1A" data-d="Coil Phase 1 (+) → Blue wire."/>
         <text x="150" y="159" text-anchor="end" class="lbl">1A (Blu)</text>
 
-        <circle class="pin" cx="160" cy="187" r="3.5" fill="var(--pink)" data-t="1B" data-d="Coil Phase A (−) → Pink wire."/>
-        <text x="150" y="191" text-anchor="end" class="lbl">1B (Pnk)</text>
+        <circle class="pin" cx="160" cy="187" r="3.5" fill="var(--yellow)" data-t="1B" data-d="Coil Phase 1 (−) → Yellow wire."/>
+        <text x="150" y="191" text-anchor="end" class="lbl">1B (Yel)</text>
 
         <circle class="pin" cx="160" cy="219" r="3.5" fill="var(--orange)" data-t="VDD" data-d="3.3V logic supply from ESP32."/>
         <text x="150" y="223" text-anchor="end" class="lbl">VDD (3V3)</text>
@@ -444,8 +444,8 @@
 
         <!-- Motor Wire Terminals -->
         <circle cx="0" cy="58" r="3.5" fill="var(--blue)"/><text x="7" y="62" class="lbl" font-size="8">Blue (1A)</text>
-        <circle cx="0" cy="78" r="3.5" fill="var(--pink)"/><text x="7" y="82" class="lbl" font-size="8">Pink (1B)</text>
-        <circle cx="0" cy="98" r="3.5" fill="var(--yellow)"/><text x="7" y="102" class="lbl" font-size="8">Yellow (2A)</text>
+        <circle cx="0" cy="78" r="3.5" fill="var(--yellow)"/><text x="7" y="82" class="lbl" font-size="8">Yellow (1B)</text>
+        <circle cx="0" cy="98" r="3.5" fill="var(--pink)"/><text x="7" y="102" class="lbl" font-size="8">Pink (2A)</text>
         <circle cx="0" cy="118" r="3.5" fill="var(--orange)"/><text x="7" y="122" class="lbl" font-size="8">Orange (2B)</text>
         <circle cx="0" cy="138" r="3.5" fill="var(--red)" stroke="#fff" stroke-dasharray="2 2"/>
         <text x="7" y="142" class="lbl" font-size="8" fill="var(--red)">Red (CUT)</text>
@@ -474,9 +474,9 @@
         <circle class="pin" cx="160" cy="27" r="3.5" fill="var(--red)"/><text x="150" y="31" text-anchor="end" class="lbl">VMOT</text>
         <circle class="pin" cx="160" cy="59" r="3.5" fill="var(--slate)"/><text x="150" y="63" text-anchor="end" class="lbl">GND</text>
         <circle class="pin" cx="160" cy="91" r="3.5" fill="var(--orange)"/><text x="150" y="95" text-anchor="end" class="lbl">2B (Org)</text>
-        <circle class="pin" cx="160" cy="123" r="3.5" fill="var(--yellow)"/><text x="150" y="127" text-anchor="end" class="lbl">2A (Yel)</text>
+        <circle class="pin" cx="160" cy="123" r="3.5" fill="var(--pink)"/><text x="150" y="127" text-anchor="end" class="lbl">2A (Pnk)</text>
         <circle class="pin" cx="160" cy="155" r="3.5" fill="var(--blue)"/><text x="150" y="159" text-anchor="end" class="lbl">1A (Blu)</text>
-        <circle class="pin" cx="160" cy="187" r="3.5" fill="var(--pink)"/><text x="150" y="191" text-anchor="end" class="lbl">1B (Pnk)</text>
+        <circle class="pin" cx="160" cy="187" r="3.5" fill="var(--yellow)"/><text x="150" y="191" text-anchor="end" class="lbl">1B (Yel)</text>
         <circle class="pin" cx="160" cy="219" r="3.5" fill="var(--orange)"/><text x="150" y="223" text-anchor="end" class="lbl">VDD (3V3)</text>
         <circle class="pin" cx="160" cy="251" r="3.5" fill="var(--slate)"/><text x="150" y="255" text-anchor="end" class="lbl">GND</text>
 
@@ -505,8 +505,8 @@
         <text x="42" y="98" text-anchor="middle" fill="var(--muted)" font-size="6.5">64:1 Gear</text>
 
         <circle cx="0" cy="58" r="3.5" fill="var(--blue)"/><text x="7" y="62" class="lbl" font-size="8">Blue (1A)</text>
-        <circle cx="0" cy="78" r="3.5" fill="var(--pink)"/><text x="7" y="82" class="lbl" font-size="8">Pink (1B)</text>
-        <circle cx="0" cy="98" r="3.5" fill="var(--yellow)"/><text x="7" y="102" class="lbl" font-size="8">Yellow (2A)</text>
+        <circle cx="0" cy="78" r="3.5" fill="var(--yellow)"/><text x="7" y="82" class="lbl" font-size="8">Yellow (1B)</text>
+        <circle cx="0" cy="98" r="3.5" fill="var(--pink)"/><text x="7" y="102" class="lbl" font-size="8">Pink (2A)</text>
         <circle cx="0" cy="118" r="3.5" fill="var(--orange)"/><text x="7" y="122" class="lbl" font-size="8">Orange (2B)</text>
         <circle cx="0" cy="138" r="3.5" fill="var(--red)" stroke="#fff" stroke-dasharray="2 2"/>
         <text x="7" y="142" class="lbl" font-size="8" fill="var(--red)">Red (CUT)</text>
