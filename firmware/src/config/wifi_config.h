@@ -6,8 +6,8 @@
 
 // 1. Station (STA) Mode: Connect to your home or workshop Wi-Fi network
 // Set these to your local Wi-Fi router's credentials:
-#define WIFI_SSID         "YOUR_WIFI_SSID"
-#define WIFI_PASSWORD     "YOUR_WIFI_PASSWORD"
+#define WIFI_SSID         "403"
+#define WIFI_PASSWORD     "mks1998!"
 
 // 2. Access Point (SoftAP) Fallback Mode:
 // If the ESP32 cannot connect to your Wi-Fi within 10 seconds,

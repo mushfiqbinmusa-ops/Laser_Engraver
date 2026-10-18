@@ -184,7 +184,11 @@ void loop() {
 
   // 2. Service TCP client
   if (!s_tcpClient || !s_tcpClient.connected()) {
+#if defined(ESP_ARDUINO_VERSION_MAJOR) && (ESP_ARDUINO_VERSION_MAJOR >= 3)
+    WiFiClient newClient = s_tcpServer.accept();
+#else
     WiFiClient newClient = s_tcpServer.available();
+#endif
     if (newClient) {
       s_tcpClient = newClient;
       s_tcpLineReader.reset();
