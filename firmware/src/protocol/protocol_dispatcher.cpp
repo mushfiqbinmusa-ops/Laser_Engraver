@@ -160,6 +160,7 @@ void ProtocolDispatcher::dispatch(const CommandRequest& req, uint32_t nowUs, uin
         m_state.setHomed(false, false);
       }
       sendAck(req.id, true, ErrorCode::Ok);
+      emitSnapshot();
       break;
     }
 
