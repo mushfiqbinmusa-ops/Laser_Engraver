@@ -212,7 +212,7 @@ void ProtocolDispatcher::dispatch(const CommandRequest& req, uint32_t nowUs, uin
         int32_t currentY = m_axisY.getPosition();
         int32_t targetX = (req.axis == AxisTarget::X) ? (currentX + req.steps) : currentX;
         int32_t targetY = (req.axis == AxisTarget::Y) ? (currentY + req.steps) : currentY;
-        if (targetX < 0 || targetX > MAX_TRAVEL_STEPS_X || targetY < 0 || targetY > MAX_TRAVEL_STEPS_Y) {
+        if (targetX < -MAX_TRAVEL_STEPS_X || targetX > MAX_TRAVEL_STEPS_X || targetY < -MAX_TRAVEL_STEPS_Y || targetY > MAX_TRAVEL_STEPS_Y) {
           sendAck(req.id, false, ErrorCode::OutOfBounds);
           return;
         }
@@ -288,7 +288,7 @@ void ProtocolDispatcher::dispatch(const CommandRequest& req, uint32_t nowUs, uin
       if (m_state.isPositionValid()) {
         int32_t targetX = m_axisX.getPosition() + req.dx;
         int32_t targetY = m_axisY.getPosition() + req.dy;
-        if (targetX < 0 || targetX > MAX_TRAVEL_STEPS_X || targetY < 0 || targetY > MAX_TRAVEL_STEPS_Y) {
+        if (targetX < -MAX_TRAVEL_STEPS_X || targetX > MAX_TRAVEL_STEPS_X || targetY < -MAX_TRAVEL_STEPS_Y || targetY > MAX_TRAVEL_STEPS_Y) {
           sendAck(req.id, false, ErrorCode::OutOfBounds);
           return;
         }

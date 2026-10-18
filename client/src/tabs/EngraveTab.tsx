@@ -3,7 +3,7 @@ import { useMachine } from '../context/MachineContext';
 import { Preset, Job } from '../types/jobs';
 
 export const EngraveTab: React.FC = () => {
-  const { connected, fresh, snapshot } = useMachine();
+  const { connected, fresh, snapshot, pulse, home } = useMachine();
   const [presets, setPresets] = useState<Preset[]>([]);
   const [selectedPresetId, setSelectedPresetId] = useState<string>('preset-wood');
   const [overridePower, setOverridePower] = useState<number | ''>('');
@@ -12,6 +12,52 @@ export const EngraveTab: React.FC = () => {
   const [jobsHistory, setJobsHistory] = useState<Job[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  // False Engraving (Dry Run) & Quick Homing State
+  const [isDryRun, setIsDryRun] = useState<boolean>(false);
+  const [isHoming, setIsHoming] = useState<boolean>(false);
+
+  // Quick Laser Pulse Test State
+  const [showPulseStation, setShowPulseStation] = useState<boolean>(false);
+  const [pulsePowerPct, setPulsePowerPct] = useState<number>(10);
+  const [pulseDurationMs, setPulseDurationMs] = useState<number>(50);
+  const [safetyConfirmed, setSafetyConfirmed] = useState<boolean>(false);
+  const [pulsing, setPulsing] = useState<boolean>(false);
+  const [pulseSuccess, setPulseSuccess] = useState<string | null>(null);
+  const [pulseError, setPulseError] = useState<string | null>(null);
+
+  const pulseDuty = Math.min(3685, Math.max(0, Math.round((pulsePowerPct / 90.0) * 3685)));
+
+  const handleQuickPulse = async () => {
+    if (!safetyConfirmed) {
+      setPulseError('Please confirm safety eyewear interlock before firing.');
+      return;
+    }
+    setPulsing(true);
+    setPulseSuccess(null);
+    setPulseError(null);
+    try {
+      await pulse(pulseDuty, pulseDurationMs);
+      setPulseSuccess(`Fired ${pulseDurationMs}ms pulse at ${pulsePowerPct}% power (${pulseDuty} duty)`);
+      window.setTimeout(() => setPulseSuccess(null), 3500);
+    } catch (err: any) {
+      setPulseError(err.message || 'Laser pulse rejected');
+    } finally {
+      setPulsing(false);
+    }
+  };
+
+  const handleQuickHome = async () => {
+    setIsHoming(true);
+    setErrorMsg(null);
+    try {
+      await home('all');
+    } catch (err: any) {
+      setErrorMsg(err.message || 'Homing failed');
+    } finally {
+      setIsHoming(false);
+    }
+  };
 
   // Parametric shape state
   const [shapeType, setShapeType] = useState<'square' | 'rectangle' | 'circle' | 'grid'>('square');
@@ -110,7 +156,7 @@ export const EngraveTab: React.FC = () => {
     setIsLoading(true);
     setErrorMsg(null);
     try {
-      const res = await fetch(`/api/jobs/${activeJob.id}/start`, { method: 'POST' });
+      const res = await fetch(`/api/jobs/${activeJob.id}/start?dry_run=${isDryRun}`, { method: 'POST' });
       if (!res.ok) {
         const err = await res.json();
         throw new Error(err.detail || 'Failed to start job');
@@ -293,11 +339,31 @@ export const EngraveTab: React.FC = () => {
                 Telemetry Fresh (&lt;2s)
               </span>
             </li>
-            <li style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span>{isHomed ? '✓' : '✗'}</span>
-              <span style={{ color: isHomed ? 'var(--text-primary)' : 'var(--accent-warning)' }}>
-                Both Axes Physically Homed
-              </span>
+            <li style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span>{isHomed ? '✓' : '✗'}</span>
+                <span style={{ color: isHomed ? 'var(--text-primary)' : 'var(--accent-warning)' }}>
+                  Both Axes Physically Homed
+                </span>
+              </div>
+              {!isHomed && (
+                <button
+                  type="button"
+                  onClick={handleQuickHome}
+                  disabled={isHoming || !connected}
+                  style={{
+                    fontSize: '11px',
+                    padding: '2px 8px',
+                    background: 'var(--bg-surface-elevated)',
+                    border: '1px solid var(--border-subtle)',
+                    borderRadius: '4px',
+                    cursor: connected && !isHoming ? 'pointer' : 'not-allowed',
+                    color: 'var(--text-primary)'
+                  }}
+                >
+                  {isHoming ? 'Homing...' : 'Home Now'}
+                </button>
+              )}
             </li>
             <li style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span>{noFaults ? '✓' : '✗'}</span>
@@ -313,7 +379,37 @@ export const EngraveTab: React.FC = () => {
             </li>
           </ul>
 
-          <hr style={{ borderColor: 'var(--border-subtle)', margin: '16px 0' }} />
+          <div
+            style={{
+              marginTop: '14px',
+              padding: '10px 12px',
+              background: isDryRun ? 'rgba(34, 139, 230, 0.15)' : 'var(--bg-app)',
+              border: `1px solid ${isDryRun ? '#339af0' : 'var(--border-subtle)'}`,
+              borderRadius: '6px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '10px'
+            }}
+          >
+            <div>
+              <label htmlFor="engrave-dry-run-toggle" style={{ fontWeight: 600, fontSize: '12px', display: 'block', cursor: 'pointer', color: isDryRun ? '#74c0fc' : 'var(--text-primary)' }}>
+                False Engraving (Motors Only)
+              </label>
+              <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
+                Trace toolpath with steppers, force laser OFF (duty = 0)
+              </span>
+            </div>
+            <input
+              id="engrave-dry-run-toggle"
+              type="checkbox"
+              checked={isDryRun}
+              onChange={(e) => setIsDryRun(e.target.checked)}
+              style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+            />
+          </div>
+
+          <hr style={{ borderColor: 'var(--border-subtle)', margin: '14px 0' }} />
 
           <button
             onClick={handleStartJob}
@@ -321,15 +417,22 @@ export const EngraveTab: React.FC = () => {
             style={{
               width: '100%',
               padding: '12px',
-              fontSize: '14px',
+              fontSize: '13px',
               fontWeight: 700,
-              background: isReady ? 'var(--accent-ready)' : 'var(--bg-surface-elevated)',
+              background: !isReady
+                ? 'var(--bg-surface-elevated)'
+                : isDryRun
+                  ? '#1971c2'
+                  : 'var(--accent-ready)',
               color: isReady ? '#FFFFFF' : 'var(--text-muted)',
               border: 'none',
-              marginBottom: '8px'
+              borderRadius: '4px',
+              cursor: isReady ? 'pointer' : 'not-allowed',
+              marginBottom: '8px',
+              transition: 'background 0.15s ease'
             }}
           >
-            START ENGRAVING
+            {isDryRun ? 'START FALSE ENGRAVING (MOTORS ONLY)' : 'START LASER ENGRAVING'}
           </button>
 
           {snapshot?.state === 'running_job' && (
@@ -345,6 +448,119 @@ export const EngraveTab: React.FC = () => {
             >
               CANCEL RUNNING JOB
             </button>
+          )}
+        </div>
+
+        {/* Quick Laser Pulse Test Station */}
+        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: '6px', padding: '16px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: showPulseStation ? '12px' : '0' }}>
+            <div>
+              <h2 style={{ fontSize: '13px', fontWeight: 600 }}>Laser Pulse Test</h2>
+              <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Direct test without switching tabs</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowPulseStation(!showPulseStation)}
+              style={{
+                fontSize: '11px',
+                padding: '4px 10px',
+                background: 'var(--bg-surface-elevated)',
+                border: '1px solid var(--border-subtle)',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                color: 'var(--text-primary)'
+              }}
+            >
+              {showPulseStation ? 'Hide Station' : 'Open Station'}
+            </button>
+          </div>
+
+          {showPulseStation && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: '8px',
+                  padding: '8px 10px',
+                  background: safetyConfirmed ? 'rgba(47, 158, 68, 0.1)' : 'var(--bg-app)',
+                  border: `1px solid ${safetyConfirmed ? 'var(--accent-ready)' : 'var(--border-subtle)'}`,
+                  borderRadius: '4px'
+                }}
+              >
+                <input
+                  type="checkbox"
+                  id="engrave-pulse-safety"
+                  checked={safetyConfirmed}
+                  onChange={(e) => setSafetyConfirmed(e.target.checked)}
+                  style={{ marginTop: '2px', cursor: 'pointer' }}
+                />
+                <label htmlFor="engrave-pulse-safety" style={{ fontSize: '11px', cursor: 'pointer', userSelect: 'none' }}>
+                  <strong>Safety Interlock:</strong> OD4+ 450nm eyewear donned & beam path clear.
+                </label>
+              </div>
+
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', marginBottom: '4px' }}>
+                  <span>Power: {pulsePowerPct}%</span>
+                  <span className="mono" style={{ color: 'var(--text-secondary)' }}>Duty: {pulseDuty}/4095</span>
+                </div>
+                <input
+                  type="range"
+                  min="1"
+                  max="90"
+                  value={pulsePowerPct}
+                  onChange={(e) => setPulsePowerPct(Number(e.target.value))}
+                  style={{ width: '100%' }}
+                />
+              </div>
+
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', marginBottom: '4px' }}>
+                  <span>Duration: {pulseDurationMs} ms</span>
+                  <span className="mono" style={{ color: 'var(--text-secondary)' }}>Max: 500ms</span>
+                </div>
+                <input
+                  type="range"
+                  min="10"
+                  max="500"
+                  step="10"
+                  value={pulseDurationMs}
+                  onChange={(e) => setPulseDurationMs(Number(e.target.value))}
+                  style={{ width: '100%' }}
+                />
+              </div>
+
+              <button
+                type="button"
+                onClick={handleQuickPulse}
+                disabled={!connected || pulsing || !safetyConfirmed}
+                style={{
+                  width: '100%',
+                  padding: '8px',
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  background: !safetyConfirmed || !connected ? 'var(--bg-surface-elevated)' : 'var(--accent-estop)',
+                  color: !safetyConfirmed || !connected ? 'var(--text-muted)' : '#FFFFFF',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: !safetyConfirmed || !connected ? 'not-allowed' : 'pointer'
+                }}
+              >
+                {pulsing ? 'FIRING PULSE...' : `FIRE LASER PULSE (${pulseDurationMs}ms @ ${pulsePowerPct}%)`}
+              </button>
+
+              {pulseSuccess && (
+                <div style={{ fontSize: '11px', color: 'var(--accent-ready)', background: 'rgba(47, 158, 68, 0.15)', padding: '6px 8px', borderRadius: '4px' }}>
+                  {pulseSuccess}
+                </div>
+              )}
+              {pulseError && (
+                <div style={{ fontSize: '11px', color: 'var(--accent-estop)', background: 'rgba(224, 49, 49, 0.15)', padding: '6px 8px', borderRadius: '4px' }}>
+                  {pulseError}
+                </div>
+              )}
+            </div>
           )}
         </div>
 

@@ -129,8 +129,8 @@ async def test_e2e_machine_lifecycle_and_safety_gates(sim_environment):
     assert res.json()["status"] == "started"
 
     # Await job streaming completion
-    for _ in range(50):
-        await asyncio.sleep(0.05)
+    for _ in range(100):
+        await asyncio.sleep(0.1)
         res = await client.get("/api/jobs")
         jobs = res.json()
         target_job = next((j for j in jobs if j["id"] == job_id), None)
@@ -139,6 +139,30 @@ async def test_e2e_machine_lifecycle_and_safety_gates(sim_environment):
     assert target_job is not None
     assert target_job["status"] == "completed"
     assert target_job["completed_segments"] == target_job["total_segments"]
+
+    # 9b. False Engraving (Dry Run: motors only, laser forced to 0 duty)
+    res = await client.post("/api/jobs/shape", json={
+        "shape_type": "square",
+        "preset_id": "preset-wood",
+        "width_mm": 5.0,
+        "name": "Dry Run Test Square"
+    })
+    assert res.status_code == 200
+    dry_job_id = res.json()["id"]
+
+    res = await client.post(f"/api/jobs/{dry_job_id}/start?dry_run=true")
+    assert res.status_code == 200
+    assert res.json()["status"] == "started"
+
+    for _ in range(50):
+        await asyncio.sleep(0.05)
+        res = await client.get("/api/jobs")
+        dry_job = next((j for j in res.json() if j["id"] == dry_job_id), None)
+        if dry_job and dry_job["status"] == "completed":
+            break
+    assert dry_job is not None
+    assert dry_job["status"] == "completed"
+    assert sim.laser_duty == 0
 
     # 10. Emergency Stop (E-Stop)
     res = await client.post("/api/machine/estop")

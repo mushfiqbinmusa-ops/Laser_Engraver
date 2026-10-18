@@ -1,6 +1,7 @@
 import asyncio
 import hashlib
 import json
+import time
 import uuid
 import logging
 from typing import List, Optional
@@ -181,7 +182,11 @@ def get_preview(job_id: str):
         return Response(content=row["preview_png"], media_type="image/png")
 
 @router.post("/{job_id}/start")
-async def start_job(job_id: str, dispatcher=Depends(get_disp)):
+async def start_job(
+    job_id: str,
+    dry_run: bool = False,
+    dispatcher=Depends(get_disp)
+):
     global _active_streaming_task, _abort_streaming, _active_job_id
 
     async with _job_lock:
@@ -219,7 +224,8 @@ async def start_job(job_id: str, dispatcher=Depends(get_disp)):
 
         with get_db() as conn:
             conn.execute("UPDATE jobs SET status = 'running', completed_segments = 0 WHERE id = ?;", (job_id,))
-            conn.execute("INSERT INTO job_events (job_id, event_type) VALUES (?, 'STARTED');", (job_id,))
+            event_type = "STARTED_DRY_RUN" if dry_run else "STARTED"
+            conn.execute("INSERT INTO job_events (job_id, event_type) VALUES (?, ?);", (job_id, event_type))
 
         try:
             # 1. job.begin
@@ -231,7 +237,7 @@ async def start_job(job_id: str, dispatcher=Depends(get_disp)):
             if not ack.accepted:
                 raise RuntimeError(f"job.begin rejected: {ack.code}")
 
-            # 2. Stream segments sequentially (ping-pong flow control)
+            # 2. Stream segments sequentially with cooperative flow control
             for seg in plan.segments:
                 if _abort_streaming:
                     raise asyncio.CancelledError()
@@ -243,11 +249,36 @@ async def start_job(job_id: str, dispatcher=Depends(get_disp)):
                     "dx": seg.dx,
                     "dy": seg.dy,
                     "speed_sps": seg.speed_sps,
-                    "duty": seg.duty
+                    "duty": 0 if dry_run else seg.duty
                 }
-                ack = await dispatcher.send_command(seg_cmd, timeout_s=10.0)
-                if not ack.accepted:
-                    raise RuntimeError(f"Segment {seg.seg_idx} rejected: {ack.code}")
+
+                # Calculate estimated move duration
+                dist = max(abs(seg.dx), abs(seg.dy))
+                sps = max(1, seg.speed_sps)
+                est_duration_s = dist / float(sps)
+                max_wait_s = max(15.0, est_duration_s + 10.0)
+                deadline = time.monotonic() + max_wait_s
+
+                # Retry on BUSY until stepper planner finishes prior move on hardware
+                ack = None
+                while time.monotonic() < deadline:
+                    if _abort_streaming:
+                        raise asyncio.CancelledError()
+                    try:
+                        ack = await dispatcher.send_command(seg_cmd, timeout_s=4.0)
+                        if ack.accepted:
+                            break
+                        if ack.code == "BUSY":
+                            await asyncio.sleep(0.04)
+                            continue
+                    except Exception:
+                        if _abort_streaming:
+                            raise asyncio.CancelledError()
+                        await asyncio.sleep(0.04)
+                        continue
+
+                if not ack or not ack.accepted:
+                    raise RuntimeError(f"Segment {seg.seg_idx} rejected: {ack.code if ack else 'TIMEOUT'}")
 
                 # Update progress
                 await ws_manager.broadcast({
@@ -257,7 +288,15 @@ async def start_job(job_id: str, dispatcher=Depends(get_disp)):
                     "total_segments": plan.total_segments
                 })
 
-            # 3. job.end
+            # 3. If on physical serial hardware, allow final segment move to finish
+            from app.bridge.serial_bridge import SerialControllerBridge
+            if isinstance(dispatcher.bridge, SerialControllerBridge) and plan.segments:
+                last_seg = plan.segments[-1]
+                last_dist = max(abs(last_seg.dx), abs(last_seg.dy))
+                last_sps = max(1, last_seg.speed_sps)
+                await asyncio.sleep(last_dist / float(last_sps))
+
+            # 4. job.end
             await dispatcher.send_command({"type": "job.end", "job_id": job_id})
 
             with get_db() as conn:

@@ -8,8 +8,8 @@
 // =============================================================================
 
 // Mechanical Travel Limits (in full microsteps)
-constexpr int32_t MAX_TRAVEL_STEPS_X    = 4096;
-constexpr int32_t MAX_TRAVEL_STEPS_Y    = 4096;
+constexpr int32_t MAX_TRAVEL_STEPS_X    = 65536;
+constexpr int32_t MAX_TRAVEL_STEPS_Y    = 65536;
 
 // Stepping Speed Limits (Steps Per Second)
 constexpr uint32_t MIN_SPEED_SPS        = 1;
@@ -33,14 +33,15 @@ constexpr uint16_t SAFETY_MAX_DUTY      = (uint16_t)((LEDC_MAX_DUTY * SAFETY_MAX
 constexpr uint32_t LASER_WATCHDOG_MS    = 500;  // Auto-off watchdog timeout in ms
 constexpr uint32_t MAX_PULSE_DURATION_MS = 500; // Max duration for laser.pulse command
 
-// Homing Parameters
-constexpr uint32_t HOMING_FAST_SPS          = 120;
-constexpr uint32_t HOMING_SLOW_SPS          = 40;
-constexpr uint32_t HOMING_MAX_SEEK_STEPS    = 4096;
-constexpr uint32_t HOMING_MAX_RETRACT_STEPS = 1024;
-constexpr uint32_t HOMING_MAX_LATCH_STEPS   = 1024;
-constexpr uint32_t HOMING_MAX_CLEAR_STEPS   = 1024;
-constexpr uint32_t HOMING_PHASE_TIMEOUT_MS  = 15000;
+// Homing Parameters (Sized for 28BYJ-48 64:1 with up to 32768 microsteps per 360° rotation)
+constexpr uint32_t HOMING_FAST_SPS          = 800;   // Safe 50 full-step/s equivalent in 1/16 mode
+constexpr uint32_t HOMING_SLOW_SPS          = 200;   // Slow precision latch rate
+constexpr uint32_t HOMING_MAX_SEEK_STEPS    = 45000; // Allows >360° search without triggering false seek limit
+constexpr uint32_t HOMING_MAX_RETRACT_STEPS = 4000;  // Max pull-off steps
+constexpr uint32_t HOMING_MAX_LATCH_STEPS   = 4000;  // Max slow latch steps
+constexpr uint32_t HOMING_MAX_CLEAR_STEPS   = 4000;  // Max initial retreat steps
+constexpr uint32_t HOMING_FINAL_PULLOFF_STEPS = 200; // Steps to move off sensor after latch so beam is open
+constexpr uint32_t HOMING_PHASE_TIMEOUT_MS  = 60000; // 60s per-phase timeout
 constexpr uint8_t  HOME_STABLE_SAMPLES      = 3;
 constexpr uint32_t HOME_DEBOUNCE_MS         = 3;
 

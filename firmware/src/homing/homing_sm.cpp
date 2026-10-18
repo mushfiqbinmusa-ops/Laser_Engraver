@@ -8,6 +8,7 @@ const char* homePhaseToString(HomePhase phase) {
     case HomePhase::FastSeek: return "fast_seek";
     case HomePhase::PullOff: return "pull_off";
     case HomePhase::SlowLatch: return "slow_latch";
+    case HomePhase::FinalPullOff: return "final_pull_off";
     case HomePhase::Complete: return "complete";
     case HomePhase::Aborted: return "aborted";
     case HomePhase::Failed: return "failed";
@@ -140,7 +141,8 @@ bool HomingStateMachine::tick(uint32_t nowUs, uint32_t nowMs) {
       // Retract away from endstop (reverse direction, false)
       stepCurrentAxis(false);
       m_phaseSteps++;
-      if (!isCurrentSensorTriggered()) {
+      // Require clearing sensor and advancing at least 20 steps past clearance
+      if (!isCurrentSensorTriggered() && m_phaseSteps >= 20) {
         // Cleared! Transition to SlowLatch
         m_phase = HomePhase::SlowLatch;
         m_phaseSteps = 0;
@@ -160,7 +162,26 @@ bool HomingStateMachine::tick(uint32_t nowUs, uint32_t nowMs) {
       stepCurrentAxis(true);
       m_phaseSteps++;
       if (isCurrentSensorTriggered()) {
-        // Latched! Axis homing complete
+        // Precision latch detected! Now perform FinalPullOff so the optical beam is clear
+        m_phase = HomePhase::FinalPullOff;
+        m_phaseSteps = 0;
+        m_phaseStartMs = nowMs;
+        m_stepIntervalUs = 1000000UL / HOMING_SLOW_SPS;
+      } else if (m_phaseSteps >= HOMING_MAX_LATCH_STEPS) {
+        m_phase = HomePhase::Failed;
+        m_result = ErrorCode::HomeSeekLimit;
+        m_active = false;
+        return false;
+      }
+      break;
+    }
+
+    case HomePhase::FinalPullOff: {
+      // Move away from endstop by HOMING_FINAL_PULLOFF_STEPS so the flag is outside the optical sensor
+      stepCurrentAxis(false);
+      m_phaseSteps++;
+      if (m_phaseSteps >= HOMING_FINAL_PULLOFF_STEPS) {
+        // Axis homing complete! Zero position and mark homed
         if (m_currentAxis == AxisTarget::X) {
           m_axisX.setPosition(0);
           m_axisX.setHomed(true);
@@ -178,11 +199,6 @@ bool HomingStateMachine::tick(uint32_t nowUs, uint32_t nowMs) {
           m_active = false;
           return false;
         }
-      } else if (m_phaseSteps >= HOMING_MAX_LATCH_STEPS) {
-        m_phase = HomePhase::Failed;
-        m_result = ErrorCode::HomeSeekLimit;
-        m_active = false;
-        return false;
       }
       break;
     }

@@ -158,8 +158,8 @@ async def set_microstep(req: DriverSetMicrostepRequest, dispatcher=Depends(get_d
 @router.post("/home")
 async def home(req: HomeStartRequest, dispatcher=Depends(get_disp)):
     try:
-        # Start homing and wait for completion
-        ack, ev = await dispatcher.send_operation(req.model_dump(), op_timeout_s=30.0)
+        # Start homing and wait for completion (generous 70s timeout for full 360° seek)
+        ack, ev = await dispatcher.send_operation(req.model_dump(), op_timeout_s=70.0)
         return {"ack": ack, "event": ev}
     except HTTPException:
         raise

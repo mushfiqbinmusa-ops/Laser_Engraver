@@ -11,6 +11,7 @@ enum class HomePhase : uint8_t {
   FastSeek,
   PullOff,
   SlowLatch,
+  FinalPullOff,
   Complete,
   Aborted,
   Failed
