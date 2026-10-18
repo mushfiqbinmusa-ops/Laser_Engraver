@@ -137,10 +137,97 @@ async def home(req: HomeStartRequest, dispatcher=Depends(get_disp)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@router.get("/status/report")
+async def get_status_report(dispatcher=Depends(get_disp)):
+    from app.core.config import settings
+    snap = dispatcher.latest_snapshot
+    if not snap:
+        # Request immediate snapshot if not cached yet
+        try:
+            await dispatcher.send_command({"type": "system.snapshot"}, timeout_s=2.0)
+            snap = dispatcher.latest_snapshot
+        except Exception:
+            pass
+
+    conn_info = {
+        "host": settings.esp32_host,
+        "port": settings.esp32_port,
+        "transport": settings.transport,
+        "connected": dispatcher.bridge.is_connected()
+    }
+
+    if not snap:
+        return {"report": "Machine offline or snapshot unavailable."}
+
+    sx = snap.sensors if hasattr(snap, "sensors") else snap.get("sensors", {})
+    pos = snap.pos if hasattr(snap, "pos") else snap.get("pos", {})
+    homed = snap.homed if hasattr(snap, "homed") else snap.get("homed", {})
+    laser = snap.laser if hasattr(snap, "laser") else snap.get("laser", {})
+
+    def _get(obj, key, default=None):
+        if isinstance(obj, dict):
+            return obj.get(key, default)
+        return getattr(obj, key, default)
+
+    pos_x = _get(pos, "x", 0)
+    pos_y = _get(pos, "y", 0)
+    homed_x = _get(homed, "x", False)
+    homed_y = _get(homed, "y", False)
+    sx_x_raw = _get(sx, "x_raw", 1)
+    sx_y_raw = _get(sx, "y_raw", 1)
+    sx_x_filt = _get(sx, "x_filtered", 1)
+    sx_y_filt = _get(sx, "y_filtered", 1)
+    laser_active = _get(laser, "active", False)
+    laser_duty = _get(laser, "duty", 0)
+    snap_state = _get(snap, "state", "unknown")
+    drivers_enabled = _get(snap, "drivers_enabled", False)
+
+    lines = [
+        "+=======================================================================+",
+        "|                 CONSOLIDATED FIXTURE STATUS REPORT                    |",
+        "+=======================================================================+",
+        f"| Hardware Target    : ESP32-S3 SuperMini | State: {str(snap_state):<21} |",
+        f"| Network Connection : {conn_info['host']:<20} | Port: {conn_info['port']:<21} |",
+        f"| Transport / Bridge : {conn_info['transport'].upper():<20} | Connected: {str(conn_info['connected']).upper():<16} |",
+        "+-----------------------------------------------------------------------+",
+        "| AXIS STATUS & KINEMATICS                                              |",
+        "+-----------------------------------------------------------------------+",
+        f"| Axis X (Motor A)   : Pos={pos_x:<8} steps (Homed={'YES' if homed_x else 'NO '}, Driver={'ON ' if drivers_enabled else 'OFF'})      |",
+        f"| Axis Y (Motor B)   : Pos={pos_y:<8} steps (Homed={'YES' if homed_y else 'NO '}, Driver={'ON ' if drivers_enabled else 'OFF'})      |",
+        f"| Microstepping Mode : 1/16 (3200 steps/rev, 80 steps/mm)               |",
+        f"| Commanded Coords   : X={(pos_x/80.0):.2f} mm | Y={(pos_y/80.0):.2f} mm                       |",
+        "+-----------------------------------------------------------------------+",
+        "| OPTICAL SENSOR STATUS (FC-51 / KY-032 LM393)                         |",
+        "+-----------------------------------------------------------------------+",
+        f"| Sensor X (GPIO 13) : Raw={'HIGH' if sx_x_raw else 'LOW '} State={'DETECTED' if sx_x_filt == 0 else 'CLEAR   '} (Active LOW)       |",
+        f"| Sensor Y (GPIO 8)  : Raw={'HIGH' if sx_y_raw else 'LOW '} State={'DETECTED' if sx_y_filt == 0 else 'CLEAR   '} (Active LOW)       |",
+        f"| Sensor Polarity    : NORMAL (Active LOW, Beam Interrupted = 0)        |",
+        "+-----------------------------------------------------------------------+",
+        "| LASER DIODE SAFETY (GPIO 12)                                          |",
+        "+-----------------------------------------------------------------------+",
+        f"| Laser Emission     : {'ACTIVE RADIATION' if laser_active else 'OFF / SAFE':<20} | Duty: {laser_duty:<4} / 4095           |",
+        f"| Safety Hardware    : 90% Hard Clamp (3685) | Watchdog: 500ms Timer     |",
+        "+=======================================================================+"
+    ]
+    report_text = "\n".join(lines)
+    dumped_snap = snap.model_dump() if hasattr(snap, "model_dump") else snap
+    return {"report": report_text, "snapshot": dumped_snap, "connected": conn_info["connected"]}
+
 @router.post("/jog")
 async def jog(req: MotionJogRequest, dispatcher=Depends(get_disp)):
     try:
         ack = await dispatcher.send_command(req.model_dump())
+        # If controller is busy executing prior step burst, wait for it to settle and retry
+        if not ack.accepted and ack.code == "BUSY":
+            import asyncio
+            for _ in range(20):
+                await asyncio.sleep(0.08)
+                if dispatcher.latest_snapshot and dispatcher.latest_snapshot.state == "moving":
+                    continue
+                ack = await dispatcher.send_command(req.model_dump())
+                if ack.accepted or ack.code != "BUSY":
+                    break
+
         if not ack.accepted:
             raise HTTPException(status_code=400, detail=f"Jog rejected: {ack.code}")
         return ack

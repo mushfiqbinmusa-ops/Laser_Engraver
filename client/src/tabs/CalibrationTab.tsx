@@ -8,8 +8,9 @@ export const CalibrationTab: React.FC = () => {
   const [customStepInput, setCustomStepInput] = useState<string>('16');
   const [isHoming, setIsHoming] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [isJogging, setIsJogging] = useState<boolean>(false);
 
-  const isJogDisabled = Boolean(!connected || !fresh || isHoming || snapshot?.fault || snapshot?.state === 'running_job');
+  const isJogDisabled = Boolean(!connected || !fresh || isHoming || isJogging || snapshot?.fault || snapshot?.state === 'running_job' || snapshot?.state === 'moving');
 
   const runHome = async (axis: 'all' | 'x' | 'y') => {
     setIsHoming(true);
@@ -24,11 +25,16 @@ export const CalibrationTab: React.FC = () => {
   };
 
   const runJog = async (axis: 'x' | 'y', steps: number) => {
+    setIsJogging(true);
     setErrorMsg(null);
     try {
       await jog(axis, steps, speedSps);
+      const estDurationMs = Math.round((Math.abs(steps) / speedSps) * 1000) + 120;
+      await new Promise((r) => setTimeout(r, estDurationMs));
     } catch (err: any) {
       setErrorMsg(err.message);
+    } finally {
+      setIsJogging(false);
     }
   };
 

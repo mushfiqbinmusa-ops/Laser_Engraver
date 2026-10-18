@@ -8,7 +8,7 @@ export const TestsTab: React.FC = () => {
   const [pingLatency, setPingLatency] = useState<number | null>(null);
   const [pinging, setPinging] = useState(false);
   const [queryingStatus, setQueryingStatus] = useState(false);
-  const [statusSnapshotData, setStatusSnapshotData] = useState<any | null>(null);
+  const [statusReportText, setStatusReportText] = useState<string | null>(null);
   const [showStatusDetails, setShowStatusDetails] = useState(false);
   const [diagnosticMsg, setDiagnosticMsg] = useState<string | null>(null);
 
@@ -71,13 +71,13 @@ export const TestsTab: React.FC = () => {
     setDiagnosticMsg(null);
     const start = performance.now();
     try {
-      const res = await fetch('/api/machine/status');
+      const res = await fetch('/api/machine/status/report');
       const elapsed = Math.round(performance.now() - start);
       if (res.ok) {
         const data = await res.json();
-        setStatusSnapshotData(data);
+        setStatusReportText(data.report);
         setShowStatusDetails(true);
-        setDiagnosticMsg(`Status snapshot retrieved in ${elapsed} ms. State: ${data.snapshot?.state || 'unknown'}`);
+        setDiagnosticMsg(`Consolidated status report retrieved in ${elapsed} ms.`);
       } else {
         const err = await res.json().catch(() => ({}));
         setDiagnosticMsg(`Status query failed: ${err.detail || res.statusText}`);
@@ -124,17 +124,39 @@ export const TestsTab: React.FC = () => {
         await new Promise((r) => setTimeout(r, 200));
       }
 
-      if (testMode === 'wiggle') {
-        // Step forward then backward
-        setMotorTestResult({ text: `Testing ${testAxis.toUpperCase()} axis: Stepping +${testSteps} steps...`, isError: false });
-        if (testAxis === 'x' || testAxis === 'both') await jog('x', testSteps, testSpeedSps);
-        if (testAxis === 'y' || testAxis === 'both') await jog('y', testSteps, testSpeedSps);
+      const stepDurationMs = Math.round((testSteps / testSpeedSps) * 1000) + 120;
 
-        await new Promise((r) => setTimeout(r, 300));
+      if (testMode === 'wiggle') {
+        // Step forward then backward with safe sequence delay to avoid BUSY collisions
+        setMotorTestResult({ text: `Testing ${testAxis.toUpperCase()} axis: Stepping +${testSteps} steps...`, isError: false });
+        if (testAxis === 'x') {
+          await jog('x', testSteps, testSpeedSps);
+          await new Promise((r) => setTimeout(r, stepDurationMs));
+        } else if (testAxis === 'y') {
+          await jog('y', testSteps, testSpeedSps);
+          await new Promise((r) => setTimeout(r, stepDurationMs));
+        } else {
+          await jog('x', testSteps, testSpeedSps);
+          await new Promise((r) => setTimeout(r, stepDurationMs));
+          await jog('y', testSteps, testSpeedSps);
+          await new Promise((r) => setTimeout(r, stepDurationMs));
+        }
+
+        await new Promise((r) => setTimeout(r, 200));
 
         setMotorTestResult({ text: `Testing ${testAxis.toUpperCase()} axis: Stepping -${testSteps} steps (returning to origin)...`, isError: false });
-        if (testAxis === 'x' || testAxis === 'both') await jog('x', -testSteps, testSpeedSps);
-        if (testAxis === 'y' || testAxis === 'both') await jog('y', -testSteps, testSpeedSps);
+        if (testAxis === 'x') {
+          await jog('x', -testSteps, testSpeedSps);
+          await new Promise((r) => setTimeout(r, stepDurationMs));
+        } else if (testAxis === 'y') {
+          await jog('y', -testSteps, testSpeedSps);
+          await new Promise((r) => setTimeout(r, stepDurationMs));
+        } else {
+          await jog('x', -testSteps, testSpeedSps);
+          await new Promise((r) => setTimeout(r, stepDurationMs));
+          await jog('y', -testSteps, testSpeedSps);
+          await new Promise((r) => setTimeout(r, stepDurationMs));
+        }
 
         setMotorTestResult({
           text: `PASS: ${testAxis.toUpperCase()} axis completed ±${testSteps} step wiggle test at ${testSpeedSps} sps successfully!`,
@@ -143,8 +165,18 @@ export const TestsTab: React.FC = () => {
       } else if (testMode === 'forward') {
         const delta = testSteps;
         setMotorTestResult({ text: `Stepping ${testAxis.toUpperCase()} axis +${delta} steps...`, isError: false });
-        if (testAxis === 'x' || testAxis === 'both') await jog('x', delta, testSpeedSps);
-        if (testAxis === 'y' || testAxis === 'both') await jog('y', delta, testSpeedSps);
+        if (testAxis === 'x') {
+          await jog('x', delta, testSpeedSps);
+          await new Promise((r) => setTimeout(r, stepDurationMs));
+        } else if (testAxis === 'y') {
+          await jog('y', delta, testSpeedSps);
+          await new Promise((r) => setTimeout(r, stepDurationMs));
+        } else {
+          await jog('x', delta, testSpeedSps);
+          await new Promise((r) => setTimeout(r, stepDurationMs));
+          await jog('y', delta, testSpeedSps);
+          await new Promise((r) => setTimeout(r, stepDurationMs));
+        }
         setMotorTestResult({
           text: `PASS: Stepped ${testAxis.toUpperCase()} +${delta} steps successfully!`,
           isError: false
@@ -152,8 +184,18 @@ export const TestsTab: React.FC = () => {
       } else {
         const delta = -testSteps;
         setMotorTestResult({ text: `Stepping ${testAxis.toUpperCase()} axis ${delta} steps...`, isError: false });
-        if (testAxis === 'x' || testAxis === 'both') await jog('x', delta, testSpeedSps);
-        if (testAxis === 'y' || testAxis === 'both') await jog('y', delta, testSpeedSps);
+        if (testAxis === 'x') {
+          await jog('x', delta, testSpeedSps);
+          await new Promise((r) => setTimeout(r, stepDurationMs));
+        } else if (testAxis === 'y') {
+          await jog('y', delta, testSpeedSps);
+          await new Promise((r) => setTimeout(r, stepDurationMs));
+        } else {
+          await jog('x', delta, testSpeedSps);
+          await new Promise((r) => setTimeout(r, stepDurationMs));
+          await jog('y', delta, testSpeedSps);
+          await new Promise((r) => setTimeout(r, stepDurationMs));
+        }
         setMotorTestResult({
           text: `PASS: Stepped ${testAxis.toUpperCase()} ${delta} steps successfully!`,
           isError: false
@@ -264,29 +306,39 @@ export const TestsTab: React.FC = () => {
             </div>
           )}
 
-          {/* Expandable Live Snapshot Data */}
-          {statusSnapshotData && (
-            <div style={{ marginTop: '10px' }}>
-              <button
-                type="button"
-                onClick={() => setShowStatusDetails(!showStatusDetails)}
-                style={{ fontSize: '11px', padding: '4px 8px', background: 'transparent', border: '1px solid var(--border-subtle)' }}
-              >
-                {showStatusDetails ? 'Hide Detailed Telemetry ▲' : 'Show Detailed Telemetry ▼'}
-              </button>
+          {/* Expandable Live Consolidated Status Report */}
+          {statusReportText && (
+            <div style={{ marginTop: '12px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)' }}>
+                  CONSOLIDATED FIXTURE STATUS REPORT
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setShowStatusDetails(!showStatusDetails)}
+                  style={{ fontSize: '11px', padding: '2px 8px', background: 'transparent', border: '1px solid var(--border-subtle)' }}
+                >
+                  {showStatusDetails ? 'Hide Report ▲' : 'Show Report ▼'}
+                </button>
+              </div>
 
               {showStatusDetails && (
                 <div style={{
-                  marginTop: '8px',
-                  padding: '10px',
+                  padding: '12px',
                   background: 'var(--bg-app)',
                   borderRadius: '4px',
                   border: '1px solid var(--border-subtle)',
-                  maxHeight: '180px',
-                  overflowY: 'auto'
+                  overflowX: 'auto'
                 }}>
-                  <pre style={{ margin: 0, fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--text-primary)' }}>
-                    {JSON.stringify(statusSnapshotData.snapshot || statusSnapshotData, null, 2)}
+                  <pre style={{
+                    margin: 0,
+                    fontSize: '11px',
+                    fontFamily: 'monospace',
+                    lineHeight: '1.35',
+                    color: '#A5D8FF',
+                    whiteSpace: 'pre'
+                  }}>
+                    {statusReportText}
                   </pre>
                 </div>
               )}
