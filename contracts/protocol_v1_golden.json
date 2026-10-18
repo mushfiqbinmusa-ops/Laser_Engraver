@@ -1,0 +1,204 @@
+{
+  "version": 1,
+  "description": "Shared golden test corpus for Laser XY Scanner Protocol v1 across C++ and Python",
+  "valid_requests": [
+    {
+      "name": "ping",
+      "raw": "{\"v\":1,\"id\":\"req-001\",\"type\":\"system.ping\"}\n",
+      "obj": {"v": 1, "id": "req-001", "type": "system.ping"}
+    },
+    {
+      "name": "snapshot",
+      "raw": "{\"v\":1,\"id\":\"req-002\",\"type\":\"system.snapshot\"}\n",
+      "obj": {"v": 1, "id": "req-002", "type": "system.snapshot"}
+    },
+    {
+      "name": "stop",
+      "raw": "{\"v\":1,\"id\":\"req-003\",\"type\":\"system.stop\"}\n",
+      "obj": {"v": 1, "id": "req-003", "type": "system.stop"}
+    },
+    {
+      "name": "estop",
+      "raw": "{\"v\":1,\"id\":\"req-004\",\"type\":\"system.estop\"}\n",
+      "obj": {"v": 1, "id": "req-004", "type": "system.estop"}
+    },
+    {
+      "name": "reset_fault",
+      "raw": "{\"v\":1,\"id\":\"req-005\",\"type\":\"system.reset_fault\"}\n",
+      "obj": {"v": 1, "id": "req-005", "type": "system.reset_fault"}
+    },
+    {
+      "name": "driver_enable",
+      "raw": "{\"v\":1,\"id\":\"req-006\",\"type\":\"driver.set_enabled\",\"enabled\":true}\n",
+      "obj": {"v": 1, "id": "req-006", "type": "driver.set_enabled", "enabled": true}
+    },
+    {
+      "name": "driver_disable",
+      "raw": "{\"v\":1,\"id\":\"req-007\",\"type\":\"driver.set_enabled\",\"enabled\":false}\n",
+      "obj": {"v": 1, "id": "req-007", "type": "driver.set_enabled", "enabled": false}
+    },
+    {
+      "name": "home_all",
+      "raw": "{\"v\":1,\"id\":\"req-008\",\"type\":\"home.start\",\"axis\":\"all\"}\n",
+      "obj": {"v": 1, "id": "req-008", "type": "home.start", "axis": "all"}
+    },
+    {
+      "name": "home_x",
+      "raw": "{\"v\":1,\"id\":\"req-009\",\"type\":\"home.start\",\"axis\":\"x\"}\n",
+      "obj": {"v": 1, "id": "req-009", "type": "home.start", "axis": "x"}
+    },
+    {
+      "name": "home_y",
+      "raw": "{\"v\":1,\"id\":\"req-010\",\"type\":\"home.start\",\"axis\":\"y\"}\n",
+      "obj": {"v": 1, "id": "req-010", "type": "home.start", "axis": "y"}
+    },
+    {
+      "name": "jog_x_positive",
+      "raw": "{\"v\":1,\"id\":\"req-011\",\"type\":\"motion.jog\",\"axis\":\"x\",\"steps\":200,\"speed_sps\":100}\n",
+      "obj": {"v": 1, "id": "req-011", "type": "motion.jog", "axis": "x", "steps": 200, "speed_sps": 100}
+    },
+    {
+      "name": "jog_y_negative",
+      "raw": "{\"v\":1,\"id\":\"req-012\",\"type\":\"motion.jog\",\"axis\":\"y\",\"steps\":-50,\"speed_sps\":120}\n",
+      "obj": {"v": 1, "id": "req-012", "type": "motion.jog", "axis": "y", "steps": -50, "speed_sps": 120}
+    },
+    {
+      "name": "move_abs",
+      "raw": "{\"v\":1,\"id\":\"req-013\",\"type\":\"motion.move_abs\",\"x\":500,\"y\":300,\"speed_sps\":150}\n",
+      "obj": {"v": 1, "id": "req-013", "type": "motion.move_abs", "x": 500, "y": 300, "speed_sps": 150}
+    },
+    {
+      "name": "laser_pulse",
+      "raw": "{\"v\":1,\"id\":\"req-014\",\"type\":\"laser.pulse\",\"duty\":1024,\"duration_ms\":50}\n",
+      "obj": {"v": 1, "id": "req-014", "type": "laser.pulse", "duty": 1024, "duration_ms": 50}
+    },
+    {
+      "name": "laser_set_duty",
+      "raw": "{\"v\":1,\"id\":\"req-015\",\"type\":\"laser.set_duty\",\"duty\":512}\n",
+      "obj": {"v": 1, "id": "req-015", "type": "laser.set_duty", "duty": 512}
+    },
+    {
+      "name": "job_begin",
+      "raw": "{\"v\":1,\"id\":\"req-016\",\"type\":\"job.begin\",\"job_id\":\"job-test-01\",\"total_segments\":2}\n",
+      "obj": {"v": 1, "id": "req-016", "type": "job.begin", "job_id": "job-test-01", "total_segments": 2}
+    },
+    {
+      "name": "job_segment_cut",
+      "raw": "{\"v\":1,\"id\":\"req-017\",\"type\":\"job.segment\",\"job_id\":\"job-test-01\",\"seg_idx\":0,\"dx\":100,\"dy\":0,\"speed_sps\":100,\"duty\":1500}\n",
+      "obj": {"v": 1, "id": "req-017", "type": "job.segment", "job_id": "job-test-01", "seg_idx": 0, "dx": 100, "dy": 0, "speed_sps": 100, "duty": 1500}
+    },
+    {
+      "name": "job_segment_travel",
+      "raw": "{\"v\":1,\"id\":\"req-018\",\"type\":\"job.segment\",\"job_id\":\"job-test-01\",\"seg_idx\":1,\"dx\":0,\"dy\":50,\"speed_sps\":200,\"duty\":0}\n",
+      "obj": {"v": 1, "id": "req-018", "type": "job.segment", "job_id": "job-test-01", "seg_idx": 1, "dx": 0, "dy": 50, "speed_sps": 200, "duty": 0}
+    },
+    {
+      "name": "job_end",
+      "raw": "{\"v\":1,\"id\":\"req-019\",\"type\":\"job.end\",\"job_id\":\"job-test-01\"}\n",
+      "obj": {"v": 1, "id": "req-019", "type": "job.end", "job_id": "job-test-01"}
+    }
+  ],
+  "valid_responses": [
+    {
+      "name": "ack_ok_simple",
+      "raw": "{\"v\":1,\"id\":\"req-001\",\"type\":\"ack\",\"accepted\":true,\"code\":\"OK\"}\n",
+      "obj": {"v": 1, "id": "req-001", "type": "ack", "accepted": true, "code": "OK"}
+    },
+    {
+      "name": "ack_ok_operation",
+      "raw": "{\"v\":1,\"id\":\"req-008\",\"type\":\"ack\",\"accepted\":true,\"code\":\"OK\",\"operation_id\":\"op-home-01\"}\n",
+      "obj": {"v": 1, "id": "req-008", "type": "ack", "accepted": true, "code": "OK", "operation_id": "op-home-01"}
+    },
+    {
+      "name": "operation_started",
+      "raw": "{\"v\":1,\"type\":\"operation.started\",\"operation_id\":\"op-home-01\",\"kind\":\"homing\"}\n",
+      "obj": {"v": 1, "type": "operation.started", "operation_id": "op-home-01", "kind": "homing"}
+    },
+    {
+      "name": "operation_progress",
+      "raw": "{\"v\":1,\"type\":\"operation.progress\",\"operation_id\":\"op-home-01\",\"phase\":\"fast_seek\",\"steps_completed\":240}\n",
+      "obj": {"v": 1, "type": "operation.progress", "operation_id": "op-home-01", "phase": "fast_seek", "steps_completed": 240}
+    },
+    {
+      "name": "operation_completed_home",
+      "raw": "{\"v\":1,\"type\":\"operation.completed\",\"operation_id\":\"op-home-01\",\"result\":\"success\",\"homed\":{\"x\":true,\"y\":true},\"pos\":{\"x\":0,\"y\":0}}\n",
+      "obj": {"v": 1, "type": "operation.completed", "operation_id": "op-home-01", "result": "success", "homed": {"x": true, "y": true}, "pos": {"x": 0, "y": 0}}
+    },
+    {
+      "name": "system_snapshot",
+      "raw": "{\"v\":1,\"type\":\"system.snapshot\",\"state\":\"idle_homed\",\"firmware_version\":\"1.0.0\",\"protocol_version\":1,\"profile_id\":\"esp32s3_a4988_v1\",\"homed\":{\"x\":true,\"y\":true},\"pos\":{\"x\":150,\"y\":220},\"pos_valid\":true,\"sensors\":{\"x_raw\":1,\"x_filtered\":0,\"y_raw\":1,\"y_filtered\":0},\"laser\":{\"duty\":0,\"active\":false,\"hard_clamped\":false},\"drivers_enabled\":true,\"fault\":null}\n",
+      "obj": {
+        "v": 1,
+        "type": "system.snapshot",
+        "state": "idle_homed",
+        "firmware_version": "1.0.0",
+        "protocol_version": 1,
+        "profile_id": "esp32s3_a4988_v1",
+        "homed": {"x": true, "y": true},
+        "pos": {"x": 150, "y": 220},
+        "pos_valid": true,
+        "sensors": {"x_raw": 1, "x_filtered": 0, "y_raw": 1, "y_filtered": 0},
+        "laser": {"duty": 0, "active": false, "hard_clamped": false},
+        "drivers_enabled": true,
+        "fault": null
+      }
+    }
+  ],
+  "invalid_requests": [
+    {
+      "name": "unsupported_version",
+      "raw": "{\"v\":2,\"id\":\"req-err-1\",\"type\":\"system.ping\"}\n",
+      "expected_error": "UNSUPPORTED_VERSION"
+    },
+    {
+      "name": "unknown_command",
+      "raw": "{\"v\":1,\"id\":\"req-err-2\",\"type\":\"robot.dance\"}\n",
+      "expected_error": "UNKNOWN_COMMAND"
+    },
+    {
+      "name": "missing_type",
+      "raw": "{\"v\":1,\"id\":\"req-err-3\"}\n",
+      "expected_error": "INVALID_ARGUMENT"
+    },
+    {
+      "name": "missing_id",
+      "raw": "{\"v\":1,\"type\":\"system.ping\"}\n",
+      "expected_error": "INVALID_ARGUMENT"
+    },
+    {
+      "name": "invalid_json",
+      "raw": "{\"v\":1,\"id\":\"broken\",not json}\n",
+      "expected_error": "PARSE_ERROR"
+    },
+    {
+      "name": "jog_missing_steps",
+      "raw": "{\"v\":1,\"id\":\"req-err-4\",\"type\":\"motion.jog\",\"axis\":\"x\"}\n",
+      "expected_error": "INVALID_ARGUMENT"
+    },
+    {
+      "name": "jog_invalid_axis",
+      "raw": "{\"v\":1,\"id\":\"req-err-5\",\"type\":\"motion.jog\",\"axis\":\"z\",\"steps\":100}\n",
+      "expected_error": "INVALID_ARGUMENT"
+    },
+    {
+      "name": "laser_pulse_exceeds_clamp",
+      "raw": "{\"v\":1,\"id\":\"req-err-6\",\"type\":\"laser.pulse\",\"duty\":4095,\"duration_ms\":50}\n",
+      "expected_error": "LASER_DUTY_CLAMPED"
+    },
+    {
+      "name": "laser_pulse_duration_excessive",
+      "raw": "{\"v\":1,\"id\":\"req-err-7\",\"type\":\"laser.pulse\",\"duty\":500,\"duration_ms\":5000}\n",
+      "expected_error": "INVALID_ARGUMENT"
+    },
+    {
+      "name": "speed_zero_or_negative",
+      "raw": "{\"v\":1,\"id\":\"req-err-8\",\"type\":\"motion.jog\",\"axis\":\"x\",\"steps\":100,\"speed_sps\":0}\n",
+      "expected_error": "INVALID_ARGUMENT"
+    },
+    {
+      "name": "speed_exceeds_max",
+      "raw": "{\"v\":1,\"id\":\"req-err-9\",\"type\":\"motion.jog\",\"axis\":\"x\",\"steps\":100,\"speed_sps\":50000}\n",
+      "expected_error": "OUT_OF_BOUNDS"
+    }
+  ]
+}

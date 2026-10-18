@@ -1,0 +1,123 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "profile_id": "esp32s3_a4988_v1",
+  "version": "1.0.0",
+  "target_mcu": "ESP32-S3 SuperMini",
+  "description": "Authoritative hardware pin allocation and safety configuration for Laser XY Scanner",
+  "pin_allocation": {
+    "PIN_MS1": {
+      "gpio": 1,
+      "direction": "OUTPUT",
+      "active_level": "HIGH",
+      "description": "Shared microstep select bit 1"
+    },
+    "PIN_MS2": {
+      "gpio": 2,
+      "direction": "OUTPUT",
+      "active_level": "HIGH",
+      "description": "Shared microstep select bit 2"
+    },
+    "RESERVED_GPIO3": {
+      "gpio": 3,
+      "direction": "UNUSED",
+      "description": "Reserved / Unused"
+    },
+    "PIN_MS3": {
+      "gpio": 4,
+      "direction": "OUTPUT",
+      "active_level": "HIGH",
+      "description": "Shared microstep select bit 3"
+    },
+    "PIN_STEP_X": {
+      "gpio": 5,
+      "direction": "OUTPUT",
+      "active_level": "RISING_EDGE",
+      "min_pulse_width_us": 3,
+      "description": "Motor A (X) Step pulse"
+    },
+    "PIN_DIR_X": {
+      "gpio": 6,
+      "direction": "OUTPUT",
+      "cw_level": "HIGH",
+      "ccw_level": "LOW",
+      "description": "Motor A (X) Direction"
+    },
+    "PIN_ENABLE_X": {
+      "gpio": 7,
+      "direction": "OUTPUT",
+      "active_level": "LOW",
+      "inactive_level": "HIGH",
+      "boot_level": "HIGH",
+      "description": "Motor A (X) Enable (Active LOW, HIGH=Disabled)"
+    },
+    "PIN_SENSOR_Y": {
+      "gpio": 8,
+      "direction": "INPUT_PULLUP",
+      "active_level": "LOW",
+      "inactive_level": "HIGH",
+      "description": "Y Optical Endstop (FC-51 / KY-032 LM393)"
+    },
+    "PIN_STEP_Y": {
+      "gpio": 9,
+      "direction": "OUTPUT",
+      "active_level": "RISING_EDGE",
+      "min_pulse_width_us": 3,
+      "description": "Motor B (Y) Step pulse"
+    },
+    "PIN_DIR_Y": {
+      "gpio": 10,
+      "direction": "OUTPUT",
+      "cw_level": "HIGH",
+      "ccw_level": "LOW",
+      "description": "Motor B (Y) Direction (Resolves GPIO 10 conflict: assigned to Y DIR)"
+    },
+    "PIN_ENABLE_Y": {
+      "gpio": 11,
+      "direction": "OUTPUT",
+      "active_level": "LOW",
+      "inactive_level": "HIGH",
+      "boot_level": "HIGH",
+      "description": "Motor B (Y) Enable (Active LOW, HIGH=Disabled)"
+    },
+    "PIN_LASER_PWM": {
+      "gpio": 12,
+      "direction": "OUTPUT",
+      "active_level": "HIGH",
+      "boot_level": "LOW",
+      "pwm_frequency_hz": 5000,
+      "pwm_resolution_bits": 12,
+      "max_duty_raw": 4095,
+      "safety_max_pct": 90,
+      "safety_max_duty": 3685,
+      "watchdog_timeout_ms": 500,
+      "description": "Laser Diode PWM (Resolves GPIO 10 conflict: assigned to GPIO 12 with 90% hard clamp)"
+    },
+    "PIN_SENSOR_X": {
+      "gpio": 13,
+      "direction": "INPUT_PULLUP",
+      "active_level": "LOW",
+      "inactive_level": "HIGH",
+      "description": "X Optical Endstop (Input only - NEVER configure as OUTPUT or LED)"
+    }
+  },
+  "safety_boundaries": {
+    "boot_laser_state": "LOW",
+    "boot_stepper_state": "DISABLED_HIGH",
+    "hard_laser_ceiling_pct": 90,
+    "hard_laser_ceiling_duty": 3685,
+    "laser_watchdog_timeout_ms": 500,
+    "max_speed_sps": 25000,
+    "min_speed_sps": 1,
+    "default_jog_speed_sps": 100,
+    "homing_fast_seek_sps": 120,
+    "homing_slow_latch_sps": 40,
+    "homing_max_seek_steps": 4096,
+    "homing_max_retract_steps": 1024,
+    "homing_max_latch_steps": 1024,
+    "homing_max_clear_steps": 1024,
+    "homing_phase_timeout_ms": 15000,
+    "sensor_debounce_samples": 3,
+    "sensor_debounce_window_ms": 3,
+    "stepper_auto_disable_ms": 30000
+  }
+}
