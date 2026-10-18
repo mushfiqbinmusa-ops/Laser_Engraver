@@ -25,6 +25,10 @@ class DriverSetEnabledRequest(BaseRequest):
     type: Literal["driver.set_enabled"] = "driver.set_enabled"
     enabled: bool
 
+class DriverSetMicrostepRequest(BaseRequest):
+    type: Literal["driver.set_microstep"] = "driver.set_microstep"
+    mode: Literal[1, 2, 4, 8, 16]
+
 class HomeStartRequest(BaseRequest):
     type: Literal["home.start"] = "home.start"
     axis: Literal["all", "x", "y"] = "all"
@@ -112,4 +116,5 @@ class SystemSnapshot(BaseModel):
     sensors: SensorReadout
     laser: LaserReadout
     drivers_enabled: bool
+    microstep_mode: Optional[int] = 16
     fault: Optional[str] = None

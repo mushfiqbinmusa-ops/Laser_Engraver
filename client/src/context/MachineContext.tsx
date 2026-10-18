@@ -13,6 +13,7 @@ interface MachineContextType {
   jog: (axis: 'x' | 'y', steps: number, speed?: number) => Promise<void>;
   pulse: (duty: number, durationMs: number) => Promise<void>;
   setDriver: (enabled: boolean) => Promise<void>;
+  setMicrostepMode: (mode: 1 | 2 | 4 | 8 | 16) => Promise<void>;
   refreshStatus: () => Promise<void>;
 }
 
@@ -185,6 +186,19 @@ export const MachineProvider: React.FC<{ children: React.ReactNode }> = ({ child
     await refreshStatus();
   }, [refreshStatus]);
 
+  const setMicrostepMode = useCallback(async (mode: 1 | 2 | 4 | 8 | 16) => {
+    const res = await fetch('/api/machine/microstep', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mode })
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.detail || 'Microstepping change failed');
+    }
+    await refreshStatus();
+  }, [refreshStatus]);
+
   const contextValue = useMemo(() => ({
     connected,
     fresh,
@@ -197,6 +211,7 @@ export const MachineProvider: React.FC<{ children: React.ReactNode }> = ({ child
     jog,
     pulse,
     setDriver,
+    setMicrostepMode,
     refreshStatus
   }), [
     connected,
@@ -210,6 +225,7 @@ export const MachineProvider: React.FC<{ children: React.ReactNode }> = ({ child
     jog,
     pulse,
     setDriver,
+    setMicrostepMode,
     refreshStatus
   ]);
 

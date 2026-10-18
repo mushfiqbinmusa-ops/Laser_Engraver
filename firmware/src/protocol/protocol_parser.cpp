@@ -185,6 +185,16 @@ ErrorCode ProtocolParser::parseLine(const char* line, size_t len, CommandRequest
     if (!extractBool(line, "enabled", req.boolArg)) {
       return ErrorCode::InvalidArgument;
     }
+  } else if (strcmp(typeStr, "driver.set_microstep") == 0) {
+    req.type = CommandType::DriverSetMicrostep;
+    uint32_t mode = 0;
+    if (!extractUInt(line, "mode", mode)) {
+      return ErrorCode::InvalidArgument;
+    }
+    if (mode != 1 && mode != 2 && mode != 4 && mode != 8 && mode != 16) {
+      return ErrorCode::InvalidArgument;
+    }
+    req.microstepMode = (uint8_t)mode;
   } else if (strcmp(typeStr, "home.start") == 0) {
     req.type = CommandType::HomeStart;
     char axisStr[16] = {0};
@@ -327,7 +337,7 @@ size_t ProtocolParser::serializeSnapshot(const SnapshotEvent& snap, char* outBuf
   }
 
   int written = snprintf(outBuf, maxLen,
-    "{\"v\":%u,\"type\":\"system.snapshot\",\"state\":\"%s\",\"firmware_version\":\"%s\",\"protocol_version\":%u,\"profile_id\":\"%s\",\"homed\":{\"x\":%s,\"y\":%s},\"pos\":{\"x\":%d,\"y\":%d},\"pos_valid\":%s,\"sensors\":{\"x_raw\":%u,\"x_filtered\":%u,\"y_raw\":%u,\"y_filtered\":%u},\"laser\":{\"duty\":%u,\"active\":%s,\"hard_clamped\":%s},\"drivers_enabled\":%s,\"fault\":%s}\n",
+    "{\"v\":%u,\"type\":\"system.snapshot\",\"state\":\"%s\",\"firmware_version\":\"%s\",\"protocol_version\":%u,\"profile_id\":\"%s\",\"homed\":{\"x\":%s,\"y\":%s},\"pos\":{\"x\":%d,\"y\":%d},\"pos_valid\":%s,\"sensors\":{\"x_raw\":%u,\"x_filtered\":%u,\"y_raw\":%u,\"y_filtered\":%u},\"laser\":{\"duty\":%u,\"active\":%s,\"hard_clamped\":%s},\"drivers_enabled\":%s,\"microstep_mode\":%u,\"fault\":%s}\n",
     snap.v,
     machineStateToString(snap.state),
     snap.firmwareVersion,
@@ -340,6 +350,7 @@ size_t ProtocolParser::serializeSnapshot(const SnapshotEvent& snap, char* outBuf
     snap.sensorYRaw ? 1 : 0, snap.sensorYFiltered ? 1 : 0,
     snap.laserDuty, snap.laserActive ? "true" : "false", snap.laserHardClamped ? "true" : "false",
     snap.driversEnabled ? "true" : "false",
+    snap.microstepMode,
     faultJson);
 
   return (written > 0 && (size_t)written < maxLen) ? (size_t)written : 0;

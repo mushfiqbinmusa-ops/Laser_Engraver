@@ -16,6 +16,7 @@ enum class CommandType : uint8_t {
   SystemEStop,
   SystemResetFault,
   DriverSetEnabled,
+  DriverSetMicrostep,
   HomeStart,
   MotionJog,
   MotionMoveAbs,
@@ -84,6 +85,7 @@ struct CommandRequest {
   uint32_t speedSps = 0;
   uint16_t duty = 0;
   uint32_t durationMs = 0;
+  uint8_t microstepMode = 16;
   
   // Job streaming
   char jobId[32] = {0};
@@ -136,5 +138,6 @@ struct SnapshotEvent {
   bool laserActive = false;
   bool laserHardClamped = false;
   bool driversEnabled = false;
+  uint8_t microstepMode = 16;
   const char* fault = nullptr;
 };

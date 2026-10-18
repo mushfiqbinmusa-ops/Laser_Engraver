@@ -16,9 +16,18 @@ ProtocolDispatcher::ProtocolDispatcher(MachineStateManager& state,
     m_laser(laser),
     m_sensors(sensors),
     m_sendFn(nullptr),
+    m_microstepFn(nullptr),
+    m_microstepMode(16),
     m_opCounter(0),
     m_opRunning(false) {
   m_currentOpId[0] = '\0';
+}
+
+void ProtocolDispatcher::setMicrostepMode(uint8_t mode) {
+  m_microstepMode = mode;
+  if (m_microstepFn) {
+    m_microstepFn(mode);
+  }
 }
 
 void ProtocolDispatcher::sendAck(const char* reqId, bool accepted, ErrorCode code, const char* opId) {
@@ -93,6 +102,7 @@ void ProtocolDispatcher::emitSnapshot() {
   snap.laserActive = m_laser.isActive();
   snap.laserHardClamped = m_laser.isHardClamped();
   snap.driversEnabled = m_axisX.isEnabled();
+  snap.microstepMode = m_microstepMode;
   snap.fault = m_state.getFault();
 
   char buf[512];
@@ -159,6 +169,13 @@ void ProtocolDispatcher::dispatch(const CommandRequest& req, uint32_t nowUs, uin
         m_axisY.setHomed(false);
         m_state.setHomed(false, false);
       }
+      sendAck(req.id, true, ErrorCode::Ok);
+      emitSnapshot();
+      break;
+    }
+
+    case CommandType::DriverSetMicrostep: {
+      setMicrostepMode(req.microstepMode);
       sendAck(req.id, true, ErrorCode::Ok);
       emitSnapshot();
       break;

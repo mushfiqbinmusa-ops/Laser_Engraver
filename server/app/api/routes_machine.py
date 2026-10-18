@@ -4,7 +4,8 @@ from pydantic import BaseModel
 from fastapi import APIRouter, HTTPException, Depends
 from app.models.protocol_models import (
     AckResponse, SystemSnapshot, MotionJogRequest, MotionMoveAbsRequest,
-    HomeStartRequest, LaserPulseRequest, DriverSetEnabledRequest
+    HomeStartRequest, LaserPulseRequest, DriverSetEnabledRequest,
+    DriverSetMicrostepRequest
 )
 
 logger = logging.getLogger(__name__)
@@ -124,6 +125,18 @@ async def set_driver(req: DriverSetEnabledRequest, dispatcher=Depends(get_disp))
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@router.post("/microstep")
+async def set_microstep(req: DriverSetMicrostepRequest, dispatcher=Depends(get_disp)):
+    try:
+        ack = await dispatcher.send_command(req.model_dump())
+        return ack
+    except HTTPException:
+        raise
+    except TimeoutError as e:
+        raise HTTPException(status_code=504, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 @router.post("/home")
 async def home(req: HomeStartRequest, dispatcher=Depends(get_disp)):
     try:
@@ -181,6 +194,11 @@ async def get_status_report(dispatcher=Depends(get_disp)):
     laser_duty = _get(laser, "duty", 0)
     snap_state = _get(snap, "state", "unknown")
     drivers_enabled = _get(snap, "drivers_enabled", False)
+    microstep_mode = _get(snap, "microstep_mode", 16) or 16
+    # 28BYJ-48 64:1 has 2048 baseline full steps/rev. A typical GT2 2mm pulley (16T or 20T) or lead screw:
+    # Baseline full-step resolution is 5 steps/mm, giving 80 steps/mm at 1/16 (5 * 16 = 80).
+    steps_per_mm = float(5 * microstep_mode)
+    steps_per_rev = 2048 * microstep_mode
 
     lines = [
         "+=======================================================================+",
@@ -194,8 +212,8 @@ async def get_status_report(dispatcher=Depends(get_disp)):
         "+-----------------------------------------------------------------------+",
         f"| Axis X (Motor A)   : Pos={pos_x:<8} steps (Homed={'YES' if homed_x else 'NO '}, Driver={'ON ' if drivers_enabled else 'OFF'})      |",
         f"| Axis Y (Motor B)   : Pos={pos_y:<8} steps (Homed={'YES' if homed_y else 'NO '}, Driver={'ON ' if drivers_enabled else 'OFF'})      |",
-        f"| Microstepping Mode : 1/16 (3200 steps/rev, 80 steps/mm)               |",
-        f"| Commanded Coords   : X={(pos_x/80.0):.2f} mm | Y={(pos_y/80.0):.2f} mm                       |",
+        f"| Microstepping Mode : 1/{microstep_mode:<2} ({steps_per_rev} steps/rev, {steps_per_mm:.1f} steps/mm)            |",
+        f"| Commanded Coords   : X={(pos_x/steps_per_mm):.2f} mm | Y={(pos_y/steps_per_mm):.2f} mm                       |",
         "+-----------------------------------------------------------------------+",
         "| OPTICAL SENSOR STATUS (FC-51 / KY-032 LM393)                         |",
         "+-----------------------------------------------------------------------+",

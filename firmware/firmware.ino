@@ -31,6 +31,37 @@ static void nativePwmWrite(uint8_t pin, uint32_t duty) {
 #endif
 }
 
+static void nativeSetMicrostepMode(uint8_t divisor) {
+  switch (divisor) {
+    case 2: // 1/2 Half step
+      digitalWrite(PIN_MS1, HIGH);
+      digitalWrite(PIN_MS2, LOW);
+      digitalWrite(PIN_MS3, LOW);
+      break;
+    case 4: // 1/4 Quarter step
+      digitalWrite(PIN_MS1, LOW);
+      digitalWrite(PIN_MS2, HIGH);
+      digitalWrite(PIN_MS3, LOW);
+      break;
+    case 8: // 1/8 Eighth step
+      digitalWrite(PIN_MS1, HIGH);
+      digitalWrite(PIN_MS2, HIGH);
+      digitalWrite(PIN_MS3, LOW);
+      break;
+    case 16: // 1/16 Sixteenth step
+      digitalWrite(PIN_MS1, HIGH);
+      digitalWrite(PIN_MS2, HIGH);
+      digitalWrite(PIN_MS3, HIGH);
+      break;
+    case 1: // 1/1 Full step
+    default:
+      digitalWrite(PIN_MS1, LOW);
+      digitalWrite(PIN_MS2, LOW);
+      digitalWrite(PIN_MS3, LOW);
+      break;
+  }
+}
+
 // Global Subsystems
 static MachineStateManager s_machineState;
 static StepperAxis s_axisX(PIN_STEP_X, PIN_DIR_X, PIN_ENABLE_X, false);
@@ -74,13 +105,11 @@ void setup() {
   pinMode(PIN_DIR_Y, OUTPUT);
   digitalWrite(PIN_DIR_Y, LOW);
 
-  // Microstepping bits (1/16 default: MS1=HIGH, MS2=HIGH, MS3=HIGH)
+  // Microstepping bits (MS1, MS2, MS3)
   pinMode(PIN_MS1, OUTPUT);
-  digitalWrite(PIN_MS1, HIGH);
   pinMode(PIN_MS2, OUTPUT);
-  digitalWrite(PIN_MS2, HIGH);
   pinMode(PIN_MS3, OUTPUT);
-  digitalWrite(PIN_MS3, HIGH);
+  nativeSetMicrostepMode(16); // Default 1/16 mode
 
   // Sensors (INPUT_PULLUP)
   pinMode(PIN_SENSOR_X, INPUT_PULLUP);
@@ -100,6 +129,7 @@ void setup() {
   s_axisY.init(nativeDigitalWrite, nativeDelayUs);
   s_laser.init(nativePwmWrite);
   s_dispatcher.setSendCallback(sendOutput);
+  s_dispatcher.setMicrostepCallback(nativeSetMicrostepMode);
 
   // 4. Start Serial
   Serial.begin(SERIAL_BAUD);

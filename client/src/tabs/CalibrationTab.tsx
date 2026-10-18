@@ -2,13 +2,30 @@ import React, { useState } from 'react';
 import { useMachine } from '../context/MachineContext';
 
 export const CalibrationTab: React.FC = () => {
-  const { connected, fresh, snapshot, home, jog, resetFault } = useMachine();
+  const { connected, fresh, snapshot, home, jog, resetFault, setMicrostepMode } = useMachine();
   const [speedSps, setSpeedSps] = useState<number>(100);
   const [jogStepSize, setJogStepSize] = useState<number>(16);
   const [customStepInput, setCustomStepInput] = useState<string>('16');
   const [isHoming, setIsHoming] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [isJogging, setIsJogging] = useState<boolean>(false);
+  const [isChangingMicrostep, setIsChangingMicrostep] = useState<boolean>(false);
+
+  const microstepMode = (snapshot?.microstep_mode || 16) as 1 | 2 | 4 | 8 | 16;
+  const stepsPerMm = 5 * microstepMode;
+  const stepsPerRev = 2048 * microstepMode;
+
+  const handleMicrostepChange = async (mode: 1 | 2 | 4 | 8 | 16) => {
+    setIsChangingMicrostep(true);
+    setErrorMsg(null);
+    try {
+      await setMicrostepMode(mode);
+    } catch (err: any) {
+      setErrorMsg(`Failed to set microstep mode: ${err.message}`);
+    } finally {
+      setIsChangingMicrostep(false);
+    }
+  };
 
   const isJogDisabled = Boolean(!connected || !fresh || isHoming || isJogging || snapshot?.fault || snapshot?.state === 'running_job' || snapshot?.state === 'moving');
 
@@ -115,28 +132,58 @@ export const CalibrationTab: React.FC = () => {
           )}
         </div>
 
-        {/* Microstepping Hardware Profile Info */}
+        {/* Microstepping Hardware Mode Selection (A4988 MS1/MS2/MS3 Pins) */}
         <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: '6px', padding: '16px' }}>
-          <h3 style={{ fontSize: '13px', fontWeight: 600, marginBottom: '8px' }}>A4988 Microstep Hardware Profile</h3>
-          <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '8px' }}>
-            Default hardware mode: <strong>1/16 Microstepping</strong> (Pins MS1=1, MS2=1, MS3=1).
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+            <h3 style={{ fontSize: '13px', fontWeight: 600 }}>A4988 Hardware Microstep Mode</h3>
+            <span style={{ fontSize: '11px', fontWeight: 600, color: 'var(--accent-ready)' }}>
+              Active: 1/{microstepMode} Mode
+            </span>
+          </div>
+          <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '12px' }}>
+            Switch hardware pin states (GPIO 1: MS1, GPIO 2: MS2, GPIO 4: MS3) like in <code>stepper_ir_homing_test</code>.
           </p>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', fontSize: '11px', textAlign: 'center' }}>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '6px', marginBottom: '14px' }}>
+            {([
+              { mode: 1, label: '1/1 Full', ms: '000', stepsRev: 2048 },
+              { mode: 2, label: '1/2 Half', ms: '100', stepsRev: 4096 },
+              { mode: 4, label: '1/4 Quad', ms: '010', stepsRev: 8192 },
+              { mode: 8, label: '1/8 Octa', ms: '110', stepsRev: 16384 },
+              { mode: 16, label: '1/16 Hex', ms: '111', stepsRev: 32768 },
+            ] as const).map((m) => (
+              <button
+                key={m.mode}
+                type="button"
+                disabled={!connected || isChangingMicrostep}
+                onClick={() => handleMicrostepChange(m.mode)}
+                style={{
+                  padding: '8px 4px',
+                  textAlign: 'center',
+                  background: microstepMode === m.mode ? 'var(--text-primary)' : 'var(--bg-surface-elevated)',
+                  color: microstepMode === m.mode ? 'var(--bg-app)' : 'var(--text-primary)',
+                  border: `1px solid ${microstepMode === m.mode ? 'var(--text-primary)' : 'var(--border-subtle)'}`,
+                  borderRadius: '4px'
+                }}
+              >
+                <div style={{ fontSize: '12px', fontWeight: 700 }}>{m.label}</div>
+                <div style={{ fontSize: '10px', opacity: 0.8 }}>MS: {m.ms}</div>
+              </button>
+            ))}
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', fontSize: '11px', textAlign: 'center' }}>
             <div style={{ background: 'var(--bg-app)', padding: '6px', borderRadius: '4px' }}>
-              <div style={{ color: 'var(--text-secondary)' }}>Step Angle</div>
-              <div style={{ fontWeight: 600 }}>1.8° (200/rev)</div>
+              <div style={{ color: 'var(--text-secondary)' }}>Full Step Baseline</div>
+              <div style={{ fontWeight: 600 }}>2048 steps / rev</div>
             </div>
             <div style={{ background: 'var(--bg-app)', padding: '6px', borderRadius: '4px' }}>
-              <div style={{ color: 'var(--text-secondary)' }}>Microstepping</div>
-              <div style={{ fontWeight: 600, color: 'var(--accent-ready)' }}>1/16 Mode</div>
+              <div style={{ color: 'var(--text-secondary)' }}>Effective Resolution</div>
+              <div style={{ fontWeight: 600, color: 'var(--accent-ready)' }}>{stepsPerRev} steps / rev</div>
             </div>
             <div style={{ background: 'var(--bg-app)', padding: '6px', borderRadius: '4px' }}>
-              <div style={{ color: 'var(--text-secondary)' }}>Steps / Rev</div>
-              <div style={{ fontWeight: 600 }}>3,200 µsteps</div>
-            </div>
-            <div style={{ background: 'var(--bg-app)', padding: '6px', borderRadius: '4px' }}>
-              <div style={{ color: 'var(--text-secondary)' }}>Resolution</div>
-              <div style={{ fontWeight: 600 }}>80 µsteps / mm</div>
+              <div style={{ color: 'var(--text-secondary)' }}>Linear Scale</div>
+              <div style={{ fontWeight: 600 }}>{stepsPerMm} steps / mm</div>
             </div>
           </div>
         </div>
@@ -150,7 +197,7 @@ export const CalibrationTab: React.FC = () => {
         <div style={{ background: 'var(--bg-surface-elevated)', border: '1px solid var(--border-subtle)', borderRadius: '6px', padding: '14px', marginBottom: '16px' }}>
           <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '4px' }}>Current Position (Open-Loop Steps)</div>
           <div className="mono" style={{ fontSize: '20px', fontWeight: 600 }}>
-            X: {pos.x} µsteps ({(pos.x / 80).toFixed(2)} mm) | Y: {pos.y} µsteps ({(pos.y / 80).toFixed(2)} mm)
+            X: {pos.x} steps ({(pos.x / stepsPerMm).toFixed(2)} mm) | Y: {pos.y} steps ({(pos.y / stepsPerMm).toFixed(2)} mm)
           </div>
           <div style={{ fontSize: '11px', color: snapshot?.pos_valid ? 'var(--accent-ready)' : 'var(--accent-warning)', marginTop: '4px' }}>
             {snapshot?.pos_valid ? '● Position Calibrated & Valid' : '○ Unhomed / Open-Loop (Homing Recommended)'}
@@ -160,16 +207,16 @@ export const CalibrationTab: React.FC = () => {
         {/* Microstep Increment Selection */}
         <div style={{ marginBottom: '18px' }}>
           <label htmlFor="microstep-size" style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '8px' }}>
-            Microstep Increment per Jog Click:
+            Step Increment per Jog Click:
           </label>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', marginBottom: '8px' }}>
             {[
-              { label: '1 µstep (Fine)', steps: 1 },
-              { label: '8 µsteps (1/2)', steps: 8 },
-              { label: '16 µsteps (1 Full)', steps: 16 },
-              { label: '40 µsteps (0.5mm)', steps: 40 },
-              { label: '80 µsteps (1.0mm)', steps: 80 },
-              { label: '160 µsteps (2.0mm)', steps: 160 },
+              { label: `1 step (${(1 / stepsPerMm).toFixed(3)}mm)`, steps: 1 },
+              { label: `${microstepMode / 2 || 1} steps (Half)`, steps: Math.max(1, Math.round(microstepMode / 2)) },
+              { label: `${microstepMode} steps (1 Full)`, steps: microstepMode },
+              { label: `${Math.round(stepsPerMm * 0.5)} steps (0.5mm)`, steps: Math.max(1, Math.round(stepsPerMm * 0.5)) },
+              { label: `${Math.round(stepsPerMm * 1.0)} steps (1.0mm)`, steps: Math.max(1, Math.round(stepsPerMm * 1.0)) },
+              { label: `${Math.round(stepsPerMm * 2.0)} steps (2.0mm)`, steps: Math.max(1, Math.round(stepsPerMm * 2.0)) },
             ].map((item) => (
               <button
                 type="button"
@@ -191,7 +238,7 @@ export const CalibrationTab: React.FC = () => {
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Custom Microsteps:</span>
+            <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Custom Steps:</span>
             <input
               id="microstep-size"
               type="number"
@@ -202,7 +249,7 @@ export const CalibrationTab: React.FC = () => {
               style={{ width: '100px', padding: '4px 8px', fontSize: '12px' }}
             />
             <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-              = {(jogStepSize / 80).toFixed(3)} mm
+              = {(jogStepSize / stepsPerMm).toFixed(3)} mm
             </span>
           </div>
         </div>
@@ -210,7 +257,7 @@ export const CalibrationTab: React.FC = () => {
         {/* Directional Jog Pad */}
         <div style={{ marginBottom: '20px', background: 'var(--bg-app)', padding: '16px', borderRadius: '6px', border: '1px solid var(--border-subtle)' }}>
           <div style={{ fontSize: '12px', fontWeight: 600, marginBottom: '12px', textAlign: 'center' }}>
-            Directional Jog (±{jogStepSize} µsteps)
+            Directional Jog (±{jogStepSize} steps)
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '80px 80px 80px', justifyContent: 'center', gap: '8px' }}>
@@ -260,22 +307,34 @@ export const CalibrationTab: React.FC = () => {
 
         {/* Jog Speed Selection */}
         <div style={{ marginBottom: '16px' }}>
-          <label style={{ display: 'block', fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '6px' }}>
-            Jog Speed (Steps per Second)
-          </label>
-          <div style={{ display: 'flex', gap: '8px' }}>
-            {[40, 100, 200, 500].map((sps) => (
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+            <label style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
+              Jog Stepping Rate (Steps / Second)
+            </label>
+            <span style={{ fontSize: '11px', color: 'var(--accent-ready)', fontWeight: 600 }}>
+              {speedSps} sps ({(speedSps / stepsPerMm).toFixed(2)} mm/s)
+            </span>
+          </div>
+          <div style={{ display: 'flex', gap: '6px', marginBottom: '6px' }}>
+            {[40, 80, 100, 200, 500, 1000].map((sps) => (
               <button
                 key={sps}
                 onClick={() => setSpeedSps(sps)}
                 style={{
+                  flex: 1,
+                  padding: '6px 4px',
+                  fontSize: '11px',
+                  fontWeight: 600,
                   background: speedSps === sps ? 'var(--text-primary)' : 'var(--bg-surface-elevated)',
                   color: speedSps === sps ? 'var(--bg-app)' : 'var(--text-primary)'
                 }}
               >
-                {sps} sps
+                {sps}
               </button>
             ))}
+          </div>
+          <div style={{ fontSize: '11px', color: 'var(--text-muted)', lineHeight: '1.4' }}>
+            💡 <strong>Note on 28BYJ-48 Steppers:</strong> High pulse frequencies (&gt;300 sps in full-step or &gt;1000 sps in microstepping) exceed the 64:1 magnetic rotor pull-in torque limit and cause stalling/cogging, making it appear sluggish. 80–200 sps gives maximum torque and smooth rotation.
           </div>
         </div>
 

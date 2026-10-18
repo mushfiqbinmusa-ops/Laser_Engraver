@@ -30,6 +30,7 @@ export interface SystemSnapshot {
   sensors: SensorReadout;
   laser: LaserReadout;
   drivers_enabled: boolean;
+  microstep_mode?: number;
   fault: string | null;
 }
 
