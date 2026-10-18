@@ -1,0 +1,124 @@
+import asyncio
+import json
+import logging
+import time
+from typing import Optional, Callable, Awaitable, Any
+from app.bridge.base import ControllerBridge
+from app.models.protocol_models import AckResponse, SystemSnapshot, OperationEvent
+
+logger = logging.getLogger(__name__)
+
+class ControllerDispatcher:
+    def __init__(self, bridge: ControllerBridge):
+        self.bridge = bridge
+        self.bridge.set_line_handler(self._handle_incoming_line)
+        self._lock = asyncio.Lock()
+        self._req_counter = 0
+        self._pending_acks: dict[str, asyncio.Future[AckResponse]] = {}
+        self._pending_ops: dict[str, asyncio.Future[OperationEvent]] = {}
+        self._event_listeners: list[Callable[[dict[str, Any]], Awaitable[None]]] = []
+        
+        self.latest_snapshot: Optional[SystemSnapshot] = None
+        self.last_snapshot_time: float = 0.0
+        self.freshness_threshold_s: float = 2.0
+
+    def add_event_listener(self, listener: Callable[[dict[str, Any]], Awaitable[None]]) -> None:
+        self._event_listeners.append(listener)
+
+    def is_fresh(self) -> bool:
+        if not self.bridge.is_connected() or not self.latest_snapshot:
+            return False
+        return (time.time() - self.last_snapshot_time) < self.freshness_threshold_s
+
+    async def _handle_incoming_line(self, line: str) -> None:
+        try:
+            data = json.loads(line)
+        except Exception as e:
+            logger.warning(f"Malformed JSON from controller: {line} - {e}")
+            return
+
+        frame_type = data.get("type")
+
+        # 1. Acknowledgment
+        if frame_type == "ack":
+            req_id = data.get("id")
+            if req_id and req_id in self._pending_acks:
+                fut = self._pending_acks.pop(req_id)
+                if not fut.done():
+                    try:
+                        ack = AckResponse.model_validate(data)
+                        fut.set_result(ack)
+                    except Exception as ex:
+                        fut.set_exception(ex)
+
+        # 2. Snapshot
+        elif frame_type == "system.snapshot":
+            try:
+                snap = SystemSnapshot.model_validate(data)
+                self.latest_snapshot = snap
+                self.last_snapshot_time = time.time()
+            except Exception as e:
+                logger.error(f"Error parsing system snapshot: {e}")
+
+        # 3. Operation Lifecycle Events
+        elif frame_type in ("operation.started", "operation.progress", "operation.completed"):
+            op_id = data.get("operation_id")
+            if frame_type == "operation.completed" and op_id and op_id in self._pending_ops:
+                fut = self._pending_ops.pop(op_id)
+                if not fut.done():
+                    try:
+                        ev = OperationEvent.model_validate(data)
+                        fut.set_result(ev)
+                    except Exception as ex:
+                        fut.set_exception(ex)
+
+        # Broadcast to subscribed listeners (e.g. WebSocket clients)
+        for listener in self._event_listeners:
+            try:
+                await listener(data)
+            except Exception as ex:
+                logger.error(f"Error notifying listener: {ex}")
+
+    async def send_command(self, cmd_dict: dict[str, Any], timeout_s: float = 3.0) -> AckResponse:
+        async with self._lock:
+            self._req_counter += 1
+            req_id = f"req-{self._req_counter:04d}"
+            cmd_dict["v"] = 1
+            cmd_dict["id"] = req_id
+
+            loop = asyncio.get_running_loop()
+            ack_future: asyncio.Future[AckResponse] = loop.create_future()
+            self._pending_acks[req_id] = ack_future
+
+            frame_json = json.dumps(cmd_dict)
+            try:
+                await self.bridge.send_frame(frame_json)
+                ack = await asyncio.wait_for(ack_future, timeout=timeout_s)
+                return ack
+            except asyncio.TimeoutError:
+                self._pending_acks.pop(req_id, None)
+                raise TimeoutError(f"Command {cmd_dict.get('type')} (id={req_id}) timed out after {timeout_s}s")
+            except Exception:
+                self._pending_acks.pop(req_id, None)
+                raise
+
+    async def send_operation(self, cmd_dict: dict[str, Any], op_timeout_s: float = 30.0) -> tuple[AckResponse, OperationEvent]:
+        # First send command and await immediate ack
+        ack = await self.send_command(cmd_dict, timeout_s=3.0)
+        if not ack.accepted or not ack.operation_id:
+            raise RuntimeError(f"Operation rejected by controller: {ack.code}")
+
+        op_id = ack.operation_id
+        loop = asyncio.get_running_loop()
+        op_future: asyncio.Future[OperationEvent] = loop.create_future()
+        self._pending_ops[op_id] = op_future
+
+        try:
+            event = await asyncio.wait_for(op_future, timeout=op_timeout_s)
+            return ack, event
+        except asyncio.TimeoutError:
+            self._pending_ops.pop(op_id, None)
+            raise TimeoutError(f"Operation {op_id} timed out after {op_timeout_s}s")
+        except Exception:
+            self._pending_ops.pop(op_id, None)
+            raise
