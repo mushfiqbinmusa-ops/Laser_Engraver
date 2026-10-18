@@ -9,6 +9,7 @@ export const Header: React.FC = () => {
     if (!fresh) return 'var(--accent-warning)';
     if (snapshot?.fault) return 'var(--accent-estop)';
     if (snapshot?.state === 'idle_homed') return 'var(--accent-ready)';
+    if (snapshot?.state === 'idle_unhomed') return '#FFD43B';
     return 'var(--text-primary)';
   };
 
@@ -16,6 +17,8 @@ export const Header: React.FC = () => {
     if (!connected) return 'CONTROLLER OFFLINE';
     if (!fresh) return 'TELEMETRY STALE';
     if (snapshot?.fault) return `FAULT: ${snapshot.fault}`;
+    if (snapshot?.state === 'idle_homed') return 'IDLE (HOMED)';
+    if (snapshot?.state === 'idle_unhomed') return 'IDLE (UNHOMED)';
     return snapshot?.state.toUpperCase() || 'UNKNOWN';
   };
 

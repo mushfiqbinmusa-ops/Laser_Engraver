@@ -27,12 +27,30 @@ class ConnectionConfigRequest(BaseModel):
 
 @router.get("/status")
 async def get_status(dispatcher=Depends(get_disp)):
+    if not dispatcher.is_fresh() and dispatcher.bridge.is_connected():
+        try:
+            await dispatcher.send_command({"type": "system.snapshot"}, timeout_s=0.5)
+        except Exception:
+            pass
     return {
         "connected": dispatcher.bridge.is_connected(),
         "fresh": dispatcher.is_fresh(),
-        "snapshot": dispatcher.latest_snapshot.model_dump() if dispatcher.latest_snapshot else None,
+        "snapshot": dispatcher.get_effective_snapshot(),
         "last_seen_epoch": dispatcher.last_snapshot_time
     }
+
+@router.post("/snapshot")
+async def trigger_snapshot(dispatcher=Depends(get_disp)):
+    try:
+        ack = await dispatcher.send_command({"type": "system.snapshot"}, timeout_s=1.5)
+        return {
+            "ack": ack,
+            "snapshot": dispatcher.get_effective_snapshot(),
+            "connected": dispatcher.bridge.is_connected(),
+            "fresh": dispatcher.is_fresh()
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/connection")
 async def get_connection_info(dispatcher=Depends(get_disp)):
@@ -153,14 +171,12 @@ async def home(req: HomeStartRequest, dispatcher=Depends(get_disp)):
 @router.get("/status/report")
 async def get_status_report(dispatcher=Depends(get_disp)):
     from app.core.config import settings
-    snap = dispatcher.latest_snapshot
-    if not snap:
-        # Request immediate snapshot if not cached yet
+    if dispatcher.bridge.is_connected() and not dispatcher.is_fresh():
         try:
-            await dispatcher.send_command({"type": "system.snapshot"}, timeout_s=2.0)
-            snap = dispatcher.latest_snapshot
+            await dispatcher.send_command({"type": "system.snapshot"}, timeout_s=1.5)
         except Exception:
             pass
+    snap = dispatcher.get_effective_snapshot()
 
     conn_info = {
         "host": settings.esp32_host,
@@ -169,8 +185,8 @@ async def get_status_report(dispatcher=Depends(get_disp)):
         "connected": dispatcher.bridge.is_connected()
     }
 
-    if not snap:
-        return {"report": "Machine offline or snapshot unavailable."}
+    if not dispatcher.bridge.is_connected():
+        return {"report": "Machine offline or controller not connected.", "snapshot": snap, "connected": False}
 
     sx = snap.sensors if hasattr(snap, "sensors") else snap.get("sensors", {})
     pos = snap.pos if hasattr(snap, "pos") else snap.get("pos", {})

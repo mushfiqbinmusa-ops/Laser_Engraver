@@ -14,7 +14,8 @@ class Settings(BaseSettings):
     esp32_port: int = 8888
     serial_port: str = "/dev/ttyACM0"
     baudrate: int = 115200
-    transport: str = "tcp" # "tcp" or "serial"
+    transport: str = "serial" # Default to serial for physical hardware control
+
     
     # Machine Defaults & Safety Limits
     work_area_width_mm: float = 50.0

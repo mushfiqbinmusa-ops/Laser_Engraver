@@ -1,5 +1,7 @@
 import asyncio
+import glob
 import logging
+from pathlib import Path
 import serial
 from typing import Callable, Awaitable, Optional
 from app.bridge.base import ControllerBridge
@@ -21,22 +23,45 @@ class SerialControllerBridge(ControllerBridge):
     def is_connected(self) -> bool:
         return self._connected and self.ser is not None and self.ser.is_open
 
+    def get_candidate_ports(self) -> list[str]:
+        """Auto-detect available USB serial ports (ESP32-S3 CDC or USB-UART bridges)."""
+        candidates: list[str] = []
+        if self.port and Path(self.port).exists():
+            candidates.append(self.port)
+        detected = sorted(glob.glob("/dev/ttyACM*") + glob.glob("/dev/ttyUSB*"))
+        for p in detected:
+            if p not in candidates:
+                candidates.append(p)
+        return candidates
+
     async def connect(self) -> bool:
-        if self._connected:
+        if self._connected and self.ser and self.ser.is_open:
             return True
-        try:
-            loop = asyncio.get_running_loop()
-            self.ser = await loop.run_in_executor(
-                None, lambda: serial.Serial(self.port, self.baudrate, timeout=0.1)
-            )
-            self._connected = True
-            self._read_task = asyncio.create_task(self._reader_loop())
-            logger.info(f"Connected to Serial at {self.port}")
-            return True
-        except Exception as e:
-            logger.warning(f"Failed to open Serial port {self.port}: {e}")
+
+        candidates = self.get_candidate_ports()
+        if not candidates:
+            logger.warning("No serial ports found (/dev/ttyACM* or /dev/ttyUSB*)")
             self._connected = False
             return False
+
+        loop = asyncio.get_running_loop()
+        for candidate in candidates:
+            try:
+                def _open():
+                    return serial.Serial(candidate, self.baudrate, timeout=0.1)
+                self.ser = await loop.run_in_executor(None, _open)
+                self.port = candidate
+                self._connected = True
+                self._read_task = asyncio.create_task(self._reader_loop())
+                logger.info(f"Connected to Serial at {self.port} (baudrate={self.baudrate})")
+                return True
+            except Exception as e:
+                logger.debug(f"Could not open serial port {candidate}: {e}")
+                self.ser = None
+
+        logger.warning(f"Failed to open any serial port from candidates: {candidates}")
+        self._connected = False
+        return False
 
     async def disconnect(self) -> None:
         self._connected = False
@@ -82,3 +107,10 @@ class SerialControllerBridge(ControllerBridge):
             logger.error(f"Serial reader loop error: {e}")
         finally:
             self._connected = False
+            if self.ser:
+                try:
+                    if self.ser.is_open:
+                        self.ser.close()
+                except Exception:
+                    pass
+                self.ser = None

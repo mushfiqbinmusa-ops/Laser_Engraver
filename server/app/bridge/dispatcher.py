@@ -30,6 +30,30 @@ class ControllerDispatcher:
     def add_event_listener(self, listener: Callable[[dict[str, Any]], Awaitable[None]]) -> None:
         self._event_listeners.append(listener)
 
+    def reset_state(self) -> None:
+        self.latest_snapshot = None
+        self.last_snapshot_time = 0.0
+
+    def get_effective_snapshot(self) -> dict[str, Any]:
+        if self.latest_snapshot:
+            return self.latest_snapshot.model_dump()
+        return {
+            "v": 1,
+            "type": "system.snapshot",
+            "state": "idle_unhomed",
+            "firmware_version": "1.0.0",
+            "protocol_version": 1,
+            "profile_id": "esp32s3_a4988_v1",
+            "homed": {"x": False, "y": False},
+            "pos": {"x": 0, "y": 0},
+            "pos_valid": False,
+            "sensors": {"x_raw": 1, "x_filtered": 0, "y_raw": 1, "y_filtered": 0},
+            "laser": {"duty": 0, "active": False, "hard_clamped": False},
+            "drivers_enabled": True,
+            "microstep_mode": 16,
+            "fault": None
+        }
+
     def is_fresh(self) -> bool:
         if not self.bridge.is_connected() or not self.latest_snapshot:
             return False

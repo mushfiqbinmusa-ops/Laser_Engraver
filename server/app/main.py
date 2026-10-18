@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import time
 from contextlib import asynccontextmanager
 from pathlib import Path
 from fastapi import FastAPI
@@ -72,18 +73,29 @@ async def reconfigure_bridge(
 async def _bridge_supervisor():
     while True:
         try:
-            if _bridge and not _bridge.is_connected():
-                logger.info(f"Attempting connection to ESP32 ({settings.transport})...")
-                connected = await _bridge.connect()
-                if connected and _dispatcher:
-                    # Immediately request snapshot upon reconnect
-                    try:
-                        await _dispatcher.send_command({"type": "system.snapshot"}, timeout_s=2.0)
-                    except Exception:
-                        pass
+            if _bridge:
+                if not _bridge.is_connected():
+                    if _dispatcher:
+                        _dispatcher.reset_state()
+                    logger.info(f"Attempting connection to ESP32 ({settings.transport})...")
+                    connected = await _bridge.connect()
+                    if connected and _dispatcher:
+                        # Immediately request snapshot upon reconnect
+                        try:
+                            await _dispatcher.send_command({"type": "system.snapshot"}, timeout_s=1.5)
+                        except Exception:
+                            pass
+                else:
+                    # Controller is connected: keep telemetry fresh in real-time
+                    # If we haven't seen a snapshot in the last 300ms, request one actively
+                    if _dispatcher and (time.time() - _dispatcher.last_snapshot_time > 0.3):
+                        try:
+                            await _dispatcher.send_command({"type": "system.snapshot"}, timeout_s=0.8)
+                        except Exception as poll_err:
+                            logger.debug(f"Telemetry poll error: {poll_err}")
         except Exception as e:
             logger.warning(f"Bridge supervisor error: {e}")
-        await asyncio.sleep(3.0)
+        await asyncio.sleep(0.35)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):

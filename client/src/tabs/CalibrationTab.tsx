@@ -225,13 +225,32 @@ export const CalibrationTab: React.FC = () => {
 
         {/* Commanded Coordinates */}
         <div style={{ background: 'var(--bg-surface-elevated)', border: '1px solid var(--border-subtle)', borderRadius: '6px', padding: '14px', marginBottom: '16px' }}>
-          <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '4px' }}>Current Position (Open-Loop Steps)</div>
-          <div className="mono" style={{ fontSize: '20px', fontWeight: 600 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+            <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Axis Position Coordinates</span>
+            <span style={{
+              fontSize: '11px',
+              fontWeight: 700,
+              padding: '2px 8px',
+              borderRadius: '3px',
+              background: (homed.x && homed.y && snapshot?.pos_valid) ? 'rgba(47, 158, 68, 0.2)' : 'rgba(240, 140, 0, 0.2)',
+              color: (homed.x && homed.y && snapshot?.pos_valid) ? 'var(--accent-ready)' : '#FFD43B',
+              border: `1px solid ${(homed.x && homed.y && snapshot?.pos_valid) ? 'var(--accent-ready)' : 'rgba(240, 140, 0, 0.4)'}`
+            }}>
+              {(homed.x && homed.y && snapshot?.pos_valid) ? '● ORIGIN HOMED & CALIBRATED' : '○ UNHOMED (OPEN-LOOP BASELINE)'}
+            </span>
+          </div>
+          <div className="mono" style={{ fontSize: '20px', fontWeight: 600, margin: '6px 0' }}>
             X: {pos.x} steps ({(pos.x / stepsPerMm).toFixed(2)} mm) | Y: {pos.y} steps ({(pos.y / stepsPerMm).toFixed(2)} mm)
           </div>
-          <div style={{ fontSize: '11px', color: snapshot?.pos_valid ? 'var(--accent-ready)' : 'var(--accent-warning)', marginTop: '4px' }}>
-            {snapshot?.pos_valid ? '● Position Calibrated & Valid' : '○ Unhomed / Open-Loop (Homing Recommended)'}
-          </div>
+          {(!homed.x || !homed.y || !snapshot?.pos_valid) ? (
+            <div style={{ fontSize: '11px', color: '#FFD43B', background: 'rgba(240, 140, 0, 0.1)', padding: '6px 8px', borderRadius: '4px', border: '1px dashed rgba(240, 140, 0, 0.3)' }}>
+              ⚠️ Coordinates (0, 0) are an arbitrary open-loop startup reference. Motors are <strong>UNHOMED</strong>. Run <strong>HOME ALL AXES</strong> to locate physical optical endstops.
+            </div>
+          ) : (
+            <div style={{ fontSize: '11px', color: 'var(--accent-ready)' }}>
+              ✓ Physical optical endstop origin verified. Absolute coordinate boundary limits enforced.
+            </div>
+          )}
         </div>
 
         {/* Microstep Increment Selection */}
