@@ -51,4 +51,7 @@ private:
   char m_currentOpId[32];
   uint32_t m_opCounter;
   bool m_opRunning;
+  uint32_t m_lastSnapshotMs;
+  bool m_lastSensorX;
+  bool m_lastSensorY;
 };

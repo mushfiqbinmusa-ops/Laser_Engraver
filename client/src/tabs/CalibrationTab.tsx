@@ -83,25 +83,55 @@ export const CalibrationTab: React.FC = () => {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '20px' }}>
             {/* Sensor X */}
             <div style={{ background: 'var(--bg-surface-elevated)', border: '1px solid var(--border-subtle)', borderRadius: '6px', padding: '16px' }}>
-              <div style={{ fontSize: '13px', fontWeight: 600, marginBottom: '8px' }}>Sensor X (GPIO 13)</div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                <span style={{ fontSize: '13px', fontWeight: 600 }}>Sensor X (GPIO 13)</span>
+                <span style={{
+                  fontSize: '10px',
+                  fontWeight: 700,
+                  padding: '2px 6px',
+                  borderRadius: '3px',
+                  background: sx?.x_filtered ? 'rgba(224, 49, 49, 0.2)' : 'rgba(47, 158, 68, 0.15)',
+                  color: sx?.x_filtered ? 'var(--accent-estop)' : 'var(--accent-ready)',
+                  border: `1px solid ${sx?.x_filtered ? 'var(--accent-estop)' : 'var(--accent-ready)'}`
+                }}>
+                  {sx ? (sx.x_filtered ? 'TRIPPED (0V)' : 'BEAM OPEN (3.3V)') : '—'}
+                </span>
+              </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '12px' }}>
-                <div>Raw Electrical: <span className="mono">{sx ? (sx.x_raw ? 'HIGH (3.3V)' : 'LOW (0V)') : '—'}</span></div>
-                <div>Debounced State: <span className="mono" style={{ fontWeight: 600, color: sx?.x_filtered ? 'var(--accent-warning)' : 'var(--accent-ready)' }}>
-                  {sx ? (sx.x_filtered ? 'BLOCKED / DETECTED' : 'BEAM CLEAR') : '—'}
+                <div>Raw Electrical: <span className="mono">{sx ? (sx.x_raw ? 'HIGH / 3.3V (Unblocked)' : 'LOW / 0V (Obstructed)') : '—'}</span></div>
+                <div>Debounced State: <span className="mono" style={{ fontWeight: 600, color: sx?.x_filtered ? 'var(--accent-estop)' : 'var(--accent-ready)' }}>
+                  {sx ? (sx.x_filtered ? 'BLOCKED / DETECTED (Flag in slot)' : 'CLEAR (Beam unbroken)') : '—'}
                 </span></div>
-                <div>Axis Home Status: <span className="mono">{homed.x ? 'HOMED ✓' : 'UNHOMED ✗'}</span></div>
+                <div>Axis Home Status: <span className="mono" style={{ fontWeight: 600, color: homed.x ? 'var(--accent-ready)' : 'var(--text-muted)' }}>
+                  {homed.x ? 'HOMED ✓ (Origin Calibrated)' : 'UNHOMED ✗ (Needs Homing)'}
+                </span></div>
               </div>
             </div>
 
             {/* Sensor Y */}
             <div style={{ background: 'var(--bg-surface-elevated)', border: '1px solid var(--border-subtle)', borderRadius: '6px', padding: '16px' }}>
-              <div style={{ fontSize: '13px', fontWeight: 600, marginBottom: '8px' }}>Sensor Y (GPIO 8)</div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                <span style={{ fontSize: '13px', fontWeight: 600 }}>Sensor Y (GPIO 8)</span>
+                <span style={{
+                  fontSize: '10px',
+                  fontWeight: 700,
+                  padding: '2px 6px',
+                  borderRadius: '3px',
+                  background: sx?.y_filtered ? 'rgba(224, 49, 49, 0.2)' : 'rgba(47, 158, 68, 0.15)',
+                  color: sx?.y_filtered ? 'var(--accent-estop)' : 'var(--accent-ready)',
+                  border: `1px solid ${sx?.y_filtered ? 'var(--accent-estop)' : 'var(--accent-ready)'}`
+                }}>
+                  {sx ? (sx.y_filtered ? 'TRIPPED (0V)' : 'BEAM OPEN (3.3V)') : '—'}
+                </span>
+              </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '12px' }}>
-                <div>Raw Electrical: <span className="mono">{sx ? (sx.y_raw ? 'HIGH (3.3V)' : 'LOW (0V)') : '—'}</span></div>
-                <div>Debounced State: <span className="mono" style={{ fontWeight: 600, color: sx?.y_filtered ? 'var(--accent-warning)' : 'var(--accent-ready)' }}>
-                  {sx ? (sx.y_filtered ? 'BLOCKED / DETECTED' : 'BEAM CLEAR') : '—'}
+                <div>Raw Electrical: <span className="mono">{sx ? (sx.y_raw ? 'HIGH / 3.3V (Unblocked)' : 'LOW / 0V (Obstructed)') : '—'}</span></div>
+                <div>Debounced State: <span className="mono" style={{ fontWeight: 600, color: sx?.y_filtered ? 'var(--accent-estop)' : 'var(--accent-ready)' }}>
+                  {sx ? (sx.y_filtered ? 'BLOCKED / DETECTED (Flag in slot)' : 'CLEAR (Beam unbroken)') : '—'}
                 </span></div>
-                <div>Axis Home Status: <span className="mono">{homed.y ? 'HOMED ✓' : 'UNHOMED ✗'}</span></div>
+                <div>Axis Home Status: <span className="mono" style={{ fontWeight: 600, color: homed.y ? 'var(--accent-ready)' : 'var(--text-muted)' }}>
+                  {homed.y ? 'HOMED ✓ (Origin Calibrated)' : 'UNHOMED ✗ (Needs Homing)'}
+                </span></div>
               </div>
             </div>
           </div>

@@ -88,7 +88,8 @@ export const MachineProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
     connectWs();
     refreshStatus();
-    const pollInterval = window.setInterval(refreshStatus, 4000);
+    // Fast 500ms fallback poll guarantees live telemetry updates even when WS is quiet
+    const pollInterval = window.setInterval(refreshStatus, 500);
 
     return () => {
       isMounted = false;

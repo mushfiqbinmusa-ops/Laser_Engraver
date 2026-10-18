@@ -19,7 +19,10 @@ ProtocolDispatcher::ProtocolDispatcher(MachineStateManager& state,
     m_microstepFn(nullptr),
     m_microstepMode(16),
     m_opCounter(0),
-    m_opRunning(false) {
+    m_opRunning(false),
+    m_lastSnapshotMs(0),
+    m_lastSensorX(false),
+    m_lastSensorY(false) {
   m_currentOpId[0] = '\0';
 }
 
@@ -322,12 +325,14 @@ void ProtocolDispatcher::update(uint32_t nowUs, uint32_t nowMs) {
           sendOperationCompleted(m_currentOpId, "success");
           m_opRunning = false;
         }
+        emitSnapshot(); // Immediately emit snapshot updating homed status!
       } else {
         m_state.setFault(errorCodeToString(m_homing.getResult()));
         if (m_opRunning) {
           sendOperationCompleted(m_currentOpId, "failed");
           m_opRunning = false;
         }
+        emitSnapshot();
       }
     }
   } else if (m_planner.isMoving()) {
@@ -335,7 +340,23 @@ void ProtocolDispatcher::update(uint32_t nowUs, uint32_t nowMs) {
     if (!ongoing) {
       if (m_state.getState() == MachineStateEnum::Moving) {
         m_state.setState(m_state.isPositionValid() ? MachineStateEnum::IdleHomed : MachineStateEnum::IdleUnhomed);
+        emitSnapshot(); // Emit position snapshot immediately when motion completes!
       }
     }
+  }
+
+  // Live dynamic telemetry:
+  // 1. Instantly emit snapshot whenever optical sensor state changes
+  bool currentSx = m_sensors.isDetectedX();
+  bool currentSy = m_sensors.isDetectedY();
+  if (currentSx != m_lastSensorX || currentSy != m_lastSensorY) {
+    m_lastSensorX = currentSx;
+    m_lastSensorY = currentSy;
+    m_lastSnapshotMs = nowMs;
+    emitSnapshot();
+  } else if ((nowMs - m_lastSnapshotMs) >= 250) {
+    // 2. Periodic heartbeat snapshot (every 250ms) for high-frequency live UI updates
+    m_lastSnapshotMs = nowMs;
+    emitSnapshot();
   }
 }
