@@ -29,6 +29,46 @@ _supervisor_task: Optional[asyncio.Task] = None
 def get_dispatcher() -> Optional[ControllerDispatcher]:
     return _dispatcher
 
+def get_bridge() -> Optional[ControllerBridge]:
+    return _bridge
+
+async def reconfigure_bridge(
+    transport: str,
+    host: str,
+    port: int,
+    serial_port: str,
+    baudrate: int
+) -> bool:
+    global _bridge, _dispatcher
+    settings.transport = transport
+    settings.esp32_host = host
+    settings.esp32_port = port
+    settings.serial_port = serial_port
+    settings.baudrate = baudrate
+
+    if _bridge:
+        await _bridge.disconnect()
+
+    if transport == "serial":
+        _bridge = SerialControllerBridge(serial_port, baudrate)
+    else:
+        _bridge = TcpControllerBridge(host, port)
+
+    if _dispatcher:
+        _dispatcher.set_bridge(_bridge)
+    else:
+        _dispatcher = ControllerDispatcher(_bridge)
+        _dispatcher.add_event_listener(ws_manager.broadcast)
+
+    connected = await _bridge.connect()
+    if connected and _dispatcher:
+        try:
+            await _dispatcher.send_command({"type": "system.snapshot"}, timeout_s=2.0)
+        except Exception:
+            pass
+    return connected
+
+
 async def _bridge_supervisor():
     while True:
         try:

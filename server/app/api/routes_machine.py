@@ -1,4 +1,6 @@
 import logging
+from typing import Optional
+from pydantic import BaseModel
 from fastapi import APIRouter, HTTPException, Depends
 from app.models.protocol_models import (
     AckResponse, SystemSnapshot, MotionJogRequest, MotionMoveAbsRequest,
@@ -15,6 +17,13 @@ def get_disp():
         raise HTTPException(status_code=503, detail="Controller dispatcher not initialized")
     return d
 
+class ConnectionConfigRequest(BaseModel):
+    transport: Optional[str] = "tcp"
+    host: Optional[str] = "192.168.4.1"
+    port: Optional[int] = 8888
+    serial_port: Optional[str] = "/dev/ttyACM0"
+    baudrate: Optional[int] = 115200
+
 @router.get("/status")
 async def get_status(dispatcher=Depends(get_disp)):
     return {
@@ -22,6 +31,37 @@ async def get_status(dispatcher=Depends(get_disp)):
         "fresh": dispatcher.is_fresh(),
         "snapshot": dispatcher.latest_snapshot.model_dump() if dispatcher.latest_snapshot else None,
         "last_seen_epoch": dispatcher.last_snapshot_time
+    }
+
+@router.get("/connection")
+async def get_connection_info(dispatcher=Depends(get_disp)):
+    from app.core.config import settings
+    return {
+        "transport": settings.transport,
+        "host": settings.esp32_host,
+        "port": settings.esp32_port,
+        "serial_port": settings.serial_port,
+        "baudrate": settings.baudrate,
+        "connected": dispatcher.bridge.is_connected() if dispatcher and dispatcher.bridge else False
+    }
+
+@router.post("/connect")
+async def connect_controller(req: ConnectionConfigRequest):
+    from app.main import reconfigure_bridge
+    from app.core.config import settings
+    success = await reconfigure_bridge(
+        transport=req.transport or settings.transport,
+        host=req.host or settings.esp32_host,
+        port=req.port or settings.esp32_port,
+        serial_port=req.serial_port or settings.serial_port,
+        baudrate=req.baudrate or settings.baudrate
+    )
+    return {
+        "success": success,
+        "transport": req.transport or settings.transport,
+        "host": req.host or settings.esp32_host,
+        "port": req.port or settings.esp32_port,
+        "connected": success
     }
 
 @router.post("/ping")

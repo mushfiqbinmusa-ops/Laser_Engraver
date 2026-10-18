@@ -4,6 +4,22 @@ import { Preset, MachineConfig } from '../types/jobs';
 export const SettingsTab: React.FC = () => {
   const [config, setConfig] = useState<MachineConfig | null>(null);
   const [presets, setPresets] = useState<Preset[]>([]);
+  const [connInfo, setConnInfo] = useState<{
+    transport: string;
+    host: string;
+    port: number;
+    serial_port: string;
+    baudrate: number;
+    connected: boolean;
+  }>({
+    transport: 'tcp',
+    host: '192.168.4.1',
+    port: 8888,
+    serial_port: '/dev/ttyACM0',
+    baudrate: 115200,
+    connected: false
+  });
+  const [connecting, setConnecting] = useState(false);
   const [newPresetName, setNewPresetName] = useState<string>('');
   const [newPowerPct, setNewPowerPct] = useState<number>(20);
   const [newSpeedSps, setNewSpeedSps] = useState<number>(100);
@@ -16,6 +32,9 @@ export const SettingsTab: React.FC = () => {
 
       const pRes = await fetch('/api/presets');
       if (pRes.ok) setPresets(await pRes.json());
+
+      const connRes = await fetch('/api/machine/connection');
+      if (connRes.ok) setConnInfo(await connRes.json());
     } catch (e: any) {
       setMsg({ text: e.message, isError: true });
     }
@@ -78,11 +97,133 @@ export const SettingsTab: React.FC = () => {
     }
   };
 
+  const handleConnectController = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setConnecting(true);
+    try {
+      const res = await fetch('/api/machine/connect', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(connInfo)
+      });
+      const data = await res.json();
+      setConnInfo((prev) => ({ ...prev, connected: data.connected }));
+      setMsg({
+        text: data.connected
+          ? `Connected to ESP32 at ${data.host}:${data.port}`
+          : `Failed to connect to ${data.host}:${data.port}. Make sure ESP32 is powered and reachable.`,
+        isError: !data.connected
+      });
+    } catch (err: any) {
+      setMsg({ text: err.message, isError: true });
+    } finally {
+      setConnecting(false);
+    }
+  };
+
   return (
     <div style={{ padding: '24px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
-      {/* Machine Hardware Configuration */}
-      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: '6px', padding: '20px' }}>
-        <h2 style={{ fontSize: '15px', fontWeight: 600, marginBottom: '16px' }}>Machine & Calibration Limits</h2>
+      {/* Left Column: Connection & Machine Hardware Configuration */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+        {/* Controller Wi-Fi / Serial Connection */}
+        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: '6px', padding: '20px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+            <h2 style={{ fontSize: '15px', fontWeight: 600 }}>Controller Connection</h2>
+            <span style={{
+              fontSize: '11px',
+              padding: '2px 8px',
+              borderRadius: '12px',
+              fontWeight: 600,
+              background: connInfo.connected ? 'rgba(47, 158, 68, 0.2)' : 'rgba(240, 140, 0, 0.2)',
+              color: connInfo.connected ? '#B2F2BB' : '#FFD43B'
+            }}>
+              {connInfo.connected ? '● CONNECTED' : '○ DISCONNECTED'}
+            </span>
+          </div>
+
+          <form onSubmit={handleConnectController} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div>
+              <label htmlFor="conn-transport" style={{ display: 'block', fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '4px' }}>
+                Transport Type
+              </label>
+              <select
+                id="conn-transport"
+                value={connInfo.transport}
+                onChange={(e) => setConnInfo({ ...connInfo, transport: e.target.value })}
+                style={{ width: '100%', padding: '6px 8px', background: 'var(--bg-surface-elevated)', color: 'inherit', border: '1px solid var(--border-subtle)', borderRadius: '4px' }}
+              >
+                <option value="tcp">Wi-Fi Network (TCP Socket)</option>
+                <option value="serial">USB Serial Cable</option>
+              </select>
+            </div>
+
+            {connInfo.transport === 'tcp' ? (
+              <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '12px' }}>
+                <div>
+                  <label htmlFor="conn-host" style={{ display: 'block', fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '4px' }}>
+                    ESP32 IP Address
+                  </label>
+                  <input
+                    id="conn-host"
+                    type="text"
+                    placeholder="192.168.4.1"
+                    value={connInfo.host}
+                    onChange={(e) => setConnInfo({ ...connInfo, host: e.target.value })}
+                    style={{ width: '100%' }}
+                  />
+                </div>
+                <div>
+                  <label htmlFor="conn-port" style={{ display: 'block', fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '4px' }}>
+                    Port
+                  </label>
+                  <input
+                    id="conn-port"
+                    type="number"
+                    value={connInfo.port}
+                    onChange={(e) => setConnInfo({ ...connInfo, port: Number(e.target.value) })}
+                    style={{ width: '100%' }}
+                  />
+                </div>
+              </div>
+            ) : (
+              <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '12px' }}>
+                <div>
+                  <label htmlFor="conn-serial" style={{ display: 'block', fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '4px' }}>
+                    Serial Device
+                  </label>
+                  <input
+                    id="conn-serial"
+                    type="text"
+                    placeholder="/dev/ttyACM0"
+                    value={connInfo.serial_port}
+                    onChange={(e) => setConnInfo({ ...connInfo, serial_port: e.target.value })}
+                    style={{ width: '100%' }}
+                  />
+                </div>
+                <div>
+                  <label htmlFor="conn-baud" style={{ display: 'block', fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '4px' }}>
+                    Baudrate
+                  </label>
+                  <input
+                    id="conn-baud"
+                    type="number"
+                    value={connInfo.baudrate}
+                    onChange={(e) => setConnInfo({ ...connInfo, baudrate: Number(e.target.value) })}
+                    style={{ width: '100%' }}
+                  />
+                </div>
+              </div>
+            )}
+
+            <button type="submit" disabled={connecting} style={{ padding: '8px 12px', fontWeight: 600 }}>
+              {connecting ? 'Connecting...' : connInfo.connected ? 'Reconnect Controller' : 'Connect to Controller'}
+            </button>
+          </form>
+        </div>
+
+        {/* Machine Hardware Configuration */}
+        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: '6px', padding: '20px' }}>
+          <h2 style={{ fontSize: '15px', fontWeight: 600, marginBottom: '16px' }}>Machine & Calibration Limits</h2>
         {config ? (
           <form onSubmit={handleSaveConfig} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
@@ -179,6 +320,7 @@ export const SettingsTab: React.FC = () => {
           <div>Loading machine config...</div>
         )}
       </div>
+    </div>
 
       {/* Preset Management */}
       <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: '6px', padding: '20px' }}>

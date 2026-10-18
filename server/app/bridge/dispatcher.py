@@ -23,6 +23,10 @@ class ControllerDispatcher:
         self.last_snapshot_time: float = 0.0
         self.freshness_threshold_s: float = 2.0
 
+    def set_bridge(self, bridge: ControllerBridge) -> None:
+        self.bridge = bridge
+        self.bridge.set_line_handler(self._handle_incoming_line)
+
     def add_event_listener(self, listener: Callable[[dict[str, Any]], Awaitable[None]]) -> None:
         self._event_listeners.append(listener)
 

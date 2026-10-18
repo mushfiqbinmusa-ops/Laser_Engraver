@@ -5,6 +5,7 @@
 
 #include "config/pin_mapping.h"
 #include "config/machine_limits.h"
+#include "config/wifi_config.h"
 #include "transport/line_reader.h"
 #include "protocol/protocol_parser.h"
 #include "protocol/protocol_dispatcher.h"
@@ -105,9 +106,42 @@ void setup() {
   // 4. Start Serial
   Serial.begin(SERIAL_BAUD);
 
-  // 5. Start TCP Server (Wi-Fi in non-blocking mode or softAP if configured)
-  s_tcpServer.begin();
+  // 5. Initialize Wi-Fi (Station Mode with SoftAP Fallback)
+  WiFi.mode(WIFI_AP_STA);
+  bool connected = false;
+
+  // Check if custom credentials were provided
+  if (strlen(WIFI_SSID) > 0 && strcmp(WIFI_SSID, "YOUR_WIFI_SSID") != 0) {
+    Serial.printf("\n[Wi-Fi] Connecting to '%s'...\n", WIFI_SSID);
+    WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+    uint32_t startAttemptTime = millis();
+    while (WiFi.status() != WL_CONNECTED && (millis() - startAttemptTime) < 10000) {
+      delay(250);
+      Serial.print(".");
+    }
+    if (WiFi.status() == WL_CONNECTED) {
+      connected = true;
+      Serial.println("\n[Wi-Fi] Connected successfully!");
+      Serial.print("[Wi-Fi] IP Address: ");
+      Serial.println(WiFi.localIP());
+    } else {
+      Serial.println("\n[Wi-Fi] Station connection timed out.");
+    }
+  }
+
+  // If station is not connected, bring up SoftAP
+  if (!connected) {
+    WiFi.softAP(WIFI_AP_SSID, WIFI_AP_PASS);
+    Serial.println("[Wi-Fi] SoftAP Access Point started.");
+    Serial.printf("[Wi-Fi] Connect your PC to SSID: %s (Password: %s)\n", WIFI_AP_SSID, WIFI_AP_PASS);
+    Serial.print("[Wi-Fi] ESP32 AP IP Address: ");
+    Serial.println(WiFi.softAPIP());
+  }
+
+  // 6. Start TCP Machine Control Socket
+  s_tcpServer.begin(WIFI_TCP_PORT);
   s_tcpServer.setNoDelay(true);
+  Serial.printf("[TCP] Machine control socket listening on port %d\n", WIFI_TCP_PORT);
 
   // Ready!
   s_machineState.setState(MachineStateEnum::IdleUnhomed);

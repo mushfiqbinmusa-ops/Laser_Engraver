@@ -103,3 +103,11 @@ async def test_api_endpoints(setup_environment):
         assert resp_prev.status_code == 200
         assert resp_prev.headers["content-type"] == "image/png"
         assert resp_prev.content[:4] == b"\x89PNG"
+
+        # 5. Connection inspection
+        resp_conn = await client.get("/api/machine/connection")
+        assert resp_conn.status_code == 200
+        conn_data = resp_conn.json()
+        assert "transport" in conn_data
+        assert "host" in conn_data
+        assert "port" in conn_data
