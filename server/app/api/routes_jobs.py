@@ -20,7 +20,9 @@ router = APIRouter(prefix="/api/jobs", tags=["jobs"])
 
 # Background execution state
 _active_streaming_task: Optional[asyncio.Task] = None
+_active_job_id: Optional[str] = None
 _abort_streaming: bool = False
+_job_lock = asyncio.Lock()
 
 def get_disp():
     from app.main import get_dispatcher
@@ -43,7 +45,7 @@ def _get_config(conn) -> MachineConfigModel:
     return MachineConfigModel.model_validate(dict(row))
 
 @router.get("", response_model=List[JobResponse])
-async def list_jobs():
+def list_jobs():
     with get_db() as conn:
         cursor = conn.execute("""
             SELECT id, name, source_filename, source_hash, status, total_segments, completed_segments, 
@@ -73,6 +75,7 @@ async def upload_svg(
 
     job_id = f"job-{uuid.uuid4().hex[:8]}"
     source_hash = hashlib.sha256(content_bytes).hexdigest()
+    safe_filename = svg_file.filename or "artwork.svg"
 
     with get_db() as conn:
         config = _get_config(conn)
@@ -86,7 +89,7 @@ async def upload_svg(
                 "laser_duty": duty
             })
 
-        plan = JobPlanner.build_plan(job_id, svg_file.filename, contours, preset, config)
+        plan = JobPlanner.build_plan(job_id, safe_filename, contours, preset, config)
         preview_bytes = render_preview_png(
             contours,
             work_w_mm=config.work_area_width_mm,
@@ -98,7 +101,7 @@ async def upload_svg(
                              machine_config_snapshot_json, plan_json, preview_png, total_segments)
             VALUES (?, ?, ?, ?, 'prepared', ?, ?, ?, ?, ?);
         """, (
-            job_id, svg_file.filename, svg_file.filename, source_hash,
+            job_id, safe_filename, safe_filename, source_hash,
             preset.model_dump_json(), config.model_dump_json(),
             plan.model_dump_json(), preview_bytes, plan.total_segments
         ))
@@ -169,7 +172,7 @@ async def create_parametric_shape(req: ParametricShapeCreate):
         return JobResponse.model_validate(dict(row))
 
 @router.get("/{job_id}/preview")
-async def get_preview(job_id: str):
+def get_preview(job_id: str):
     with get_db() as conn:
         cursor = conn.execute("SELECT preview_png FROM jobs WHERE id = ?;", (job_id,))
         row = cursor.fetchone()
@@ -179,34 +182,36 @@ async def get_preview(job_id: str):
 
 @router.post("/{job_id}/start")
 async def start_job(job_id: str, dispatcher=Depends(get_disp)):
-    global _active_streaming_task, _abort_streaming
+    global _active_streaming_task, _abort_streaming, _active_job_id
 
-    if _active_streaming_task and not _active_streaming_task.done():
-        raise HTTPException(status_code=400, detail="A job is already executing")
+    async with _job_lock:
+        if _active_streaming_task and not _active_streaming_task.done():
+            raise HTTPException(status_code=400, detail="A job is already executing")
 
-    # Readiness Gate check
-    if not dispatcher.bridge.is_connected():
-        raise HTTPException(status_code=400, detail="Controller is not connected")
-    if not dispatcher.is_fresh():
-        raise HTTPException(status_code=400, detail="Controller telemetry is stale")
-    if not dispatcher.latest_snapshot:
-        raise HTTPException(status_code=400, detail="No snapshot received from controller")
-    
-    snap = dispatcher.latest_snapshot
-    if not (snap.homed.get("x") and snap.homed.get("y")):
-        raise HTTPException(status_code=400, detail="Cannot start: Both X and Y axes must be homed")
-    if snap.fault:
-        raise HTTPException(status_code=400, detail=f"Cannot start: Machine in fault state ({snap.fault})")
+        # Readiness Gate check
+        if not dispatcher.bridge.is_connected():
+            raise HTTPException(status_code=400, detail="Controller is not connected")
+        if not dispatcher.is_fresh():
+            raise HTTPException(status_code=400, detail="Controller telemetry is stale")
+        if not dispatcher.latest_snapshot:
+            raise HTTPException(status_code=400, detail="No snapshot received from controller")
+        
+        snap = dispatcher.latest_snapshot
+        if not (snap.homed.get("x") and snap.homed.get("y")):
+            raise HTTPException(status_code=400, detail="Cannot start: Both X and Y axes must be homed")
+        if snap.fault:
+            raise HTTPException(status_code=400, detail=f"Cannot start: Machine in fault state ({snap.fault})")
 
-    with get_db() as conn:
-        cursor = conn.execute("SELECT plan_json FROM jobs WHERE id = ?;", (job_id,))
-        row = cursor.fetchone()
-        if not row:
-            raise HTTPException(status_code=404, detail="Job not found")
-        plan_dict = json.loads(row["plan_json"])
-        plan = PreparedJobPlan.model_validate(plan_dict)
+        with get_db() as conn:
+            cursor = conn.execute("SELECT plan_json FROM jobs WHERE id = ?;", (job_id,))
+            row = cursor.fetchone()
+            if not row:
+                raise HTTPException(status_code=404, detail="Job not found")
+            plan_dict = json.loads(row["plan_json"])
+            plan = PreparedJobPlan.model_validate(plan_dict)
 
-    _abort_streaming = False
+        _abort_streaming = False
+        _active_job_id = job_id
 
     async def _stream_job_worker():
         global _abort_streaming
@@ -284,15 +289,21 @@ async def start_job(job_id: str, dispatcher=Depends(get_disp)):
                 conn.execute("UPDATE jobs SET status = 'failed' WHERE id = ?;", (job_id,))
                 conn.execute("INSERT INTO job_events (job_id, event_type, details_json) VALUES (?, 'FAILED', ?);",
                              (job_id, json.dumps({"error": str(e)})))
+        finally:
+            _active_job_id = None
 
     _active_streaming_task = asyncio.create_task(_stream_job_worker())
     return {"ok": True, "job_id": job_id, "status": "started"}
 
 @router.post("/{job_id}/cancel")
 async def cancel_job(job_id: str, dispatcher=Depends(get_disp)):
-    global _abort_streaming, _active_streaming_task
-    _abort_streaming = True
-    if _active_streaming_task:
-        _active_streaming_task.cancel()
-    await dispatcher.send_command({"type": "system.stop"})
-    return {"ok": True, "job_id": job_id, "status": "canceled"}
+    global _abort_streaming, _active_streaming_task, _active_job_id
+    async with _job_lock:
+        if _active_job_id and _active_job_id != job_id:
+            raise HTTPException(status_code=400, detail=f"Job {job_id} is not currently running")
+        _abort_streaming = True
+        if _active_streaming_task:
+            _active_streaming_task.cancel()
+        _active_job_id = None
+        await dispatcher.send_command({"type": "system.stop"})
+        return {"ok": True, "job_id": job_id, "status": "canceled"}

@@ -4,7 +4,8 @@ LaserController::LaserController()
   : m_pwmWrite(nullptr),
     m_currentDuty(0),
     m_lastRefreshMs(0),
-    m_pulseEndMs(0),
+    m_pulseStartMs(0),
+    m_pulseDurationMs(0),
     m_pulseActive(false),
     m_wasClamped(false) {}
 
@@ -44,15 +45,16 @@ bool LaserController::pulse(uint16_t duty, uint32_t durationMs, uint32_t nowMs) 
   }
   setDuty(duty, nowMs);
   m_pulseActive = true;
-  m_pulseEndMs = nowMs + durationMs;
+  m_pulseStartMs = nowMs;
+  m_pulseDurationMs = durationMs;
   return true;
 }
 
 void LaserController::checkWatchdog(uint32_t nowMs) {
   if (m_currentDuty == 0) return;
 
-  // Check pulse expiration
-  if (m_pulseActive && nowMs >= m_pulseEndMs) {
+  // Check pulse expiration (rollover-safe subtraction)
+  if (m_pulseActive && ((nowMs - m_pulseStartMs) >= m_pulseDurationMs)) {
     forceOff();
     return;
   }

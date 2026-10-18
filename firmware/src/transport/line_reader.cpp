@@ -18,10 +18,9 @@ bool LineReader::feedByte(char c) {
 
   if (c == '\n') {
     if (m_overflow) {
-      // Overlong frame boundary reached.
+      // Overlong frame boundary reached. Keep m_overflow true so caller inspects hasOverflow()
       m_buffer[0] = '\0';
       m_length = 0;
-      m_overflow = false;
       return true; // Signal caller that an overlong command ended
     }
     m_buffer[m_length] = '\0';
@@ -47,5 +46,6 @@ bool LineReader::feedByte(char c) {
 
 void LineReader::clearLine() {
   m_length = 0;
+  m_overflow = false;
   m_buffer[0] = '\0';
 }

@@ -105,9 +105,15 @@ class SvgParser:
             if token.isalpha():
                 cmd = token
                 i += 1
+                if cmd in ("Z", "z"):
+                    if current_contour:
+                        current_contour.append((start_x, start_y))
+                    cx, cy = start_x, start_y
                 continue
 
             if cmd in ("M", "m"):
+                if i + 1 >= len(tokens):
+                    break
                 if current_contour:
                     contours.append(current_contour)
                     current_contour = []
@@ -125,6 +131,8 @@ class SvgParser:
                 cmd = "L" if cmd == "M" else "l"
 
             elif cmd in ("L", "l"):
+                if i + 1 >= len(tokens):
+                    break
                 x = float(token) * UNIT_TO_MM[""]
                 y = float(tokens[i+1]) * UNIT_TO_MM[""]
                 i += 2
@@ -149,12 +157,13 @@ class SvgParser:
                 current_contour.append((cx, cy))
 
             elif cmd in ("Z", "z"):
-                current_contour.append((start_x, start_y))
+                if current_contour:
+                    current_contour.append((start_x, start_y))
                 cx, cy = start_x, start_y
-                # If command is Z without following coordinates, continue
+                i += 1
 
             else:
-                # Unsupported path command (e.g. Bezier curves); skip token
+                # Unsupported path command; advance
                 i += 1
 
         if current_contour:

@@ -125,9 +125,10 @@ void loop() {
         ack.v = 1;
         ack.accepted = false;
         ack.code = ErrorCode::CommandTooLong;
-        char buf[128];
-        ProtocolParser::serializeAck(ack, buf, sizeof(buf));
-        sendOutput(buf);
+        char buf[MAX_FRAME_SIZE] = {0};
+        if (ProtocolParser::serializeAck(ack, buf, sizeof(buf)) > 0) {
+          sendOutput(buf);
+        }
       } else {
         CommandRequest req;
         ErrorCode err = ProtocolParser::parseLine(s_serialLineReader.getLine(), s_serialLineReader.getLength(), req);
@@ -138,9 +139,10 @@ void loop() {
           ack.v = 1;
           ack.accepted = false;
           ack.code = err;
-          char buf[128];
-          ProtocolParser::serializeAck(ack, buf, sizeof(buf));
-          sendOutput(buf);
+          char buf[MAX_FRAME_SIZE] = {0};
+          if (ProtocolParser::serializeAck(ack, buf, sizeof(buf)) > 0) {
+            sendOutput(buf);
+          }
         }
       }
       s_serialLineReader.clearLine();
@@ -164,9 +166,10 @@ void loop() {
           ack.v = 1;
           ack.accepted = false;
           ack.code = ErrorCode::CommandTooLong;
-          char buf[128];
-          ProtocolParser::serializeAck(ack, buf, sizeof(buf));
-          sendOutput(buf);
+          char buf[MAX_FRAME_SIZE] = {0};
+          if (ProtocolParser::serializeAck(ack, buf, sizeof(buf)) > 0) {
+            sendOutput(buf);
+          }
         } else {
           CommandRequest req;
           ErrorCode err = ProtocolParser::parseLine(s_tcpLineReader.getLine(), s_tcpLineReader.getLength(), req);
@@ -177,9 +180,10 @@ void loop() {
             ack.v = 1;
             ack.accepted = false;
             ack.code = err;
-            char buf[128];
-            ProtocolParser::serializeAck(ack, buf, sizeof(buf));
-            sendOutput(buf);
+            char buf[MAX_FRAME_SIZE] = {0};
+            if (ProtocolParser::serializeAck(ack, buf, sizeof(buf)) > 0) {
+              sendOutput(buf);
+            }
           }
         }
         s_tcpLineReader.clearLine();

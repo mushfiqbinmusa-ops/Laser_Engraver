@@ -1,5 +1,6 @@
 import logging
 from pathlib import Path
+from typing import Optional
 import sqlite3
 from app.db.database import get_db
 
@@ -7,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 MIGRATIONS_DIR = Path(__file__).parent / "sql"
 
-def run_migrations(db_path: Path = None) -> int:
+def run_migrations(db_path: Optional[Path] = None) -> int:
     applied_count = 0
     with get_db(db_path) as conn:
         conn.execute("""

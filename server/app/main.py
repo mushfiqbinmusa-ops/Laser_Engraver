@@ -6,6 +6,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
+from typing import Optional
+from app.bridge.base import ControllerBridge
 from app.core.config import settings
 from app.db.migrations import run_migrations
 from app.bridge.tcp_bridge import TcpControllerBridge
@@ -20,11 +22,11 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(na
 logger = logging.getLogger(__name__)
 
 # Global singletons
-_bridge = None
-_dispatcher = None
-_supervisor_task = None
+_bridge: Optional[ControllerBridge] = None
+_dispatcher: Optional[ControllerDispatcher] = None
+_supervisor_task: Optional[asyncio.Task] = None
 
-def get_dispatcher() -> ControllerDispatcher:
+def get_dispatcher() -> Optional[ControllerDispatcher]:
     return _dispatcher
 
 async def _bridge_supervisor():
@@ -70,6 +72,17 @@ async def lifespan(app: FastAPI):
     # Shutdown
     if _supervisor_task:
         _supervisor_task.cancel()
+        try:
+            await _supervisor_task
+        except asyncio.CancelledError:
+            pass
+
+    if _dispatcher and _bridge and _bridge.is_connected():
+        try:
+            await _dispatcher.send_command({"type": "system.stop"}, timeout_s=1.0)
+        except Exception:
+            pass
+
     if _bridge:
         await _bridge.disconnect()
     logger.info("Shutdown complete.")
@@ -83,7 +96,7 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )

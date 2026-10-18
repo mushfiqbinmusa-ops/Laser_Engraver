@@ -29,40 +29,60 @@ async def ping(dispatcher=Depends(get_disp)):
     try:
         ack = await dispatcher.send_command({"type": "system.ping"})
         return ack
-    except Exception as e:
+    except HTTPException:
+        raise
+    except TimeoutError as e:
         raise HTTPException(status_code=504, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/stop")
 async def stop(dispatcher=Depends(get_disp)):
     try:
         ack = await dispatcher.send_command({"type": "system.stop"})
         return ack
-    except Exception as e:
+    except HTTPException:
+        raise
+    except TimeoutError as e:
         raise HTTPException(status_code=504, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/estop")
 async def estop(dispatcher=Depends(get_disp)):
     try:
         ack = await dispatcher.send_command({"type": "system.estop"})
         return ack
-    except Exception as e:
+    except HTTPException:
+        raise
+    except TimeoutError as e:
         raise HTTPException(status_code=504, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/reset-fault")
 async def reset_fault(dispatcher=Depends(get_disp)):
     try:
         ack = await dispatcher.send_command({"type": "system.reset_fault"})
         return ack
-    except Exception as e:
+    except HTTPException:
+        raise
+    except TimeoutError as e:
         raise HTTPException(status_code=504, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/driver")
 async def set_driver(req: DriverSetEnabledRequest, dispatcher=Depends(get_disp)):
     try:
         ack = await dispatcher.send_command(req.model_dump())
         return ack
-    except Exception as e:
+    except HTTPException:
+        raise
+    except TimeoutError as e:
         raise HTTPException(status_code=504, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/home")
 async def home(req: HomeStartRequest, dispatcher=Depends(get_disp)):
@@ -70,8 +90,12 @@ async def home(req: HomeStartRequest, dispatcher=Depends(get_disp)):
         # Start homing and wait for completion
         ack, ev = await dispatcher.send_operation(req.model_dump(), op_timeout_s=30.0)
         return {"ack": ack, "event": ev}
-    except Exception as e:
+    except HTTPException:
+        raise
+    except TimeoutError as e:
         raise HTTPException(status_code=504, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/jog")
 async def jog(req: MotionJogRequest, dispatcher=Depends(get_disp)):
@@ -80,8 +104,12 @@ async def jog(req: MotionJogRequest, dispatcher=Depends(get_disp)):
         if not ack.accepted:
             raise HTTPException(status_code=400, detail=f"Jog rejected: {ack.code}")
         return ack
-    except Exception as e:
+    except HTTPException:
+        raise
+    except TimeoutError as e:
         raise HTTPException(status_code=504, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/move-abs")
 async def move_abs(req: MotionMoveAbsRequest, dispatcher=Depends(get_disp)):
@@ -90,8 +118,12 @@ async def move_abs(req: MotionMoveAbsRequest, dispatcher=Depends(get_disp)):
         if not ack.accepted:
             raise HTTPException(status_code=400, detail=f"Move rejected: {ack.code}")
         return ack
-    except Exception as e:
+    except HTTPException:
+        raise
+    except TimeoutError as e:
         raise HTTPException(status_code=504, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/laser/pulse")
 async def laser_pulse(req: LaserPulseRequest, dispatcher=Depends(get_disp)):
@@ -100,5 +132,9 @@ async def laser_pulse(req: LaserPulseRequest, dispatcher=Depends(get_disp)):
         if not ack.accepted:
             raise HTTPException(status_code=400, detail=f"Laser pulse rejected: {ack.code}")
         return ack
-    except Exception as e:
+    except HTTPException:
+        raise
+    except TimeoutError as e:
         raise HTTPException(status_code=504, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

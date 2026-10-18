@@ -8,9 +8,11 @@ def euclidean_dist(p1: Point, p2: Point) -> float:
 class TspOptimizer:
     @staticmethod
     def optimize_order(contours: List[Contour], start_pos: Point = (0.0, 0.0)) -> List[Contour]:
-        if len(contours) <= 1:
-            return contours
+        valid_contours = [c for c in contours if len(c) > 0]
+        if len(valid_contours) <= 1:
+            return valid_contours
 
+        contours = valid_contours
         unvisited = list(range(len(contours)))
         ordered: List[Contour] = []
         current_pt = start_pos

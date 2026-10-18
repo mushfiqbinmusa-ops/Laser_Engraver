@@ -16,6 +16,7 @@ class ControllerDispatcher:
         self._req_counter = 0
         self._pending_acks: dict[str, asyncio.Future[AckResponse]] = {}
         self._pending_ops: dict[str, asyncio.Future[OperationEvent]] = {}
+        self._completed_ops_cache: dict[str, OperationEvent] = {}
         self._event_listeners: list[Callable[[dict[str, Any]], Awaitable[None]]] = []
         
         self.latest_snapshot: Optional[SystemSnapshot] = None
@@ -43,13 +44,13 @@ class ControllerDispatcher:
         if frame_type == "ack":
             req_id = data.get("id")
             if req_id and req_id in self._pending_acks:
-                fut = self._pending_acks.pop(req_id)
-                if not fut.done():
+                ack_fut = self._pending_acks.pop(req_id)
+                if not ack_fut.done():
                     try:
                         ack = AckResponse.model_validate(data)
-                        fut.set_result(ack)
+                        ack_fut.set_result(ack)
                     except Exception as ex:
-                        fut.set_exception(ex)
+                        ack_fut.set_exception(ex)
 
         # 2. Snapshot
         elif frame_type == "system.snapshot":
@@ -63,14 +64,24 @@ class ControllerDispatcher:
         # 3. Operation Lifecycle Events
         elif frame_type in ("operation.started", "operation.progress", "operation.completed"):
             op_id = data.get("operation_id")
-            if frame_type == "operation.completed" and op_id and op_id in self._pending_ops:
-                fut = self._pending_ops.pop(op_id)
-                if not fut.done():
-                    try:
-                        ev = OperationEvent.model_validate(data)
-                        fut.set_result(ev)
-                    except Exception as ex:
-                        fut.set_exception(ex)
+            if frame_type == "operation.completed" and op_id:
+                try:
+                    ev = OperationEvent.model_validate(data)
+                except Exception as ex:
+                    logger.error(f"Error parsing operation event: {ex}")
+                    ev = None
+
+                if ev:
+                    if op_id in self._pending_ops:
+                        op_fut = self._pending_ops.pop(op_id)
+                        if not op_fut.done():
+                            op_fut.set_result(ev)
+                    else:
+                        # Cache completed event in case send_operation hasn't registered yet
+                        self._completed_ops_cache[op_id] = ev
+                        if len(self._completed_ops_cache) > 50:
+                            oldest_k = next(iter(self._completed_ops_cache))
+                            self._completed_ops_cache.pop(oldest_k, None)
 
         # Broadcast to subscribed listeners (e.g. WebSocket clients)
         for listener in self._event_listeners:
@@ -83,21 +94,20 @@ class ControllerDispatcher:
         async with self._lock:
             self._req_counter += 1
             req_id = f"req-{self._req_counter:04d}"
-            cmd_dict["v"] = 1
-            cmd_dict["id"] = req_id
+            payload = {**cmd_dict, "v": 1, "id": req_id}
 
             loop = asyncio.get_running_loop()
             ack_future: asyncio.Future[AckResponse] = loop.create_future()
             self._pending_acks[req_id] = ack_future
 
-            frame_json = json.dumps(cmd_dict)
+            frame_json = json.dumps(payload)
             try:
                 await self.bridge.send_frame(frame_json)
                 ack = await asyncio.wait_for(ack_future, timeout=timeout_s)
                 return ack
             except asyncio.TimeoutError:
                 self._pending_acks.pop(req_id, None)
-                raise TimeoutError(f"Command {cmd_dict.get('type')} (id={req_id}) timed out after {timeout_s}s")
+                raise TimeoutError(f"Command {payload.get('type')} (id={req_id}) timed out after {timeout_s}s")
             except Exception:
                 self._pending_acks.pop(req_id, None)
                 raise
@@ -109,6 +119,11 @@ class ControllerDispatcher:
             raise RuntimeError(f"Operation rejected by controller: {ack.code}")
 
         op_id = ack.operation_id
+        # Check if operation completed already before future registration
+        if op_id in self._completed_ops_cache:
+            cached_ev = self._completed_ops_cache.pop(op_id)
+            return ack, cached_ev
+
         loop = asyncio.get_running_loop()
         op_future: asyncio.Future[OperationEvent] = loop.create_future()
         self._pending_ops[op_id] = op_future

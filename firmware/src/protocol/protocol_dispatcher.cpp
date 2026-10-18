@@ -182,6 +182,20 @@ void ProtocolDispatcher::dispatch(const CommandRequest& req, uint32_t nowUs, uin
         sendAck(req.id, false, m_state.getState() == MachineStateEnum::Faulted ? ErrorCode::SafetyInterlockTripped : ErrorCode::Busy);
         return;
       }
+      if (m_planner.isMoving()) {
+        sendAck(req.id, false, ErrorCode::Busy);
+        return;
+      }
+      if (m_state.isPositionValid()) {
+        int32_t currentX = m_axisX.getPosition();
+        int32_t currentY = m_axisY.getPosition();
+        int32_t targetX = (req.axis == AxisTarget::X) ? (currentX + req.steps) : currentX;
+        int32_t targetY = (req.axis == AxisTarget::Y) ? (currentY + req.steps) : currentY;
+        if (targetX < 0 || targetX > MAX_TRAVEL_STEPS_X || targetY < 0 || targetY > MAX_TRAVEL_STEPS_Y) {
+          sendAck(req.id, false, ErrorCode::OutOfBounds);
+          return;
+        }
+      }
       int32_t dx = (req.axis == AxisTarget::X) ? req.steps : 0;
       int32_t dy = (req.axis == AxisTarget::Y) ? req.steps : 0;
       m_state.setState(MachineStateEnum::Moving);
@@ -191,8 +205,16 @@ void ProtocolDispatcher::dispatch(const CommandRequest& req, uint32_t nowUs, uin
     }
 
     case CommandType::MotionMoveAbs: {
-      if (!m_state.canMoveAbs()) {
+      if (m_state.getState() == MachineStateEnum::Faulted) {
+        sendAck(req.id, false, ErrorCode::SafetyInterlockTripped);
+        return;
+      }
+      if (!m_state.isPositionValid()) {
         sendAck(req.id, false, ErrorCode::NotHomed);
+        return;
+      }
+      if (m_planner.isMoving() || m_state.getState() == MachineStateEnum::Moving || m_state.getState() == MachineStateEnum::RunningJob) {
+        sendAck(req.id, false, ErrorCode::Busy);
         return;
       }
       int32_t dx = req.targetX - m_axisX.getPosition();
@@ -237,6 +259,18 @@ void ProtocolDispatcher::dispatch(const CommandRequest& req, uint32_t nowUs, uin
       if (m_state.getState() != MachineStateEnum::RunningJob) {
         sendAck(req.id, false, ErrorCode::NotHomed);
         return;
+      }
+      if (m_planner.isMoving()) {
+        sendAck(req.id, false, ErrorCode::Busy);
+        return;
+      }
+      if (m_state.isPositionValid()) {
+        int32_t targetX = m_axisX.getPosition() + req.dx;
+        int32_t targetY = m_axisY.getPosition() + req.dy;
+        if (targetX < 0 || targetX > MAX_TRAVEL_STEPS_X || targetY < 0 || targetY > MAX_TRAVEL_STEPS_Y) {
+          sendAck(req.id, false, ErrorCode::OutOfBounds);
+          return;
+        }
       }
       m_laser.setDuty(req.duty, nowMs);
       m_planner.startMove(req.dx, req.dy, req.speedSps, nowUs);

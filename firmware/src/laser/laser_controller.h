@@ -31,7 +31,8 @@ private:
   PwmWriteFn m_pwmWrite;
   uint16_t m_currentDuty;
   uint32_t m_lastRefreshMs;
-  uint32_t m_pulseEndMs;
+  uint32_t m_pulseStartMs;
+  uint32_t m_pulseDurationMs;
   bool m_pulseActive;
   bool m_wasClamped;
 };

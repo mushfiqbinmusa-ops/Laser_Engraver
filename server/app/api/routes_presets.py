@@ -7,14 +7,14 @@ from app.models.preset_models import PresetModel, PresetCreate, PresetUpdate, Ma
 router = APIRouter(prefix="/api/presets", tags=["presets"])
 
 @router.get("", response_model=List[PresetModel])
-async def list_presets():
+def list_presets():
     with get_db() as conn:
         cursor = conn.execute("SELECT * FROM presets ORDER BY is_builtin DESC, name ASC;")
         rows = cursor.fetchall()
         return [PresetModel.model_validate(dict(r)) for r in rows]
 
 @router.post("", response_model=PresetModel)
-async def create_preset(p: PresetCreate):
+def create_preset(p: PresetCreate):
     preset_id = f"preset-{uuid.uuid4().hex[:8]}"
     # Calculate duty from power pct: duty = round((pct / 90.0) * 3685)
     duty = int(round((p.laser_power_pct / 90.0) * 3685))
@@ -33,7 +33,7 @@ async def create_preset(p: PresetCreate):
         return PresetModel.model_validate(dict(row))
 
 @router.delete("/{preset_id}")
-async def delete_preset(preset_id: str):
+def delete_preset(preset_id: str):
     with get_db() as conn:
         cursor = conn.execute("SELECT is_builtin FROM presets WHERE id = ?;", (preset_id,))
         row = cursor.fetchone()
@@ -47,7 +47,7 @@ async def delete_preset(preset_id: str):
 
 # Machine configuration routes
 @router.get("/config", response_model=MachineConfigModel)
-async def get_machine_config():
+def get_machine_config():
     with get_db() as conn:
         cursor = conn.execute("SELECT * FROM machine_config WHERE id = 'default';")
         row = cursor.fetchone()
@@ -56,7 +56,7 @@ async def get_machine_config():
         return MachineConfigModel.model_validate(dict(row))
 
 @router.put("/config", response_model=MachineConfigModel)
-async def update_machine_config(cfg: MachineConfigModel):
+def update_machine_config(cfg: MachineConfigModel):
     with get_db() as conn:
         conn.execute("""
             UPDATE machine_config SET

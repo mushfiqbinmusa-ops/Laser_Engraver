@@ -3,8 +3,8 @@ from pydantic import BaseModel, Field
 
 class BaseRequest(BaseModel):
     v: int = Field(default=1, description="Protocol version, strictly 1")
-    id: str = Field(description="Request correlation ID")
-    type: str = Field(description="Command identifier")
+    id: Optional[str] = Field(default="", description="Request correlation ID")
+    type: str = Field(default="", description="Command identifier")
 
 class PingRequest(BaseRequest):
     type: Literal["system.ping"] = "system.ping"

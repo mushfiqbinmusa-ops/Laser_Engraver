@@ -4,12 +4,13 @@ from app.svg.parser import Contour, Point
 class SvgTransformer:
     @staticmethod
     def get_bounds(contours: List[Contour]) -> Tuple[float, float, float, float]:
-        if not contours:
+        valid_contours = [c for c in contours if c]
+        if not valid_contours:
             return 0.0, 0.0, 0.0, 0.0
-        min_x = min(p[0] for c in contours for p in c)
-        max_x = max(p[0] for c in contours for p in c)
-        min_y = min(p[1] for c in contours for p in c)
-        max_y = max(p[1] for c in contours for p in c)
+        min_x = min(p[0] for c in valid_contours for p in c)
+        max_x = max(p[0] for c in valid_contours for p in c)
+        min_y = min(p[1] for c in valid_contours for p in c)
+        max_y = max(p[1] for c in valid_contours for p in c)
         return min_x, min_y, max_x, max_y
 
     @staticmethod
