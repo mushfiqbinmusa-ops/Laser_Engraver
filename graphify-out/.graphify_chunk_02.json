@@ -1,0 +1,924 @@
+{
+  "nodes": [
+    {
+      "id": "laser_xy_3d_parts_images_27eb95fb827bb4617622e574c83647a1_chassis_render",
+      "label": "3D Printed Chassis Base Model Render",
+      "file_type": "image",
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/Laser_XY_3D_Parts/images/27eb95fb827bb4617622e574c83647a1.png",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "laser_xy_3d_parts_images_27eb95fb827bb4617622e574c83647a1_heatsink_pocket",
+      "label": "Heatsink Pocket & Dual Motor Mounting Brackets",
+      "file_type": "concept",
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/Laser_XY_3D_Parts/images/27eb95fb827bb4617622e574c83647a1.png",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "laser_xy_3d_parts_images_img_2973_laser_burn_test",
+      "label": "Laser Beam Cardboard Burn Test Photograph",
+      "file_type": "image",
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/Laser_XY_3D_Parts/images/IMG_2973.JPG",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "laser_xy_3d_parts_images_img_2973_vector_burn_rectangle",
+      "label": "Vector Rectangle Line Burn Pattern",
+      "file_type": "concept",
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/Laser_XY_3D_Parts/images/IMG_2973.JPG",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "laser_xy_3d_parts_images_img_2976_assembled_scanner_photo",
+      "label": "Assembled Laser XY Scanner Physical Hardware Photograph",
+      "file_type": "image",
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/Laser_XY_3D_Parts/images/IMG_2976.JPG",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "laser_xy_3d_parts_images_img_2976_dual_mirror_stepper_assembly",
+      "label": "Dual-Mirror Stepper Deflection Optical Assembly",
+      "file_type": "concept",
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/Laser_XY_3D_Parts/images/IMG_2976.JPG",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "laser_xy_3d_parts_images_laser_xy_scanner_wiring_schematic",
+      "label": "Arduino Nano & Dual ULN2003 Driver Wiring Schematic",
+      "file_type": "image",
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/Laser_XY_3D_Parts/images/Laser_XY_Scanner.png",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "laser_xy_3d_parts_images_laser_xy_scanner_pinout_connections",
+      "label": "Stepper Driver & Homing Limit Switch Digital Pin Mapping",
+      "file_type": "concept",
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/Laser_XY_3D_Parts/images/Laser_XY_Scanner.png",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "laser_xy_3d_parts_images_laser_xy_scanner_1_cad_isometric",
+      "label": "Laser XY Scanner CAD Isometric Ray Tracing Render",
+      "file_type": "image",
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/Laser_XY_3D_Parts/images/Laser_XY_Scanner_1.png",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "laser_xy_3d_parts_images_laser_xy_scanner_1_optical_ray_trace",
+      "label": "Collimated Laser Beam Optical Deflection Ray Path",
+      "file_type": "concept",
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/Laser_XY_3D_Parts/images/Laser_XY_Scanner_1.png",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "laser_xy_3d_parts_images_laser_xy_scanner_2_cad_rear",
+      "label": "Laser XY Scanner CAD Rear Elevation Perspective",
+      "file_type": "image",
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/Laser_XY_3D_Parts/images/Laser_XY_Scanner_2.png",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "laser_xy_3d_parts_images_laser_xy_scanner_2_orthogonal_mirrors",
+      "label": "Orthogonal Mirror Arrangement for 2D Angular Deflection",
+      "file_type": "concept",
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/Laser_XY_3D_Parts/images/Laser_XY_Scanner_2.png",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "laser_xy_3d_parts_images_laser_xy_scanner_3_cad_right",
+      "label": "Laser XY Scanner CAD Right-Hand Isometric Model",
+      "file_type": "image",
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/Laser_XY_3D_Parts/images/Laser_XY_Scanner_3.png",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "laser_xy_3d_parts_images_laser_xy_scanner_3_perpendicular_axes",
+      "label": "Perpendicular Stepper Motor Axis Mounting Layout",
+      "file_type": "concept",
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/Laser_XY_3D_Parts/images/Laser_XY_Scanner_3.png",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "laser_xy_3d_parts_images_laser_xy_scanner_4_cad_front",
+      "label": "Laser XY Scanner CAD Front Elevation & Lens Mount View",
+      "file_type": "image",
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/Laser_XY_3D_Parts/images/Laser_XY_Scanner_4.png",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "laser_xy_3d_parts_images_laser_xy_scanner_4_diode_housing",
+      "label": "12mm Laser Diode Housing & Adjustable Focusing Ring",
+      "file_type": "concept",
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/Laser_XY_3D_Parts/images/Laser_XY_Scanner_4.png",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "laser_xy_3d_parts_images_laser_xy_scanner_featured_banner",
+      "label": "Thingiverse Featured Project Banner and Composite Artwork",
+      "file_type": "image",
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/Laser_XY_3D_Parts/images/Laser_XY_Scanner_Featured.png",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "laser_xy_3d_parts_images_laser_xy_scanner_featured_branding",
+      "label": "Low-Cost DIY Laser XY Scanner Project Identity",
+      "file_type": "concept",
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/Laser_XY_3D_Parts/images/Laser_XY_Scanner_Featured.png",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "laser_xy_scanner_featured_readme_thumbnail",
+      "label": "Repository README Featured Project Thumbnail",
+      "file_type": "image",
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/laser-xy-scanner-featured.png",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "resources_28byj48_stepper_motor_product_photo",
+      "label": "28BYJ-48 5V Unipolar Geared Stepper Motor Product Photograph",
+      "file_type": "image",
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/resources/28byj48 stepper motor.jpeg",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "resources_28byj48_stepper_motor_reduction_geartrain",
+      "label": "28BYJ-48 Internal 64:1 Reduction Gearhead Mechanics",
+      "file_type": "concept",
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/resources/28byj48 stepper motor.jpeg",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "resources_a4988_stepper_motor_driver_pinout_diagram",
+      "label": "Allegro A4988 Stepper Motor Driver Pinout & Schematic Diagram",
+      "file_type": "image",
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/resources/A4988-Stepper-Motor-Driver-Pinout.webp",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "resources_a4988_stepper_motor_driver_pinout_microstep_config",
+      "label": "A4988 Microstep Select (MS1-MS3) and Vref Current Regulation",
+      "file_type": "concept",
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/resources/A4988-Stepper-Motor-Driver-Pinout.webp",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "resources_infrared_obstacle_avoidance_ir_sensor_module_diagram",
+      "label": "FC-51 Optical Obstacle Avoidance IR Sensor Component Diagram",
+      "file_type": "image",
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/resources/Infrared Obstacle Avoidance IR Sensor Module.jpeg",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "resources_infrared_obstacle_avoidance_ir_sensor_module_comparator",
+      "label": "LM393 Comparator & IR Phototransceiver Subsystem",
+      "file_type": "concept",
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/resources/Infrared Obstacle Avoidance IR Sensor Module.jpeg",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "resources_laser_back_01_driver_pcb_back_photo",
+      "label": "Laser Constant-Current Driver PCB Backside Photograph",
+      "file_type": "image",
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/resources/laser_back_01.jpg",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "resources_laser_back_01_current_sense_bank",
+      "label": "Parallel SMD Current-Sense Resistor Bank (R250)",
+      "file_type": "concept",
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/resources/laser_back_01.jpg",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "resources_laser_front_01_driver_pcb_front_photo",
+      "label": "Laser Driver Board Top-Side Buck Converter Layout Photograph",
+      "file_type": "image",
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/resources/laser_front_01.jpg",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "resources_laser_front_01_buck_regulator_circuit",
+      "label": "Switch-Mode Buck Inductor, Power MOSFET & Capacitor Bank",
+      "file_type": "concept",
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/resources/laser_front_01.jpg",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "resources_laser_front_02_driver_pcb_macro_photo",
+      "label": "Laser Driver PCB Component Macro Focus Photograph",
+      "file_type": "image",
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/resources/laser_front_02.jpg",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "resources_laser_front_02_pwm_ttl_interface",
+      "label": "TTL/PWM High-Speed Modulation Interface & Control Terminals",
+      "file_type": "concept",
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/resources/laser_front_02.jpg",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    }
+  ],
+  "edges": [
+    {
+      "source": "laser_xy_3d_parts_images_27eb95fb827bb4617622e574c83647a1_chassis_render",
+      "target": "laser_xy_3d_parts_images_27eb95fb827bb4617622e574c83647a1_heatsink_pocket",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/Laser_XY_3D_Parts/images/27eb95fb827bb4617622e574c83647a1.png",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "laser_xy_3d_parts_images_27eb95fb827bb4617622e574c83647a1_chassis_render",
+      "target": "laser_xy_3d_parts_readme_summary",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/Laser_XY_3D_Parts/images/27eb95fb827bb4617622e574c83647a1.png",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "laser_xy_3d_parts_images_27eb95fb827bb4617622e574c83647a1_heatsink_pocket",
+      "target": "bom_aixiz_heatsink",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/Laser_XY_3D_Parts/images/27eb95fb827bb4617622e574c83647a1.png",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "laser_xy_3d_parts_images_img_2973_laser_burn_test",
+      "target": "laser_xy_3d_parts_images_img_2973_vector_burn_rectangle",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/Laser_XY_3D_Parts/images/IMG_2973.JPG",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "laser_xy_3d_parts_images_img_2973_laser_burn_test",
+      "target": "laser_xy_3d_parts_readme_galvo_scanning",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/Laser_XY_3D_Parts/images/IMG_2973.JPG",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "laser_xy_3d_parts_images_img_2973_vector_burn_rectangle",
+      "target": "resources_report_laser_radiation_safety",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75,
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/Laser_XY_3D_Parts/images/IMG_2973.JPG",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "laser_xy_3d_parts_images_img_2976_assembled_scanner_photo",
+      "target": "laser_xy_3d_parts_images_img_2976_dual_mirror_stepper_assembly",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/Laser_XY_3D_Parts/images/IMG_2976.JPG",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "laser_xy_3d_parts_images_img_2976_assembled_scanner_photo",
+      "target": "bom_bill_of_materials",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/Laser_XY_3D_Parts/images/IMG_2976.JPG",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "laser_xy_3d_parts_images_img_2976_dual_mirror_stepper_assembly",
+      "target": "resources_report_dual_mirror_deflection",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/Laser_XY_3D_Parts/images/IMG_2976.JPG",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "laser_xy_3d_parts_images_img_2976_assembled_scanner_photo",
+      "target": "laser_xy_3d_parts_images_27eb95fb827bb4617622e574c83647a1_chassis_render",
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/Laser_XY_3D_Parts/images/IMG_2976.JPG",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "laser_xy_3d_parts_images_laser_xy_scanner_wiring_schematic",
+      "target": "laser_xy_3d_parts_images_laser_xy_scanner_pinout_connections",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/Laser_XY_3D_Parts/images/Laser_XY_Scanner.png",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "laser_xy_3d_parts_images_laser_xy_scanner_wiring_schematic",
+      "target": "bom_arduino_nano",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/Laser_XY_3D_Parts/images/Laser_XY_Scanner.png",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "laser_xy_3d_parts_images_laser_xy_scanner_wiring_schematic",
+      "target": "bom_28byj48_stepper",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/Laser_XY_3D_Parts/images/Laser_XY_Scanner.png",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "laser_xy_3d_parts_images_laser_xy_scanner_pinout_connections",
+      "target": "resources_laser_engraver_plan_config_h_spec",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/Laser_XY_3D_Parts/images/Laser_XY_Scanner.png",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "laser_xy_3d_parts_images_laser_xy_scanner_1_cad_isometric",
+      "target": "laser_xy_3d_parts_images_laser_xy_scanner_1_optical_ray_trace",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/Laser_XY_3D_Parts/images/Laser_XY_Scanner_1.png",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "laser_xy_3d_parts_images_laser_xy_scanner_1_optical_ray_trace",
+      "target": "resources_report_dual_mirror_deflection",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/Laser_XY_3D_Parts/images/Laser_XY_Scanner_1.png",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "laser_xy_3d_parts_images_laser_xy_scanner_1_cad_isometric",
+      "target": "bom_first_surface_mirrors",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/Laser_XY_3D_Parts/images/Laser_XY_Scanner_1.png",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "laser_xy_3d_parts_images_laser_xy_scanner_2_cad_rear",
+      "target": "laser_xy_3d_parts_images_laser_xy_scanner_2_orthogonal_mirrors",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/Laser_XY_3D_Parts/images/Laser_XY_Scanner_2.png",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "laser_xy_3d_parts_images_laser_xy_scanner_2_orthogonal_mirrors",
+      "target": "resources_report_pincushion_distortion",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/Laser_XY_3D_Parts/images/Laser_XY_Scanner_2.png",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "laser_xy_3d_parts_images_laser_xy_scanner_2_cad_rear",
+      "target": "laser_xy_3d_parts_images_laser_xy_scanner_1_cad_isometric",
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/Laser_XY_3D_Parts/images/Laser_XY_Scanner_2.png",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "laser_xy_3d_parts_images_laser_xy_scanner_3_cad_right",
+      "target": "laser_xy_3d_parts_images_laser_xy_scanner_3_perpendicular_axes",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/Laser_XY_3D_Parts/images/Laser_XY_Scanner_3.png",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "laser_xy_3d_parts_images_laser_xy_scanner_3_perpendicular_axes",
+      "target": "resources_report_geartrain_backlash",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75,
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/Laser_XY_3D_Parts/images/Laser_XY_Scanner_3.png",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "laser_xy_3d_parts_images_laser_xy_scanner_3_cad_right",
+      "target": "laser_xy_3d_parts_images_laser_xy_scanner_1_cad_isometric",
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/Laser_XY_3D_Parts/images/Laser_XY_Scanner_3.png",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "laser_xy_3d_parts_images_laser_xy_scanner_4_cad_front",
+      "target": "laser_xy_3d_parts_images_laser_xy_scanner_4_diode_housing",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/Laser_XY_3D_Parts/images/Laser_XY_Scanner_4.png",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "laser_xy_3d_parts_images_laser_xy_scanner_4_diode_housing",
+      "target": "bom_m140_laser_diode",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/Laser_XY_3D_Parts/images/Laser_XY_Scanner_4.png",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "laser_xy_3d_parts_images_laser_xy_scanner_4_cad_front",
+      "target": "laser_xy_3d_parts_images_laser_xy_scanner_1_cad_isometric",
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/Laser_XY_3D_Parts/images/Laser_XY_Scanner_4.png",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "laser_xy_3d_parts_images_laser_xy_scanner_featured_banner",
+      "target": "laser_xy_3d_parts_images_laser_xy_scanner_featured_branding",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/Laser_XY_3D_Parts/images/Laser_XY_Scanner_Featured.png",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "laser_xy_3d_parts_images_laser_xy_scanner_featured_banner",
+      "target": "readme_project_overview",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/Laser_XY_3D_Parts/images/Laser_XY_Scanner_Featured.png",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "laser_xy_3d_parts_images_laser_xy_scanner_featured_banner",
+      "target": "laser_xy_3d_parts_images_img_2976_assembled_scanner_photo",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/Laser_XY_3D_Parts/images/Laser_XY_Scanner_Featured.png",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "laser_xy_scanner_featured_readme_thumbnail",
+      "target": "laser_xy_3d_parts_images_laser_xy_scanner_featured_banner",
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/laser-xy-scanner-featured.png",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "laser_xy_scanner_featured_readme_thumbnail",
+      "target": "readme_project_overview",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/laser-xy-scanner-featured.png",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "resources_28byj48_stepper_motor_product_photo",
+      "target": "resources_28byj48_stepper_motor_reduction_geartrain",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/resources/28byj48 stepper motor.jpeg",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "resources_28byj48_stepper_motor_product_photo",
+      "target": "bom_28byj48_stepper",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/resources/28byj48 stepper motor.jpeg",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "resources_28byj48_stepper_motor_reduction_geartrain",
+      "target": "stepper_motor_test_testing_guide_bipolar_conversion",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/resources/28byj48 stepper motor.jpeg",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "resources_a4988_stepper_motor_driver_pinout_diagram",
+      "target": "resources_a4988_stepper_motor_driver_pinout_microstep_config",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/resources/A4988-Stepper-Motor-Driver-Pinout.webp",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "resources_a4988_stepper_motor_driver_pinout_diagram",
+      "target": "stepper_motor_test_testing_guide_a4988_driver",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/resources/A4988-Stepper-Motor-Driver-Pinout.webp",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "resources_a4988_stepper_motor_driver_pinout_microstep_config",
+      "target": "stepper_motor_test_testing_guide_vref_calibration",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/resources/A4988-Stepper-Motor-Driver-Pinout.webp",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "resources_a4988_stepper_motor_driver_pinout_microstep_config",
+      "target": "stepper_motor_test_testing_guide_microstepping_kinematics",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/resources/A4988-Stepper-Motor-Driver-Pinout.webp",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "resources_infrared_obstacle_avoidance_ir_sensor_module_diagram",
+      "target": "resources_infrared_obstacle_avoidance_ir_sensor_module_comparator",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/resources/Infrared Obstacle Avoidance IR Sensor Module.jpeg",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "resources_infrared_obstacle_avoidance_ir_sensor_module_diagram",
+      "target": "ir_sensor_test_testing_guide_fc51_module",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/resources/Infrared Obstacle Avoidance IR Sensor Module.jpeg",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "resources_infrared_obstacle_avoidance_ir_sensor_module_comparator",
+      "target": "ir_sensor_test_testing_guide_lm393_comparator",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/resources/Infrared Obstacle Avoidance IR Sensor Module.jpeg",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "resources_infrared_obstacle_avoidance_ir_sensor_module_diagram",
+      "target": "bom_ir_sensor_module",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/resources/Infrared Obstacle Avoidance IR Sensor Module.jpeg",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "resources_laser_back_01_driver_pcb_back_photo",
+      "target": "resources_laser_back_01_current_sense_bank",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/resources/laser_back_01.jpg",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "resources_laser_back_01_driver_pcb_back_photo",
+      "target": "bom_laser_driver_board",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/resources/laser_back_01.jpg",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "resources_laser_back_01_current_sense_bank",
+      "target": "laser_pwm_test_testing_guide_thermal_stress_test",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75,
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/resources/laser_back_01.jpg",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "resources_laser_front_01_driver_pcb_front_photo",
+      "target": "resources_laser_front_01_buck_regulator_circuit",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/resources/laser_front_01.jpg",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "resources_laser_front_01_driver_pcb_front_photo",
+      "target": "bom_laser_driver_board",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/resources/laser_front_01.jpg",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "resources_laser_front_01_driver_pcb_front_photo",
+      "target": "resources_laser_back_01_driver_pcb_back_photo",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/resources/laser_front_01.jpg",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "resources_laser_front_01_buck_regulator_circuit",
+      "target": "laser_pwm_test_testing_guide_shared_ground",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/resources/laser_front_01.jpg",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "resources_laser_front_02_driver_pcb_macro_photo",
+      "target": "resources_laser_front_02_pwm_ttl_interface",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/resources/laser_front_02.jpg",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "resources_laser_front_02_driver_pcb_macro_photo",
+      "target": "resources_laser_front_01_driver_pcb_front_photo",
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/resources/laser_front_02.jpg",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "resources_laser_front_02_pwm_ttl_interface",
+      "target": "resources_command_report_pwm_modulation_concept",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/resources/laser_front_02.jpg",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "resources_laser_front_02_pwm_ttl_interface",
+      "target": "laser_pwm_test_testing_guide_frequency_tuning",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/resources/laser_front_02.jpg",
+      "source_location": null,
+      "weight": 1.0
+    }
+  ],
+  "hyperedges": [
+    {
+      "id": "dual_axis_mirror_galvo_mechanism",
+      "label": "Dual-Axis Stepper Mirror Scanning Mechanism",
+      "nodes": [
+        "laser_xy_3d_parts_images_laser_xy_scanner_1_optical_ray_trace",
+        "laser_xy_3d_parts_images_laser_xy_scanner_2_orthogonal_mirrors",
+        "laser_xy_3d_parts_images_img_2976_dual_mirror_stepper_assembly",
+        "resources_report_dual_mirror_deflection"
+      ],
+      "relation": "implement",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/Laser_XY_3D_Parts/images/Laser_XY_Scanner_1.png"
+    },
+    {
+      "id": "laser_driver_buck_subsystem",
+      "label": "Constant-Current Laser Driver Hardware Subsystem",
+      "nodes": [
+        "resources_laser_front_01_driver_pcb_front_photo",
+        "resources_laser_back_01_driver_pcb_back_photo",
+        "resources_laser_front_01_buck_regulator_circuit",
+        "resources_laser_back_01_current_sense_bank",
+        "bom_laser_driver_board"
+      ],
+      "relation": "implement",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/resources/laser_front_01.jpg"
+    },
+    {
+      "id": "mechatronic_homing_and_motion_control",
+      "label": "Mechatronic Motion and Homing Electronics",
+      "nodes": [
+        "laser_xy_3d_parts_images_laser_xy_scanner_wiring_schematic",
+        "resources_28byj48_stepper_motor_product_photo",
+        "resources_a4988_stepper_motor_driver_pinout_diagram",
+        "resources_infrared_obstacle_avoidance_ir_sensor_module_diagram"
+      ],
+      "relation": "participate_in",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "/home/mushfiq/Desktop/Laser-XY-Scanner/Laser_XY_3D_Parts/images/Laser_XY_Scanner.png"
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

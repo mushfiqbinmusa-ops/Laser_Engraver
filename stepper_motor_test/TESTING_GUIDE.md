@@ -215,7 +215,7 @@ $$V_{ref} = I_{max} \times 8 \times R_s = I_{max} \times 0.8$$
 > [!NOTE]
 > ### 💡 Is `stepper_motor_test.ino` for both Single and Dual Stepper Testing?
 > **YES!** `stepper_motor_test.ino` is a unified, all-in-one test suite designed for both stages:
-> 1. **Phase 1 (Single Stepper Bring-Up):** Wire only **Motor A (X-Axis)**. Motor B's pins are held inactive. You can run all single-axis commands (`STEP <n>`, `SPEED <sps>`, `RUN <sps>`, `STOP`, `REV <n>`, `BACKLASH`, `RAMP`, `STALL`).
+> 1. **Phase 1 (Single Stepper Bring-Up):** Wire only **Motor A (X-Axis)**. Motor B's pins are held inactive. You can run all single-axis commands (`STEP <n>`, `SPEED <sps>`, `START <sps>`, `STOP`, `REV <n>`, `BACKLASH`, `STALL`).
 > 2. **Phase 2 (Dual Stepper Coordinated Testing):** Add **Motor B (Y-Axis)** when ready. You can test both motors together with vector interpolation commands (`DUAL STEP <nA> <nB>`, `DUAL GOTO <xA> <yB>`, `DUAL CIRCLE <r>`, `DUAL SQUARE <s>`).
 >
 > You do **not** need a separate sketch—the single firmware safely accommodates both wiring states!
@@ -698,10 +698,10 @@ Follow these 7 structured validation phases sequentially:
    +==================================================+
    ```
 4. Type `STATUS` and press Enter. Verify:
-   - Drivers Disabled: `YES`
+   - Drivers Enabled: `NO  (Outputs High-Z)`
    - Positions: `A=0, B=0`
 5. Test microstepping pin switching:
-   - Type `MICRO 16`. Verify response: `Microstepping set to 1/16`.
+   - Type `MICRO 16`. Verify response: `[MICRO] Microstepping set to 1/16. Effective steps/rev = 32768.`
    - Measure voltage with DMM on pins MS1, MS2, MS3: All three must read **3.3V**.
    - Type `MICRO 1`. Measure MS1, MS2, MS3: All three must read **0.0V**.
 6. **Pass Criteria:** Firmware boots cleanly, commands respond, GPIO logic transitions properly.
@@ -799,7 +799,7 @@ Follow these 7 structured validation phases sequentially:
 
 1. Type `TEST`.
    - Firmware runs all 6 hardware tests: LED, Microstepping logic, Motor A motion, Motor B motion, Dual diagonal vector, and Microstepping resolution switch.
-   - Verify `[ALL SELF-TEST CHECKS PASSED [OK]]`.
+   - Verify `ALL SELF-TEST CHECKS PASSED [OK]`.
 2. Type `BENCHMARK`.
    - ESP32-S3 evaluates raw GPIO step generation and DDA math overhead.
    - Observe step pulse capability exceeds 100 kHz (far above 28BYJ-48 requirement).
@@ -823,33 +823,52 @@ Follow these 7 structured validation phases sequentially:
 
 ## 9. Serial Command Reference
 
+> [!NOTE]
+> **Motor target syntax:** Commands marked `[A|B|BOTH]` default to **Motor A** when no target is given. Accepted aliases are `A`/`X` (Motor A), `B`/`Y` (Motor B), and `BOTH`/`ALL`/`AB` (both motors). These strings are case-insensitive.
+>
+> **Speed sign convention:** A **positive** speed runs CW; a **negative** speed runs CCW.
+
+### 9.1 Motor Run & Move Commands
+
 | Command | Arguments | Example | Description |
 |---|---|---|---|
-| `STEP` | `[<n>]` | `STEP 500` / `STEP -200` | Step Motor A by $N$ microsteps (+ forward, - reverse). |
-| `SPEED` | `<sps>` | `SPEED 600` | Run Motor A continuously at specified steps/sec. |
-| `STOP` | *None* | `STOP` | Stop continuous motion immediately. |
-| `GOTO` | `<pos>` | `GOTO 2048` | Move Motor A to absolute step coordinate. |
+| `START` | `[A\|B\|BOTH] [sps]` | `START B 100` / `START 100` | Run motor(s) continuously. Defaults to Motor A at 100 sps. |
+| `STEP` | `[A\|B\|BOTH] <n> [sps]` | `STEP 500` / `STEP B 200 100` | Step motor(s) by $N$ microsteps (+ forward, - reverse). Defaults to 100 steps. |
+| `SPEED` | `[A\|B\|BOTH] <sps>` | `SPEED 600` / `SPEED B 100` | Set speed and start continuous motion. With no argument, reports configured A & B speeds. |
+| `STOP` | `[A\|B\|ALL]` | `STOP` / `STOP B` | Stop continuous motion (single motor or all). |
+| `GOTO` | `[A\|B] <pos> [sps]` | `GOTO 2048` / `GOTO B 500 400` | Move motor to absolute step coordinate. |
+| `REV` | `[A\|B\|BOTH] <n> [sps]` | `REV 1.5` / `REV B -2 300` | Move motor(s) by exact number of output revolutions. |
+| `DIR` | `[A\|B\|BOTH] <CW\|CCW>` | `DIR CCW` / `DIR B CW` | Invert/restore default rotation direction. Also accepts `FORWARD`/`REVERSE`. No argument reports current setting. |
 | `POS` | *None* | `POS` | Report current step positions, angles, and revolutions. |
-| `ZERO` | *None* | `ZERO` | Reset axis position counters to 0 (Home). |
-| `DIR` | `<CW\|CCW>` | `DIR CCW` | Invert or restore default Motor A rotation direction. |
-| `REV` | `<n>` | `REV 1.5` / `REV -2` | Move Motor A by exact number of output revolutions. |
-| `RPM` | *None* | `RPM` | Display current rotational speed in RPM. |
+| `ZERO` | *None* | `ZERO` | Reset both axis position counters to 0 (Home). |
+| `RPM` | *None* | `RPM` | Display configured and live rotational speeds in RPM. |
 | `MICRO` | `<1\|2\|4\|8\|16>` | `MICRO 16` | Set microstepping mode via MS1/MS2/MS3 pins. |
 | `ENABLE` | *None* | `ENABLE` | Assert driver ENABLE pin (active LOW, energized). |
 | `DISABLE`| *None* | `DISABLE` | Release driver ENABLE pin (high-Z, coils off). |
+
+### 9.2 Dual Motor (A + B) Commands
+
+| Command | Arguments | Example | Description |
+|---|---|---|---|
 | `DUAL STEP` | `<nA> <nB>` | `DUAL STEP 200 400` | Step Motor A and Motor B simultaneously. |
 | `DUAL GOTO` | `<xA> <yB>` | `DUAL GOTO 1000 1000` | Coordinated Bresenham move to $(X, Y)$ coordinate. |
 | `DUAL SPEED`| `<sA> <sB>` | `DUAL SPEED 600 600` | Configure default individual speeds for A and B. |
-| `DUAL CIRCLE`| `<radius> [segs]` | `DUAL CIRCLE 500 48` | Trace parametric circular vector path. |
+| `DUAL CIRCLE`| `<radius> [segs]` | `DUAL CIRCLE 500 48` | Trace parametric circular vector path (8–360 segments). |
 | `DUAL SQUARE`| `<size>` | `DUAL SQUARE 600` | Trace square vector path of side length $S$. |
 | `DUAL HOME`| *None* | `DUAL HOME` | Return both axes back to $(0, 0)$ coordinate. |
+
+### 9.3 Diagnostics & System Commands
+
+| Command | Arguments | Example | Description |
+|---|---|---|---|
 | `BACKLASH`| *None* | `BACKLASH` | Run spur gear backlash diagnostic sequence. |
 | `STALL` | `<sps> <steps>` | `STALL 1000 2048` | High-speed step generator test & jitter analysis. |
 | `TEST` | *None* | `TEST` | Execute full automated hardware self-test suite. |
 | `BENCHMARK`| *None* | `BENCHMARK` | Measure ESP32-S3 max pulse generation throughput. |
-| `ACCEL` | `<sps2>` | `ACCEL 3000` | Set acceleration parameter (steps/sec$^2$). |
-| `AUTODISABLE`| `<0\|1>` | `AUTODISABLE 1` | Enable/disable 30-second idle driver power cut. |
+| `ACCEL` | `<sps2>` | `ACCEL 3000` | Set acceleration parameter (steps/sec$^2$). No argument reports current value. |
+| `AUTODISABLE`| `<0\|1>` | `AUTODISABLE 1` | Enable/disable 30-second idle driver power cut. No argument reports current state. |
+| `ECHO` | *None* | `ECHO` | Toggle command echo on/off. |
 | `STATUS` / `?`| *None* | `STATUS` | Print comprehensive status report in ASCII box. |
 | `HELP` / `H`| *None* | `HELP` | Print command cheat sheet and safety notes. |
 | `RESET` | *None* | `RESET` | Restore all settings to safe defaults, disable drivers. |
-| **`X`** | *Key* | `X` | **Emergency abort** — instantly halts any active move. |
+| **Abort** | *Key* | `X` / `!` / `SPACE` / `ESC` | **Emergency abort** — instantly halts any active move. |

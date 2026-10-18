@@ -1,0 +1,28 @@
+/home/mushfiq/Desktop/Laser-XY-Scanner/BOM.md
+/home/mushfiq/Desktop/Laser-XY-Scanner/Laser_XY_3D_Parts/LICENSE.txt
+/home/mushfiq/Desktop/Laser-XY-Scanner/Laser_XY_3D_Parts/README.txt
+/home/mushfiq/Desktop/Laser-XY-Scanner/README.md
+/home/mushfiq/Desktop/Laser-XY-Scanner/ir_sensor_test/TESTING_GUIDE.md
+/home/mushfiq/Desktop/Laser-XY-Scanner/laser-engraver-server/requirements.txt
+/home/mushfiq/Desktop/Laser-XY-Scanner/laser-engraver-server/static/index.html
+/home/mushfiq/Desktop/Laser-XY-Scanner/laser_pwm_test/TESTING_GUIDE.md
+/home/mushfiq/Desktop/Laser-XY-Scanner/resources/command_report.md
+/home/mushfiq/Desktop/Laser-XY-Scanner/resources/laser_engraver_plan.md
+/home/mushfiq/Desktop/Laser-XY-Scanner/resources/report.md
+/home/mushfiq/Desktop/Laser-XY-Scanner/stepper_motor_test/TESTING_GUIDE.md
+/home/mushfiq/Desktop/Laser-XY-Scanner/Laser_XY_3D_Parts/images/27eb95fb827bb4617622e574c83647a1.png
+/home/mushfiq/Desktop/Laser-XY-Scanner/Laser_XY_3D_Parts/images/IMG_2973.JPG
+/home/mushfiq/Desktop/Laser-XY-Scanner/Laser_XY_3D_Parts/images/IMG_2976.JPG
+/home/mushfiq/Desktop/Laser-XY-Scanner/Laser_XY_3D_Parts/images/Laser_XY_Scanner.png
+/home/mushfiq/Desktop/Laser-XY-Scanner/Laser_XY_3D_Parts/images/Laser_XY_Scanner_1.png
+/home/mushfiq/Desktop/Laser-XY-Scanner/Laser_XY_3D_Parts/images/Laser_XY_Scanner_2.png
+/home/mushfiq/Desktop/Laser-XY-Scanner/Laser_XY_3D_Parts/images/Laser_XY_Scanner_3.png
+/home/mushfiq/Desktop/Laser-XY-Scanner/Laser_XY_3D_Parts/images/Laser_XY_Scanner_4.png
+/home/mushfiq/Desktop/Laser-XY-Scanner/Laser_XY_3D_Parts/images/Laser_XY_Scanner_Featured.png
+/home/mushfiq/Desktop/Laser-XY-Scanner/laser-xy-scanner-featured.png
+/home/mushfiq/Desktop/Laser-XY-Scanner/resources/28byj48 stepper motor.jpeg
+/home/mushfiq/Desktop/Laser-XY-Scanner/resources/A4988-Stepper-Motor-Driver-Pinout.webp
+/home/mushfiq/Desktop/Laser-XY-Scanner/resources/Infrared Obstacle Avoidance IR Sensor Module.jpeg
+/home/mushfiq/Desktop/Laser-XY-Scanner/resources/laser_back_01.jpg
+/home/mushfiq/Desktop/Laser-XY-Scanner/resources/laser_front_01.jpg
+/home/mushfiq/Desktop/Laser-XY-Scanner/resources/laser_front_02.jpg

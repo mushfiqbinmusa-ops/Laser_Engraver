@@ -87,6 +87,11 @@ The **FC-51 / KY-032 IR Obstacle Avoidance Sensor Module** provides a non-contac
 <a id="2-hardware-wiring--circuit-diagrams"></a>
 ## 2. Hardware Wiring & Circuit Diagrams
 
+> [!TIP]
+> ### 🌟 Interactive Dynamic HTML Schematic Available!
+> For an animated, interactive visual schematic with signal pulsing, pin tooltips, and a **Single Sensor vs Dual Sensor toggle**, open:  
+> **👉 [`ir_sensor_test/circuit_diagram.html`](file:///home/mushfiq/Desktop/Laser-XY-Scanner/ir_sensor_test/circuit_diagram.html)** directly in your web browser!
+
 <a id="mermaid-architecture-diagram"></a>
 ### Mermaid System Architecture Diagram
 
@@ -97,9 +102,10 @@ flowchart TD
         GNDRail["Common Ground Rail"]
     end
 
-    subgraph ESP["ESP32-S3 SuperMini"]
-        GPIO5["GPIO 5 (X-Axis Endstop In)"]
-        GPIO6["GPIO 6 (Y-Axis Endstop In)"]
+    subgraph ESP["ESP32-S3 SuperMini (Integrated Setup)"]
+        GPIO3["GPIO 3 (X-Axis Endstop In)"]
+        GPIO8["GPIO 8 (Y-Axis Endstop In)"]
+        GPIO12["GPIO 12 (Laser Control / PWM)"]
         GPIO13["GPIO 13 (Status LED Out)"]
         ESP_5V["5V Pin"]
         ESP_GND["GND Pin"]
@@ -134,11 +140,11 @@ flowchart TD
     GNDRail --> SX_GND
     GNDRail --> SY_GND
 
-    SX_OUT -->|"Direct Connection (<3.3V verified)"| GPIO5
-    SY_OUT -->|"Direct Connection (<3.3V verified)"| GPIO6
+    SX_OUT -->|"Direct Connection (<3.3V verified)"| GPIO3
+    SY_OUT -->|"Direct Connection (<3.3V verified)"| GPIO8
 
     SX_OUT -.->|"If unverified clone (>3.3V)"| R1
-    R1 -.-> GPIO5
+    R1 -.-> GPIO3
     R1 -.-> R2
     R2 -.-> GNDRail
 
@@ -148,7 +154,7 @@ flowchart TD
 ---
 
 <a id="esp32-s3-supermini-pin-layout"></a>
-### ESP32-S3 SuperMini Pin Layout
+### ESP32-S3 SuperMini Pin Layout (Integrated Steppers + IR Sensors + Laser)
 
 *(Castellated 18-pin DIP footprint: 9 pins Left, 9 pins Right, USB-C at Top)*
 ```
@@ -156,15 +162,15 @@ flowchart TD
                        ┌─────────────────────┐
                        │   [ USB-C PORT ]    │
                        │                     │
-        5V Power (VBUS)│ [5V]             [5]│◄─── Sensor X OUT (GPIO 5)
-            Common GND │ [GND]            [6]│◄─── Sensor Y OUT (GPIO 6)
-            3.3V Logic │ [3V3]            [7]│    (Available)
-       UART0 TX (IO43) │ [TX]             [8]│    (Available)
-       UART0 RX (IO44) │ [RX]             [9]│    (Available)
-                       │ [1]             [10]│    (Available)
-                       │ [2]             [11]│    (Available)
-                       │ [3]             [12]│    (Available)
-                       │ [4]             [13]│───► Onboard Status LED (Mirrored)
+        5V Power (VBUS)│ [5V]             [5]│───► Motor A STEP (GPIO 5)
+            Common GND │ [GND]            [6]│───► Motor A DIR (GPIO 6)
+            3.3V Logic │ [3V3]            [7]│───► Motor A EN (GPIO 7)
+       UART0 TX (IO43) │ [TX]             [8]│◄─── Sensor Y OUT (GPIO 8)
+       UART0 RX (IO44) │ [RX]             [9]│───► Motor B STEP (GPIO 9)
+        MS1 Shared Bus │ [1]             [10]│───► Motor B DIR (GPIO 10)
+        MS2 Shared Bus │ [2]             [11]│───► Motor B EN (GPIO 11)
+  Sensor X OUT (GPIO 3)│ [3]             [12]│───► Laser PWM / Control (GPIO 12)
+        MS3 Shared Bus │ [4]             [13]│───► Onboard Status LED (GPIO 13)
                        │                     │
                        └─────────────────────┘
 ```
@@ -181,7 +187,7 @@ flowchart TD
   ┌─────────────────────────┐                 ┌─────────────────────────────────┐
   │ [5V]  (Pin 1 Left Row)  │────────────────►│ VCC                             │
   │ [GND] (Pin 2 Left Row)  │────────────────►│ GND                             │
-  │ [5]   (Pin 1 Right Row) │◄────────────────│ OUT (Active LOW on detect)      │
+  │ [3]   (Pin 8 Left Row)  │◄────────────────│ OUT (Active LOW on detect)      │
   │ [13]  (Pin 9 Right Row) │──► [Status LED] │                                 │
   └─────────────────────────┘                 │ [Trim-pot] [LM393] [LEDs]       │
                                               └─────────────────────────────────┘
@@ -210,8 +216,9 @@ flowchart TD
   │ [5V]  (Pin 1 Left Row)                 │  │
   │ [GND] (Pin 2 Left Row) ────────────────┼──┘
   │                                        │
-  │ [5]   (Pin 1 Right Row) ◄──────────────┼──────── Sensor X OUT
-  │ [6]   (Pin 2 Right Row) ◄──────────────┼──────── Sensor Y OUT
+  │ [3]   (Pin 8 Left Row)  ◄──────────────┼──────── Sensor X OUT
+  │ [8]   (Pin 4 Right Row) ◄──────────────┼──────── Sensor Y OUT
+  │ [12]  (Pin 8 Right Row) ───────────────┼───────► Laser Control (Reserved)
   │ [13]  (Pin 9 Right Row) ──► Status LED │
   └────────────────────────────────────────┘
 ```
@@ -231,11 +238,12 @@ flowchart TD
 If you ever use a generic clone sensor that does NOT have the indicator LED in the pull-up branch (or if OUT measures > 3.3V with a multimeter), insert a simple resistive voltage divider:
 
 ```
-  Sensor OUT (5V) ────[ 10kΩ ]────┬────► ESP32 GPIO 5 (or 6)
+  Sensor OUT (5V) ────[ 10kΩ ]────┬────► ESP32 GPIO 3 (or 8)
                                   │
                                 [ 20kΩ ]
                                   │
                                  GND
+```
 
 ---
 
@@ -285,7 +293,7 @@ Assemble the primary X-axis homing endstop first to verify sensor functionality 
 
 * **Step 1 (Sensor Power):** Connect a red jumper wire from the breadboard **Red 5V Rail** to the **`VCC`** pin of Sensor X.
 * **Step 2 (Sensor Ground):** Connect a black jumper wire from the breadboard **Black/Blue GND Rail** to the **`GND`** pin of Sensor X.
-* **Step 3 (Digital Signal Line):** Connect a jumper wire (e.g. Yellow or Green) from Sensor X **`OUT`** directly to ESP32-S3 SuperMini **Pin 1 (Right Row, `5` / GPIO 5)**.
+* **Step 3 (Digital Signal Line):** Connect a jumper wire (e.g. Yellow or Green) from Sensor X **`OUT`** directly to ESP32-S3 SuperMini **Pin 8 (Left Row, `3` / GPIO 3)**.
 * **Step 4 (Status LED):** The firmware automatically mirrors the detection state onto the onboard LED on **Pin 9 (Right Row, `13` / GPIO 13)**. When an obstacle is detected, `13` illuminates.
 
 ---
@@ -296,11 +304,11 @@ When ready to test both axes simultaneously:
 
 * **Step 1 (Sensor Y Power):** Connect a red jumper wire from the breadboard **Red 5V Rail** to the **`VCC`** pin of Sensor Y.
 * **Step 2 (Sensor Y Ground):** Connect a black jumper wire from the breadboard **Black/Blue GND Rail** to the **`GND`** pin of Sensor Y.
-* **Step 3 (Sensor Y Signal Line):** Connect a jumper wire (e.g. Blue or White) from Sensor Y **`OUT`** directly to ESP32-S3 SuperMini **Pin 2 (Right Row, `6` / GPIO 6)**.
+* **Step 3 (Sensor Y Signal Line):** Connect a jumper wire (e.g. Blue or White) from Sensor Y **`OUT`** directly to ESP32-S3 SuperMini **Pin 4 (Right Row, `8` / GPIO 8)**.
 
 ---
 
-#### 5. Master Breadboard Pin Interconnection Table
+#### 5. Master Breadboard Pin Interconnection Table (Sensors + Stepper Motors + Laser)
 
 | Component & Pin | Net / Signal Name | ESP32-S3 SuperMini Physical Header Pin | Electrical Characteristics | Wire Color Suggestion |
 |---|---|---|---|---|
@@ -311,10 +319,11 @@ When ready to test both axes simultaneously:
 | **UART0 RX Serial** | Debug Console / Flashing | **Pin 5 (Left Row, `RX` / GPIO 44)** | 3.3V UART Input | **Green** |
 | **Sensor X VCC** | Sensor X Power | Connected to 5V Rail | +5V DC | **Red** |
 | **Sensor X GND** | Sensor X Ground | Connected to GND Rail | 0V Ground | **Black** |
-| **Sensor X OUT** | X Endstop Signal | **Pin 1 (Right Row, `5` / GPIO 5)** | 0V (Detected) / ~3.0V (Clear) | **Yellow / Green** |
+| **Sensor X OUT** | X Endstop Signal | **Pin 8 (Left Row, `3` / GPIO 3)** | 0V (Detected) / ~3.0V (Clear) | **Yellow / Green** |
 | **Sensor Y VCC** | Sensor Y Power | Connected to 5V Rail | +5V DC | **Red** |
 | **Sensor Y GND** | Sensor Y Ground | Connected to GND Rail | 0V Ground | **Black** |
-| **Sensor Y OUT** | Y Endstop Signal | **Pin 2 (Right Row, `6` / GPIO 6)** | 0V (Detected) / ~3.0V (Clear) | **Blue / White** |
+| **Sensor Y OUT** | Y Endstop Signal | **Pin 4 (Right Row, `8` / GPIO 8)** | 0V (Detected) / ~3.0V (Clear) | **Blue / White** |
+| **Laser PWM / Control** | Laser Driver In | **Pin 8 (Right Row, `12` / GPIO 12)**| 3.3V PWM / Digital Control | **Purple** |
 | **Onboard Status LED** | Endstop Indicator | **Pin 9 (Right Row, `13` / GPIO 13)** | Active HIGH drive | Built-in SMD LED |
 
 ---
@@ -361,16 +370,16 @@ The FC-51 sensor's precision as an optical endstop depends on accurately tuning 
    ==================================================
      ESP32-S3 SuperMini IR Sensor Test Firmware
    ==================================================
-   [INIT] Sensor X Pin : GPIO 5 (Input Pull-up)
-   [INIT] Sensor Y Pin : GPIO 6 (Input Pull-up)
+   [INIT] Sensor X Pin : GPIO 3 (Input Pull-up)
+   [INIT] Sensor Y Pin : GPIO 8 (Input Pull-up)
    [INIT] Status LED   : GPIO 13
    [INIT] Ready. Type HELP for command list.
    ```
 3. Type `STATUS` and press Enter:
    - When no obstacle is present: `Sensor X: CLEAR (HIGH, 1) | Sensor Y: CLEAR (HIGH, 1)`.
    - Place an object in front of Sensor X and type `STATUS`: `Sensor X: TRIGGERED (LOW, 0)`.
-4. Type `STREAM 100` to start real-time 100 ms polling. Move your flag in and out of the beam to verify clean, responsive triggering without glitching. Send `STOP` to halt the stream.
-5. Type `CAL` to enter interactive calibration mode with live millisecond transition timestamps.
+4. Type `MONITOR 100` to start real-time 100 ms polling. Move your flag in and out of the beam to verify clean, responsive triggering without glitching. Send `X` to halt the monitor.
+5. Type `CALIB` to enter interactive calibration mode with live millisecond transition timestamps.
 
 ---
 
@@ -426,7 +435,7 @@ flowchart LR
 
 **Objective:** Verify power rails, ground reference, and basic optical operation before issuing firmware commands.
 
-1. Connect Sensor X to ESP32: VCC → 5V, GND → GND, OUT → GPIO 5.
+1. Connect Sensor X to ESP32: VCC → 5V, GND → GND, OUT → GPIO 3.
 2. Plug the ESP32-S3 SuperMini into USB.
 3. Observe the LEDs on the FC-51 sensor module:
    - **Power LED (Red):** Must be lit continuously.
@@ -455,12 +464,13 @@ MONITOR
 +----------+---------+------------+-------------------+-----------------+
 | Sensor   | Pin     | Raw Level  | Logic State       | Interpretation  |
 +----------+---------+------------+-------------------+-----------------+
-| X-Axis   | GPIO 5  | LOW (0)    | DETECTED          | Obstacle Present|
-| Y-Axis   | GPIO 6  | HIGH (1)   | CLEAR             | Beam Clear      |
+| X-Axis   | GPIO 3  | LOW (0)    | DETECTED          | Obstacle Present|
+| Y-Axis   | GPIO 8  | HIGH (1)   | CLEAR             | Beam Clear      |
 +----------+---------+------------+-------------------+-----------------+
 | Status LED (GPIO 13) : ON  (Obstacle Mirrored)                        |
 | Active Polarity     : NORMAL   (LOW=Detected, HIGH=Clear)             |
 +-----------------------------------------------------------------------+
+```
 ```
 
 #### Step-by-Step Actions:
@@ -689,8 +699,9 @@ Update pin definitions to match our tested ESP32-S3 layout:
 
 ```cpp
 // ── Endstop / Homing Sensors (FC-51 Optical) ─────────────────────────────────
-#define ENDSTOP_X_PIN        5     // IR Sensor X OUT (GPIO 5)
-#define ENDSTOP_Y_PIN        6     // IR Sensor Y OUT (GPIO 6)
+#define ENDSTOP_X_PIN        3     // IR Sensor X OUT (GPIO 3, Pin 8 Left Row)
+#define ENDSTOP_Y_PIN        8     // IR Sensor Y OUT (GPIO 8, Pin 4 Right Row)
+#define LASER_PIN            12    // Laser Control / PWM (GPIO 12, Pin 8 Right Row)
 #define STATUS_LED_PIN       13    // Onboard Status LED
 
 // ── Homing Parameters ────────────────────────────────────────────────────────

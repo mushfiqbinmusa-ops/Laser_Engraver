@@ -10,11 +10,12 @@
 //  LM393 Comparator used as contactless optical homing endstops for X and Y axes.
 //
 //  Default Pinout:
-//    - Sensor X OUT : GPIO 5  (Active LOW on detection)
-//    - Sensor Y OUT : GPIO 6  (Active LOW on detection)
+//    - Sensor X OUT : GPIO 3  (Active LOW on detection)
+//    - Sensor Y OUT : GPIO 8  (Active LOW on detection)
 //    - Status LED   : GPIO 13 (Mirror detection: ON = Obstacle)
 //    - Sensor VCC   : 5V Rail (USB VBUS)
 //    - Sensor GND   : Common GND
+//    - [Laser PWM   : GPIO 12 reserved for Laser Control]
 //
 //  Open Serial Monitor at 115200 baud, type HELP for command list.
 // =============================================================================
@@ -22,9 +23,9 @@
 #include <Arduino.h>
 
 // ── Pin Configuration ────────────────────────────────────────────────────────
-#define SENSOR_X_PIN      5         // IR Sensor X OUT (Homing X-axis)
-#define SENSOR_Y_PIN      6         // IR Sensor Y OUT (Homing Y-axis)
-#define STATUS_LED_PIN    13        // Status / indicator LED (GPIO 13)
+#define SENSOR_X_PIN      3         // IR Sensor X OUT (Homing X-axis, Pin 8 Left Row)
+#define SENSOR_Y_PIN      8         // IR Sensor Y OUT (Homing Y-axis, Pin 4 Right Row)
+#define STATUS_LED_PIN    13        // Status / indicator LED (GPIO 13, Pin 9 Right Row)
 
 // ── ESP32 Core v2.x / v3.x Compatibility Helpers ─────────────────────────────
 inline void setupLEDC(uint8_t pin, uint32_t freq, uint8_t resolution, uint8_t channel) {
@@ -377,7 +378,7 @@ void cmdMonitor(String args) {
   if (pollIntervalMs > 0) {
     // Polling mode
     Serial.printf("[MONITOR] Starting polling monitor every %d ms. Send 'X' to stop.\n", pollIntervalMs);
-    Serial.println("  Timestamp   | Sensor X (GPIO 5)       | Sensor Y (GPIO 6)       | LED");
+    Serial.printf("  Timestamp   | Sensor X (GPIO %-2d)      | Sensor Y (GPIO %-2d)      | LED\n", SENSOR_X_PIN, SENSOR_Y_PIN);
     Serial.println(" -------------+-------------------------+-------------------------+-----");
 
     unsigned long startMs = millis();
@@ -472,8 +473,11 @@ void cmdWatch(String args) {
     return;
   }
 
-  const char* label = (target == 1) ? "Sensor X (GPIO 5)" : (target == 2) ? "Sensor Y (GPIO 6)" : "BOTH Sensors (X & Y)";
-  Serial.printf("[WATCH] Watching %s continuously. Send 'X' to abort.\n", label);
+  char labelBuf[64];
+  if (target == 1) snprintf(labelBuf, sizeof(labelBuf), "Sensor X (GPIO %d)", SENSOR_X_PIN);
+  else if (target == 2) snprintf(labelBuf, sizeof(labelBuf), "Sensor Y (GPIO %d)", SENSOR_Y_PIN);
+  else snprintf(labelBuf, sizeof(labelBuf), "BOTH Sensors (X: GPIO %d & Y: GPIO %d)", SENSOR_X_PIN, SENSOR_Y_PIN);
+  Serial.printf("[WATCH] Watching %s continuously. Send 'X' to abort.\n", labelBuf);
 
   bool lastX = isObstacleDetected(SENSOR_X_PIN);
   bool lastY = isObstacleDetected(SENSOR_Y_PIN);
@@ -489,8 +493,8 @@ void cmdWatch(String args) {
       bool curX = isObstacleDetected(SENSOR_X_PIN);
       if (curX != lastX) {
         unsigned long elapsed = millis() - startMs;
-        Serial.printf("  [t=%6lu ms] SENSOR X: %s (Raw GPIO 5 = %d)\n",
-                      elapsed, curX ? "** DETECTED **" : "CLEAR", readRawPin(SENSOR_X_PIN));
+        Serial.printf("  [t=%6lu ms] SENSOR X: %s (Raw GPIO %d = %d)\n",
+                      elapsed, curX ? "** DETECTED **" : "CLEAR", SENSOR_X_PIN, readRawPin(SENSOR_X_PIN));
         if (curX) recordTriggerEvent(SENSOR_X_PIN);
         else recordReleaseEvent(SENSOR_X_PIN);
         lastX = curX;
@@ -502,8 +506,8 @@ void cmdWatch(String args) {
       bool curY = isObstacleDetected(SENSOR_Y_PIN);
       if (curY != lastY) {
         unsigned long elapsed = millis() - startMs;
-        Serial.printf("  [t=%6lu ms] SENSOR Y: %s (Raw GPIO 6 = %d)\n",
-                      elapsed, curY ? "** DETECTED **" : "CLEAR", readRawPin(SENSOR_Y_PIN));
+        Serial.printf("  [t=%6lu ms] SENSOR Y: %s (Raw GPIO %d = %d)\n",
+                      elapsed, curY ? "** DETECTED **" : "CLEAR", SENSOR_Y_PIN, readRawPin(SENSOR_Y_PIN));
         if (curY) recordTriggerEvent(SENSOR_Y_PIN);
         else recordReleaseEvent(SENSOR_Y_PIN);
         lastY = curY;
@@ -566,7 +570,7 @@ void cmdCalib() {
 
   unsigned long triggerTimeUs = micros();
   Serial.println("\n  >>> TRIGGER DETECTED! <<<");
-  Serial.println("  [OK] Sensor X switched to DETECTED (LOW on GPIO 5).");
+  Serial.printf("  [OK] Sensor X switched to DETECTED (LOW on GPIO %d).\n", SENSOR_X_PIN);
 
   // Check transition bounce
   int bounces = 0;
@@ -684,7 +688,7 @@ void cmdDebounce(String args) {
     if (samples < 100) samples = 100;
     if (samples > 50000) samples = 50000;
 
-    Serial.printf("[DEBOUNCE] Taking %d rapid samples on Sensor X (GPIO 5)...\n", samples);
+    Serial.printf("[DEBOUNCE] Taking %d rapid samples on Sensor X (GPIO %d)...\n", samples, SENSOR_X_PIN);
     int highCount = 0;
     int lowCount  = 0;
     int transitions = 0;
@@ -848,7 +852,7 @@ void cmdEdges(String args) {
 // ── RESPONSE TIME ────────────────────────────────────────────────────────────
 void cmdResponse() {
   Serial.println("\n[RESPONSE] Response Time & Transition Latency Test.");
-  Serial.println("           Wave an object rapidly past Sensor X (GPIO 5)... (Send 'X' to abort)");
+  Serial.printf("           Wave an object rapidly past Sensor X (GPIO %d)... (Send 'X' to abort)\n", SENSOR_X_PIN);
 
   // Wait for initial clear
   while (isObstacleDetected(SENSOR_X_PIN)) {

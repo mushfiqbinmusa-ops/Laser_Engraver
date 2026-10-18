@@ -1,0 +1,3809 @@
+{
+  "nodes": [
+    {
+      "id": "laser_engraver_firmware_config",
+      "label": "config.h",
+      "file_type": "code",
+      "source_file": "laser-engraver-firmware/config.h",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_firmware_gcode_parser_cpp_laser_engraver_firmware_gcode_parser",
+      "label": "gcode_parser.cpp",
+      "file_type": "code",
+      "source_file": "laser-engraver-firmware/gcode_parser.cpp",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_firmware_gcode_parser_parsecommand",
+      "label": "parseCommand()",
+      "file_type": "code",
+      "source_file": "laser-engraver-firmware/gcode_parser.cpp",
+      "source_location": "L3",
+      "_callable": true,
+      "metadata": {
+        "unresolved_calls": [
+          {
+            "callee": "trim",
+            "receiver_type": "String",
+            "lang": "cpp",
+            "line": "L5"
+          },
+          {
+            "callee": "length",
+            "receiver_type": "String",
+            "lang": "cpp",
+            "line": "L6"
+          },
+          {
+            "callee": "indexOf",
+            "receiver_type": "String",
+            "lang": "cpp",
+            "line": "L21"
+          },
+          {
+            "callee": "substring",
+            "receiver_type": "String",
+            "lang": "cpp",
+            "line": "L27"
+          },
+          {
+            "callee": "startsWith",
+            "receiver_type": "String",
+            "lang": "cpp",
+            "line": "L38"
+          }
+        ]
+      },
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_firmware_gcode_parser_cpp_string",
+      "label": "String",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast"
+    },
+    {
+      "id": "gcodecommand",
+      "label": "GCodeCommand",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_firmware_gcode_parser_h_laser_engraver_firmware_gcode_parser",
+      "label": "gcode_parser.h",
+      "file_type": "code",
+      "source_file": "laser-engraver-firmware/gcode_parser.h",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_firmware_homing_cpp_laser_engraver_firmware_homing",
+      "label": "homing.cpp",
+      "file_type": "code",
+      "source_file": "laser-engraver-firmware/homing.cpp",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_firmware_homing_h_laser_engraver_firmware_homing",
+      "label": "homing.h",
+      "file_type": "code",
+      "source_file": "laser-engraver-firmware/homing.h",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_firmware_homing_homingcontroller",
+      "label": "HomingController",
+      "file_type": "code",
+      "source_file": "laser-engraver-firmware/homing.h",
+      "source_location": "L5",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_firmware_homing_homingcontroller_begin",
+      "label": ".begin()",
+      "file_type": "code",
+      "source_file": "laser-engraver-firmware/homing.h",
+      "source_location": "L7",
+      "_callable": true,
+      "definition_file": "laser-engraver-firmware/homing.cpp",
+      "definition_location": "L4",
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_firmware_homing_homingcontroller_homex",
+      "label": ".homeX()",
+      "file_type": "code",
+      "source_file": "laser-engraver-firmware/homing.h",
+      "source_location": "L8",
+      "_callable": true,
+      "definition_file": "laser-engraver-firmware/homing.cpp",
+      "definition_location": "L13",
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_firmware_homing_homingcontroller_homey",
+      "label": ".homeY()",
+      "file_type": "code",
+      "source_file": "laser-engraver-firmware/homing.h",
+      "source_location": "L9",
+      "_callable": true,
+      "definition_file": "laser-engraver-firmware/homing.cpp",
+      "definition_location": "L18",
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_firmware_homing_homingcontroller_homeall",
+      "label": ".homeAll()",
+      "file_type": "code",
+      "source_file": "laser-engraver-firmware/homing.h",
+      "source_location": "L10",
+      "_callable": true,
+      "definition_file": "laser-engraver-firmware/homing.cpp",
+      "definition_location": "L23",
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_firmware_homing_homingcontroller_readendstop",
+      "label": ".readEndstop()",
+      "file_type": "code",
+      "source_file": "laser-engraver-firmware/homing.h",
+      "source_location": "L13",
+      "_callable": true,
+      "definition_file": "laser-engraver-firmware/homing.cpp",
+      "definition_location": "L9",
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_firmware_laser_cpp_laser_engraver_firmware_laser",
+      "label": "laser.cpp",
+      "file_type": "code",
+      "source_file": "laser-engraver-firmware/laser.cpp",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_firmware_laser_h_laser_engraver_firmware_laser",
+      "label": "laser.h",
+      "file_type": "code",
+      "source_file": "laser-engraver-firmware/laser.h",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_firmware_laser_lasercontroller",
+      "label": "LaserController",
+      "file_type": "code",
+      "source_file": "laser-engraver-firmware/laser.h",
+      "source_location": "L5",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_firmware_laser_lasercontroller_begin",
+      "label": ".begin()",
+      "file_type": "code",
+      "source_file": "laser-engraver-firmware/laser.h",
+      "source_location": "L7",
+      "_callable": true,
+      "definition_file": "laser-engraver-firmware/laser.cpp",
+      "definition_location": "L4",
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_firmware_laser_lasercontroller_setduty",
+      "label": ".setDuty()",
+      "file_type": "code",
+      "source_file": "laser-engraver-firmware/laser.h",
+      "source_location": "L8",
+      "_callable": true,
+      "definition_file": "laser-engraver-firmware/laser.cpp",
+      "definition_location": "L10",
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_firmware_laser_lasercontroller_off",
+      "label": ".off()",
+      "file_type": "code",
+      "source_file": "laser-engraver-firmware/laser.h",
+      "source_location": "L9",
+      "_callable": true,
+      "definition_file": "laser-engraver-firmware/laser.cpp",
+      "definition_location": "L15",
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_firmware_laser_lasercontroller_on",
+      "label": ".on()",
+      "file_type": "code",
+      "source_file": "laser-engraver-firmware/laser.h",
+      "source_location": "L10",
+      "_callable": true,
+      "definition_file": "laser-engraver-firmware/laser.cpp",
+      "definition_location": "L20",
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_firmware_laser_lasercontroller_getduty",
+      "label": ".getDuty()",
+      "file_type": "code",
+      "source_file": "laser-engraver-firmware/laser.h",
+      "source_location": "L11",
+      "_callable": true,
+      "definition_file": "laser-engraver-firmware/laser.cpp",
+      "definition_location": "L24",
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_firmware_laser_lasercontroller_duty",
+      "label": "duty_",
+      "file_type": "code",
+      "source_file": "laser-engraver-firmware/laser.h",
+      "source_location": "L14",
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_firmware_motion_cpp_laser_engraver_firmware_motion",
+      "label": "motion.cpp",
+      "file_type": "code",
+      "source_file": "laser-engraver-firmware/motion.cpp",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_firmware_motion_h_laser_engraver_firmware_motion",
+      "label": "motion.h",
+      "file_type": "code",
+      "source_file": "laser-engraver-firmware/motion.h",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_firmware_motion_motioncontroller",
+      "label": "MotionController",
+      "file_type": "code",
+      "source_file": "laser-engraver-firmware/motion.h",
+      "source_location": "L5",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_firmware_motion_motioncontroller_begin",
+      "label": ".begin()",
+      "file_type": "code",
+      "source_file": "laser-engraver-firmware/motion.h",
+      "source_location": "L7",
+      "_callable": true,
+      "definition_file": "laser-engraver-firmware/motion.cpp",
+      "definition_location": "L4",
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_firmware_motion_motioncontroller_moveto",
+      "label": ".moveTo()",
+      "file_type": "code",
+      "source_file": "laser-engraver-firmware/motion.h",
+      "source_location": "L8",
+      "_callable": true,
+      "definition_file": "laser-engraver-firmware/motion.cpp",
+      "definition_location": "L28",
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_firmware_motion_motioncontroller_setposition",
+      "label": ".setPosition()",
+      "file_type": "code",
+      "source_file": "laser-engraver-firmware/motion.h",
+      "source_location": "L9",
+      "_callable": true,
+      "definition_file": "laser-engraver-firmware/motion.cpp",
+      "definition_location": "L15",
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_firmware_motion_motioncontroller_x",
+      "label": ".x()",
+      "file_type": "code",
+      "source_file": "laser-engraver-firmware/motion.h",
+      "source_location": "L10",
+      "_callable": true,
+      "definition_file": "laser-engraver-firmware/motion.cpp",
+      "definition_location": "L20",
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_firmware_motion_motioncontroller_y",
+      "label": ".y()",
+      "file_type": "code",
+      "source_file": "laser-engraver-firmware/motion.h",
+      "source_location": "L11",
+      "_callable": true,
+      "definition_file": "laser-engraver-firmware/motion.cpp",
+      "definition_location": "L24",
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_firmware_status_cpp_laser_engraver_firmware_status",
+      "label": "status.cpp",
+      "file_type": "code",
+      "source_file": "laser-engraver-firmware/status.cpp",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_firmware_status_serializestatus",
+      "label": "serializeStatus()",
+      "file_type": "code",
+      "source_file": "laser-engraver-firmware/status.cpp",
+      "source_location": "L3",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_firmware_status_cpp_string",
+      "label": "String",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast"
+    },
+    {
+      "id": "machinestatus",
+      "label": "MachineStatus",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_firmware_status_h_laser_engraver_firmware_status",
+      "label": "status.h",
+      "file_type": "code",
+      "source_file": "laser-engraver-firmware/status.h",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_firmware_wifi_server_cpp_laser_engraver_firmware_wifi_server",
+      "label": "wifi_server.cpp",
+      "file_type": "code",
+      "source_file": "laser-engraver-firmware/wifi_server.cpp",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_firmware_wifi_server_cpp_string",
+      "label": "String",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_firmware_wifi_server_h_laser_engraver_firmware_wifi_server",
+      "label": "wifi_server.h",
+      "file_type": "code",
+      "source_file": "laser-engraver-firmware/wifi_server.h",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_firmware_wifi_server_wifiservercontroller",
+      "label": "WiFiServerController",
+      "file_type": "code",
+      "source_file": "laser-engraver-firmware/wifi_server.h",
+      "source_location": "L6",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_firmware_wifi_server_wifiservercontroller_begin",
+      "label": ".begin()",
+      "file_type": "code",
+      "source_file": "laser-engraver-firmware/wifi_server.h",
+      "source_location": "L8",
+      "_callable": true,
+      "definition_file": "laser-engraver-firmware/wifi_server.cpp",
+      "definition_location": "L3",
+      "metadata": {
+        "unresolved_calls": [
+          {
+            "callee": "begin",
+            "receiver_type": "WiFi",
+            "lang": "cpp",
+            "line": "L4"
+          },
+          {
+            "callee": "status",
+            "receiver_type": "WiFi",
+            "lang": "cpp",
+            "line": "L5"
+          }
+        ]
+      },
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_firmware_wifi_server_wifiservercontroller_connected",
+      "label": ".connected()",
+      "file_type": "code",
+      "source_file": "laser-engraver-firmware/wifi_server.h",
+      "source_location": "L9",
+      "_callable": true,
+      "definition_file": "laser-engraver-firmware/wifi_server.cpp",
+      "definition_location": "L12",
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_firmware_wifi_server_wifiservercontroller_readcommand",
+      "label": ".readCommand()",
+      "file_type": "code",
+      "source_file": "laser-engraver-firmware/wifi_server.h",
+      "source_location": "L10",
+      "_callable": true,
+      "definition_file": "laser-engraver-firmware/wifi_server.cpp",
+      "definition_location": "L16",
+      "metadata": {
+        "unresolved_calls": [
+          {
+            "callee": "trim",
+            "receiver_type": "String",
+            "lang": "cpp",
+            "line": "L26"
+          }
+        ]
+      },
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_firmware_wifi_server_wifiservercontroller_sendstatus",
+      "label": ".sendStatus()",
+      "file_type": "code",
+      "source_file": "laser-engraver-firmware/wifi_server.h",
+      "source_location": "L11",
+      "_callable": true,
+      "definition_file": "laser-engraver-firmware/wifi_server.cpp",
+      "definition_location": "L30",
+      "_origin": "ast"
+    },
+    {
+      "id": "wifiserver",
+      "label": "WiFiServer",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_firmware_wifi_server_wifiservercontroller_server",
+      "label": "server_",
+      "file_type": "code",
+      "source_file": "laser-engraver-firmware/wifi_server.h",
+      "source_location": "L14",
+      "_origin": "ast"
+    },
+    {
+      "id": "wificlient",
+      "label": "WiFiClient",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_firmware_wifi_server_wifiservercontroller_client",
+      "label": "client_",
+      "file_type": "code",
+      "source_file": "laser-engraver-firmware/wifi_server.h",
+      "source_location": "L15",
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_server_config",
+      "label": "config.py",
+      "file_type": "code",
+      "source_file": "laser-engraver-server/config.py",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_server_config_settings",
+      "label": "Settings",
+      "file_type": "code",
+      "source_file": "laser-engraver-server/config.py",
+      "source_location": "L12",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_server_db_database",
+      "label": "database.py",
+      "file_type": "code",
+      "source_file": "laser-engraver-server/db/database.py",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_server_db_database_init_db",
+      "label": "init_db()",
+      "file_type": "code",
+      "source_file": "laser-engraver-server/db/database.py",
+      "source_location": "L11",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_server_db_database_save_job",
+      "label": "save_job()",
+      "file_type": "code",
+      "source_file": "laser-engraver-server/db/database.py",
+      "source_location": "L29",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_server_db_database_py_any",
+      "label": "Any",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_server_db_database_get_job",
+      "label": "get_job()",
+      "file_type": "code",
+      "source_file": "laser-engraver-server/db/database.py",
+      "source_location": "L43",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_server_esp32_bridge_init",
+      "label": "__init__.py",
+      "file_type": "code",
+      "source_file": "laser-engraver-server/esp32_bridge/__init__.py",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_server_esp32_bridge_init_rationale_1",
+      "label": "Bridge helpers for talking to the ESP32 motion controller.",
+      "file_type": "rationale",
+      "source_file": "laser-engraver-server/esp32_bridge/__init__.py",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_server_esp32_bridge_serial_client",
+      "label": "serial_client.py",
+      "file_type": "code",
+      "source_file": "laser-engraver-server/esp32_bridge/serial_client.py",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_server_esp32_bridge_serial_client_esp32serialclient",
+      "label": "ESP32SerialClient",
+      "file_type": "code",
+      "source_file": "laser-engraver-server/esp32_bridge/serial_client.py",
+      "source_location": "L8",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_server_esp32_bridge_serial_client_esp32serialclient_init",
+      "label": ".__init__()",
+      "file_type": "code",
+      "source_file": "laser-engraver-server/esp32_bridge/serial_client.py",
+      "source_location": "L9",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_server_esp32_bridge_serial_client_esp32serialclient_connect",
+      "label": ".connect()",
+      "file_type": "code",
+      "source_file": "laser-engraver-server/esp32_bridge/serial_client.py",
+      "source_location": "L14",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_server_esp32_bridge_serial_client_esp32serialclient_send_line",
+      "label": ".send_line()",
+      "file_type": "code",
+      "source_file": "laser-engraver-server/esp32_bridge/serial_client.py",
+      "source_location": "L17",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_server_esp32_bridge_serial_client_esp32serialclient_connected",
+      "label": ".connected()",
+      "file_type": "code",
+      "source_file": "laser-engraver-server/esp32_bridge/serial_client.py",
+      "source_location": "L28",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_server_esp32_bridge_serial_client_esp32serialclient_close",
+      "label": ".close()",
+      "file_type": "code",
+      "source_file": "laser-engraver-server/esp32_bridge/serial_client.py",
+      "source_location": "L31",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_server_esp32_bridge_tcp_client",
+      "label": "tcp_client.py",
+      "file_type": "code",
+      "source_file": "laser-engraver-server/esp32_bridge/tcp_client.py",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_server_esp32_bridge_tcp_client_esp32tcpclient",
+      "label": "ESP32TCPClient",
+      "file_type": "code",
+      "source_file": "laser-engraver-server/esp32_bridge/tcp_client.py",
+      "source_location": "L8",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_server_esp32_bridge_tcp_client_esp32tcpclient_init",
+      "label": ".__init__()",
+      "file_type": "code",
+      "source_file": "laser-engraver-server/esp32_bridge/tcp_client.py",
+      "source_location": "L9",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_server_esp32_bridge_tcp_client_esp32tcpclient_connect",
+      "label": ".connect()",
+      "file_type": "code",
+      "source_file": "laser-engraver-server/esp32_bridge/tcp_client.py",
+      "source_location": "L15",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_server_esp32_bridge_tcp_client_esp32tcpclient_send_line",
+      "label": ".send_line()",
+      "file_type": "code",
+      "source_file": "laser-engraver-server/esp32_bridge/tcp_client.py",
+      "source_location": "L18",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_server_esp32_bridge_tcp_client_esp32tcpclient_connected",
+      "label": ".connected()",
+      "file_type": "code",
+      "source_file": "laser-engraver-server/esp32_bridge/tcp_client.py",
+      "source_location": "L31",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_server_esp32_bridge_tcp_client_esp32tcpclient_close",
+      "label": ".close()",
+      "file_type": "code",
+      "source_file": "laser-engraver-server/esp32_bridge/tcp_client.py",
+      "source_location": "L34",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_server_laser_config",
+      "label": "laser_config.py",
+      "file_type": "code",
+      "source_file": "laser-engraver-server/laser_config.py",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_server_main",
+      "label": "main.py",
+      "file_type": "code",
+      "source_file": "laser-engraver-server/main.py",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "get",
+      "label": "get",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_server_main_index",
+      "label": "index()",
+      "file_type": "code",
+      "source_file": "laser-engraver-server/main.py",
+      "source_location": "L40",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "htmlresponse",
+      "label": "HTMLResponse",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_server_main_health",
+      "label": "health()",
+      "file_type": "code",
+      "source_file": "laser-engraver-server/main.py",
+      "source_location": "L45",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_server_main_py_any",
+      "label": "Any",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast"
+    },
+    {
+      "id": "post",
+      "label": "post",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_server_main_home",
+      "label": "home()",
+      "file_type": "code",
+      "source_file": "laser-engraver-server/main.py",
+      "source_location": "L53",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_server_main_laser_power",
+      "label": "laser_power()",
+      "file_type": "code",
+      "source_file": "laser-engraver-server/main.py",
+      "source_location": "L68",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_server_main_upload",
+      "label": "upload()",
+      "file_type": "code",
+      "source_file": "laser-engraver-server/main.py",
+      "source_location": "L87",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "uploadfile",
+      "label": "UploadFile",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_server_main_job_preview",
+      "label": "job_preview()",
+      "file_type": "code",
+      "source_file": "laser-engraver-server/main.py",
+      "source_location": "L124",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "websocket",
+      "label": "websocket",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_server_main_websocket_endpoint",
+      "label": "websocket_endpoint()",
+      "file_type": "code",
+      "source_file": "laser-engraver-server/main.py",
+      "source_location": "L135",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_server_static_app",
+      "label": "app.js",
+      "file_type": "code",
+      "source_file": "laser-engraver-server/static/app.js",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_server_static_app_powerslider",
+      "label": "powerSlider",
+      "file_type": "code",
+      "source_file": "laser-engraver-server/static/app.js",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_server_static_app_powervalue",
+      "label": "powerValue",
+      "file_type": "code",
+      "source_file": "laser-engraver-server/static/app.js",
+      "source_location": "L2",
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_server_static_app_statustag",
+      "label": "statusTag",
+      "file_type": "code",
+      "source_file": "laser-engraver-server/static/app.js",
+      "source_location": "L3",
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_server_static_app_transporttag",
+      "label": "transportTag",
+      "file_type": "code",
+      "source_file": "laser-engraver-server/static/app.js",
+      "source_location": "L4",
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_server_static_app_gcodeoutput",
+      "label": "gcodeOutput",
+      "file_type": "code",
+      "source_file": "laser-engraver-server/static/app.js",
+      "source_location": "L5",
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_server_static_app_previewimage",
+      "label": "previewImage",
+      "file_type": "code",
+      "source_file": "laser-engraver-server/static/app.js",
+      "source_location": "L6",
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_server_static_app_homebtn",
+      "label": "homeBtn",
+      "file_type": "code",
+      "source_file": "laser-engraver-server/static/app.js",
+      "source_location": "L7",
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_server_static_app_uploadform",
+      "label": "uploadForm",
+      "file_type": "code",
+      "source_file": "laser-engraver-server/static/app.js",
+      "source_location": "L8",
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_server_static_app_refreshhealth",
+      "label": "refreshHealth()",
+      "file_type": "code",
+      "source_file": "laser-engraver-server/static/app.js",
+      "source_location": "L52",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_server_svg_processor_init",
+      "label": "__init__.py",
+      "file_type": "code",
+      "source_file": "laser-engraver-server/svg_processor/__init__.py",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_server_svg_processor_gcode_gen",
+      "label": "gcode_gen.py",
+      "file_type": "code",
+      "source_file": "laser-engraver-server/svg_processor/gcode_gen.py",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_server_svg_processor_gcode_gen_generate_gcode",
+      "label": "generate_gcode()",
+      "file_type": "code",
+      "source_file": "laser-engraver-server/svg_processor/gcode_gen.py",
+      "source_location": "L8",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_server_svg_processor_gcode_gen_py_polyline",
+      "label": "Polyline",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_server_svg_processor_parser",
+      "label": "parser.py",
+      "file_type": "code",
+      "source_file": "laser-engraver-server/svg_processor/parser.py",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_server_svg_processor_parser_parse_svg",
+      "label": "parse_svg()",
+      "file_type": "code",
+      "source_file": "laser-engraver-server/svg_processor/parser.py",
+      "source_location": "L16",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_server_svg_processor_parser_py_polyline",
+      "label": "Polyline",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_server_svg_processor_parser_fallback_parse_svg",
+      "label": "_fallback_parse_svg()",
+      "file_type": "code",
+      "source_file": "laser-engraver-server/svg_processor/parser.py",
+      "source_location": "L55",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_server_svg_processor_parser_rationale_17",
+      "label": "Parse SVG content and return a list of polylines.",
+      "file_type": "rationale",
+      "source_file": "laser-engraver-server/svg_processor/parser.py",
+      "source_location": "L17",
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_server_svg_processor_preview",
+      "label": "preview.py",
+      "file_type": "code",
+      "source_file": "laser-engraver-server/svg_processor/preview.py",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_server_svg_processor_preview_render_preview",
+      "label": "render_preview()",
+      "file_type": "code",
+      "source_file": "laser-engraver-server/svg_processor/preview.py",
+      "source_location": "L11",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_server_svg_processor_preview_py_polyline",
+      "label": "Polyline",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_server_svg_processor_preview_render_preview_to_px",
+      "label": "to_px()",
+      "file_type": "code",
+      "source_file": "laser-engraver-server/svg_processor/preview.py",
+      "source_location": "L32",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_server_svg_processor_preview_to_png",
+      "label": "_to_png()",
+      "file_type": "code",
+      "source_file": "laser-engraver-server/svg_processor/preview.py",
+      "source_location": "L51",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "image",
+      "label": "Image",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_server_svg_processor_sorter",
+      "label": "sorter.py",
+      "file_type": "code",
+      "source_file": "laser-engraver-server/svg_processor/sorter.py",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_server_svg_processor_sorter_distance",
+      "label": "_distance()",
+      "file_type": "code",
+      "source_file": "laser-engraver-server/svg_processor/sorter.py",
+      "source_location": "L9",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_server_svg_processor_sorter_sort_paths_nearest_neighbour",
+      "label": "sort_paths_nearest_neighbour()",
+      "file_type": "code",
+      "source_file": "laser-engraver-server/svg_processor/sorter.py",
+      "source_location": "L13",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_server_svg_processor_sorter_py_polyline",
+      "label": "Polyline",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_server_svg_processor_transform",
+      "label": "transform.py",
+      "file_type": "code",
+      "source_file": "laser-engraver-server/svg_processor/transform.py",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_server_svg_processor_transform_fit_to_work_area",
+      "label": "fit_to_work_area()",
+      "file_type": "code",
+      "source_file": "laser-engraver-server/svg_processor/transform.py",
+      "source_location": "L8",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_server_svg_processor_transform_py_polyline",
+      "label": "Polyline",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_server_tests_test_api",
+      "label": "test_api.py",
+      "file_type": "code",
+      "source_file": "laser-engraver-server/tests/test_api.py",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_server_tests_test_api_test_health",
+      "label": "test_health()",
+      "file_type": "code",
+      "source_file": "laser-engraver-server/tests/test_api.py",
+      "source_location": "L8",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_server_tests_test_api_test_upload_svg",
+      "label": "test_upload_svg()",
+      "file_type": "code",
+      "source_file": "laser-engraver-server/tests/test_api.py",
+      "source_location": "L15",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_server_tests_test_svg_processor",
+      "label": "test_svg_processor.py",
+      "file_type": "code",
+      "source_file": "laser-engraver-server/tests/test_svg_processor.py",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_server_tests_test_svg_processor_test_parse_svg_line",
+      "label": "test_parse_svg_line()",
+      "file_type": "code",
+      "source_file": "laser-engraver-server/tests/test_svg_processor.py",
+      "source_location": "L6",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_server_tests_test_svg_processor_test_fit_to_work_area_scales_points",
+      "label": "test_fit_to_work_area_scales_points()",
+      "file_type": "code",
+      "source_file": "laser-engraver-server/tests/test_svg_processor.py",
+      "source_location": "L13",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "laser_engraver_server_tests_test_svg_processor_test_generate_gcode_starts_and_ends_properly",
+      "label": "test_generate_gcode_starts_and_ends_properly()",
+      "file_type": "code",
+      "source_file": "laser-engraver-server/tests/test_svg_processor.py",
+      "source_location": "L21",
+      "_callable": true,
+      "_origin": "ast"
+    }
+  ],
+  "edges": [
+    {
+      "source": "laser_engraver_firmware_config",
+      "target": "arduino",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-firmware/config.h",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_firmware_gcode_parser_cpp_laser_engraver_firmware_gcode_parser",
+      "target": "laser_engraver_firmware_gcode_parser_h_laser_engraver_firmware_gcode_parser",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-firmware/gcode_parser.cpp",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_firmware_gcode_parser_cpp_laser_engraver_firmware_gcode_parser",
+      "target": "laser_engraver_firmware_gcode_parser_parsecommand",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-firmware/gcode_parser.cpp",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_firmware_gcode_parser_parsecommand",
+      "target": "laser_engraver_firmware_gcode_parser_cpp_string",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-firmware/gcode_parser.cpp",
+      "source_location": "L3",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_firmware_gcode_parser_parsecommand",
+      "target": "gcodecommand",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-firmware/gcode_parser.cpp",
+      "source_location": "L3",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_firmware_gcode_parser_h_laser_engraver_firmware_gcode_parser",
+      "target": "arduino",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-firmware/gcode_parser.h",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_firmware_homing_cpp_laser_engraver_firmware_homing",
+      "target": "laser_engraver_firmware_homing_h_laser_engraver_firmware_homing",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-firmware/homing.cpp",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_firmware_homing_cpp_laser_engraver_firmware_homing",
+      "target": "laser_engraver_firmware_config",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-firmware/homing.cpp",
+      "source_location": "L2",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_firmware_homing_cpp_laser_engraver_firmware_homing",
+      "target": "laser_engraver_firmware_homing_homingcontroller_begin",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-firmware/homing.cpp",
+      "source_location": "L4",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_firmware_homing_cpp_laser_engraver_firmware_homing",
+      "target": "laser_engraver_firmware_homing_homingcontroller_readendstop",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-firmware/homing.cpp",
+      "source_location": "L9",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_firmware_homing_cpp_laser_engraver_firmware_homing",
+      "target": "laser_engraver_firmware_homing_homingcontroller_homex",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-firmware/homing.cpp",
+      "source_location": "L13",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_firmware_homing_cpp_laser_engraver_firmware_homing",
+      "target": "laser_engraver_firmware_homing_homingcontroller_homey",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-firmware/homing.cpp",
+      "source_location": "L18",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_firmware_homing_cpp_laser_engraver_firmware_homing",
+      "target": "laser_engraver_firmware_homing_homingcontroller_homeall",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-firmware/homing.cpp",
+      "source_location": "L23",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_firmware_homing_h_laser_engraver_firmware_homing",
+      "target": "arduino",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-firmware/homing.h",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_firmware_homing_h_laser_engraver_firmware_homing",
+      "target": "laser_engraver_firmware_homing_homingcontroller",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-firmware/homing.h",
+      "source_location": "L5",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_firmware_homing_homingcontroller",
+      "target": "laser_engraver_firmware_homing_homingcontroller_begin",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-firmware/homing.h",
+      "source_location": "L7",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_firmware_homing_homingcontroller",
+      "target": "laser_engraver_firmware_homing_homingcontroller_homex",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-firmware/homing.h",
+      "source_location": "L8",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_firmware_homing_homingcontroller",
+      "target": "laser_engraver_firmware_homing_homingcontroller_homey",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-firmware/homing.h",
+      "source_location": "L9",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_firmware_homing_homingcontroller",
+      "target": "laser_engraver_firmware_homing_homingcontroller_homeall",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-firmware/homing.h",
+      "source_location": "L10",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_firmware_homing_homingcontroller",
+      "target": "laser_engraver_firmware_homing_homingcontroller_readendstop",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-firmware/homing.h",
+      "source_location": "L13",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_firmware_laser_cpp_laser_engraver_firmware_laser",
+      "target": "laser_engraver_firmware_laser_h_laser_engraver_firmware_laser",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-firmware/laser.cpp",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_firmware_laser_cpp_laser_engraver_firmware_laser",
+      "target": "laser_engraver_firmware_config",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-firmware/laser.cpp",
+      "source_location": "L2",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_firmware_laser_cpp_laser_engraver_firmware_laser",
+      "target": "laser_engraver_firmware_laser_lasercontroller_begin",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-firmware/laser.cpp",
+      "source_location": "L4",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_firmware_laser_cpp_laser_engraver_firmware_laser",
+      "target": "laser_engraver_firmware_laser_lasercontroller_setduty",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-firmware/laser.cpp",
+      "source_location": "L10",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_firmware_laser_cpp_laser_engraver_firmware_laser",
+      "target": "laser_engraver_firmware_laser_lasercontroller_off",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-firmware/laser.cpp",
+      "source_location": "L15",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_firmware_laser_cpp_laser_engraver_firmware_laser",
+      "target": "laser_engraver_firmware_laser_lasercontroller_on",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-firmware/laser.cpp",
+      "source_location": "L20",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_firmware_laser_cpp_laser_engraver_firmware_laser",
+      "target": "laser_engraver_firmware_laser_lasercontroller_getduty",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-firmware/laser.cpp",
+      "source_location": "L24",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_firmware_laser_h_laser_engraver_firmware_laser",
+      "target": "arduino",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-firmware/laser.h",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_firmware_laser_h_laser_engraver_firmware_laser",
+      "target": "laser_engraver_firmware_laser_lasercontroller",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-firmware/laser.h",
+      "source_location": "L5",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_firmware_laser_lasercontroller",
+      "target": "laser_engraver_firmware_laser_lasercontroller_begin",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-firmware/laser.h",
+      "source_location": "L7",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_firmware_laser_lasercontroller",
+      "target": "laser_engraver_firmware_laser_lasercontroller_setduty",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-firmware/laser.h",
+      "source_location": "L8",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_firmware_laser_lasercontroller",
+      "target": "laser_engraver_firmware_laser_lasercontroller_off",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-firmware/laser.h",
+      "source_location": "L9",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_firmware_laser_lasercontroller",
+      "target": "laser_engraver_firmware_laser_lasercontroller_on",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-firmware/laser.h",
+      "source_location": "L10",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_firmware_laser_lasercontroller",
+      "target": "laser_engraver_firmware_laser_lasercontroller_getduty",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-firmware/laser.h",
+      "source_location": "L11",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_firmware_laser_lasercontroller",
+      "target": "laser_engraver_firmware_laser_lasercontroller_duty",
+      "relation": "defines",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-firmware/laser.h",
+      "source_location": "L14",
+      "weight": 1.0,
+      "context": "field",
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_firmware_motion_cpp_laser_engraver_firmware_motion",
+      "target": "laser_engraver_firmware_motion_h_laser_engraver_firmware_motion",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-firmware/motion.cpp",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_firmware_motion_cpp_laser_engraver_firmware_motion",
+      "target": "laser_engraver_firmware_config",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-firmware/motion.cpp",
+      "source_location": "L2",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_firmware_motion_cpp_laser_engraver_firmware_motion",
+      "target": "laser_engraver_firmware_motion_motioncontroller_begin",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-firmware/motion.cpp",
+      "source_location": "L4",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_firmware_motion_cpp_laser_engraver_firmware_motion",
+      "target": "laser_engraver_firmware_motion_motioncontroller_setposition",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-firmware/motion.cpp",
+      "source_location": "L15",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_firmware_motion_cpp_laser_engraver_firmware_motion",
+      "target": "laser_engraver_firmware_motion_motioncontroller_x",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-firmware/motion.cpp",
+      "source_location": "L20",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_firmware_motion_cpp_laser_engraver_firmware_motion",
+      "target": "laser_engraver_firmware_motion_motioncontroller_y",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-firmware/motion.cpp",
+      "source_location": "L24",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_firmware_motion_cpp_laser_engraver_firmware_motion",
+      "target": "laser_engraver_firmware_motion_motioncontroller_moveto",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-firmware/motion.cpp",
+      "source_location": "L28",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_firmware_motion_h_laser_engraver_firmware_motion",
+      "target": "arduino",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-firmware/motion.h",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_firmware_motion_h_laser_engraver_firmware_motion",
+      "target": "laser_engraver_firmware_motion_motioncontroller",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-firmware/motion.h",
+      "source_location": "L5",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_firmware_motion_motioncontroller",
+      "target": "laser_engraver_firmware_motion_motioncontroller_begin",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-firmware/motion.h",
+      "source_location": "L7",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_firmware_motion_motioncontroller",
+      "target": "laser_engraver_firmware_motion_motioncontroller_moveto",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-firmware/motion.h",
+      "source_location": "L8",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_firmware_motion_motioncontroller",
+      "target": "laser_engraver_firmware_motion_motioncontroller_setposition",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-firmware/motion.h",
+      "source_location": "L9",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_firmware_motion_motioncontroller",
+      "target": "laser_engraver_firmware_motion_motioncontroller_x",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-firmware/motion.h",
+      "source_location": "L10",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_firmware_motion_motioncontroller",
+      "target": "laser_engraver_firmware_motion_motioncontroller_y",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-firmware/motion.h",
+      "source_location": "L11",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_firmware_motion_motioncontroller",
+      "target": "laser_engraver_firmware_motion_motioncontroller_x",
+      "relation": "defines",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-firmware/motion.h",
+      "source_location": "L14",
+      "weight": 1.0,
+      "context": "field",
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_firmware_motion_motioncontroller",
+      "target": "laser_engraver_firmware_motion_motioncontroller_y",
+      "relation": "defines",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-firmware/motion.h",
+      "source_location": "L15",
+      "weight": 1.0,
+      "context": "field",
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_firmware_status_cpp_laser_engraver_firmware_status",
+      "target": "laser_engraver_firmware_status_h_laser_engraver_firmware_status",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-firmware/status.cpp",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_firmware_status_cpp_laser_engraver_firmware_status",
+      "target": "laser_engraver_firmware_status_serializestatus",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-firmware/status.cpp",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_firmware_status_serializestatus",
+      "target": "laser_engraver_firmware_status_cpp_string",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-firmware/status.cpp",
+      "source_location": "L3",
+      "weight": 1.0,
+      "context": "return_type",
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_firmware_status_serializestatus",
+      "target": "machinestatus",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-firmware/status.cpp",
+      "source_location": "L3",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_firmware_status_h_laser_engraver_firmware_status",
+      "target": "arduino",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-firmware/status.h",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_firmware_wifi_server_cpp_laser_engraver_firmware_wifi_server",
+      "target": "laser_engraver_firmware_wifi_server_h_laser_engraver_firmware_wifi_server",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-firmware/wifi_server.cpp",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_firmware_wifi_server_cpp_laser_engraver_firmware_wifi_server",
+      "target": "laser_engraver_firmware_wifi_server_wifiservercontroller_begin",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-firmware/wifi_server.cpp",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_firmware_wifi_server_cpp_laser_engraver_firmware_wifi_server",
+      "target": "laser_engraver_firmware_wifi_server_wifiservercontroller_connected",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-firmware/wifi_server.cpp",
+      "source_location": "L12",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_firmware_wifi_server_cpp_laser_engraver_firmware_wifi_server",
+      "target": "laser_engraver_firmware_wifi_server_wifiservercontroller_readcommand",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-firmware/wifi_server.cpp",
+      "source_location": "L16",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_firmware_wifi_server_wifiservercontroller_readcommand",
+      "target": "laser_engraver_firmware_wifi_server_cpp_string",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-firmware/wifi_server.cpp",
+      "source_location": "L16",
+      "weight": 1.0,
+      "context": "return_type",
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_firmware_wifi_server_cpp_laser_engraver_firmware_wifi_server",
+      "target": "laser_engraver_firmware_wifi_server_wifiservercontroller_sendstatus",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-firmware/wifi_server.cpp",
+      "source_location": "L30",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_firmware_wifi_server_wifiservercontroller_sendstatus",
+      "target": "laser_engraver_firmware_wifi_server_cpp_string",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-firmware/wifi_server.cpp",
+      "source_location": "L30",
+      "weight": 1.0,
+      "context": "parameter_type",
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_firmware_wifi_server_h_laser_engraver_firmware_wifi_server",
+      "target": "arduino",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-firmware/wifi_server.h",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_firmware_wifi_server_h_laser_engraver_firmware_wifi_server",
+      "target": "wifi",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-firmware/wifi_server.h",
+      "source_location": "L4",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_firmware_wifi_server_h_laser_engraver_firmware_wifi_server",
+      "target": "laser_engraver_firmware_wifi_server_wifiservercontroller",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-firmware/wifi_server.h",
+      "source_location": "L6",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_firmware_wifi_server_wifiservercontroller",
+      "target": "laser_engraver_firmware_wifi_server_wifiservercontroller_begin",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-firmware/wifi_server.h",
+      "source_location": "L8",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_firmware_wifi_server_wifiservercontroller",
+      "target": "laser_engraver_firmware_wifi_server_wifiservercontroller_connected",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-firmware/wifi_server.h",
+      "source_location": "L9",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_firmware_wifi_server_wifiservercontroller",
+      "target": "laser_engraver_firmware_wifi_server_wifiservercontroller_readcommand",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-firmware/wifi_server.h",
+      "source_location": "L10",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_firmware_wifi_server_wifiservercontroller",
+      "target": "laser_engraver_firmware_wifi_server_wifiservercontroller_sendstatus",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-firmware/wifi_server.h",
+      "source_location": "L11",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_firmware_wifi_server_wifiservercontroller",
+      "target": "wifiserver",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-firmware/wifi_server.h",
+      "source_location": "L14",
+      "weight": 1.0,
+      "context": "field",
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_firmware_wifi_server_wifiservercontroller",
+      "target": "laser_engraver_firmware_wifi_server_wifiservercontroller_server",
+      "relation": "defines",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-firmware/wifi_server.h",
+      "source_location": "L14",
+      "weight": 1.0,
+      "context": "field",
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_firmware_wifi_server_wifiservercontroller",
+      "target": "wificlient",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-firmware/wifi_server.h",
+      "source_location": "L15",
+      "weight": 1.0,
+      "context": "field",
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_firmware_wifi_server_wifiservercontroller",
+      "target": "laser_engraver_firmware_wifi_server_wifiservercontroller_client",
+      "relation": "defines",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-firmware/wifi_server.h",
+      "source_location": "L15",
+      "weight": 1.0,
+      "context": "field",
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_config",
+      "target": "dataclasses",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/config.py",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_config",
+      "target": "pathlib",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/config.py",
+      "source_location": "L4",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_config",
+      "target": "laser_engraver_server_config_settings",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/config.py",
+      "source_location": "L12",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_db_database",
+      "target": "sqlite3",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/db/database.py",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_db_database",
+      "target": "pathlib",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/db/database.py",
+      "source_location": "L4",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_db_database",
+      "target": "typing",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/db/database.py",
+      "source_location": "L5",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_db_database",
+      "target": "laser_engraver_server_db_database_init_db",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/db/database.py",
+      "source_location": "L11",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_db_database",
+      "target": "laser_engraver_server_db_database_save_job",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/db/database.py",
+      "source_location": "L29",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_db_database_save_job",
+      "target": "laser_engraver_server_db_database_py_any",
+      "relation": "references",
+      "context": "generic_arg",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/db/database.py",
+      "source_location": "L29",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_db_database",
+      "target": "laser_engraver_server_db_database_get_job",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/db/database.py",
+      "source_location": "L43",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_db_database_get_job",
+      "target": "laser_engraver_server_db_database_py_any",
+      "relation": "references",
+      "context": "generic_arg",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/db/database.py",
+      "source_location": "L43",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_esp32_bridge_init_rationale_1",
+      "target": "laser_engraver_server_esp32_bridge_init",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/esp32_bridge/__init__.py",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_esp32_bridge_serial_client",
+      "target": "typing",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/esp32_bridge/serial_client.py",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_esp32_bridge_serial_client",
+      "target": "serial",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/esp32_bridge/serial_client.py",
+      "source_location": "L5",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_esp32_bridge_serial_client",
+      "target": "laser_engraver_server_esp32_bridge_serial_client_esp32serialclient",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/esp32_bridge/serial_client.py",
+      "source_location": "L8",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_esp32_bridge_serial_client_esp32serialclient",
+      "target": "laser_engraver_server_esp32_bridge_serial_client_esp32serialclient_init",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/esp32_bridge/serial_client.py",
+      "source_location": "L9",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_esp32_bridge_serial_client_esp32serialclient",
+      "target": "laser_engraver_server_esp32_bridge_serial_client_esp32serialclient_connect",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/esp32_bridge/serial_client.py",
+      "source_location": "L14",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_esp32_bridge_serial_client_esp32serialclient",
+      "target": "laser_engraver_server_esp32_bridge_serial_client_esp32serialclient_send_line",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/esp32_bridge/serial_client.py",
+      "source_location": "L17",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_esp32_bridge_serial_client_esp32serialclient",
+      "target": "laser_engraver_server_esp32_bridge_serial_client_esp32serialclient_connected",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/esp32_bridge/serial_client.py",
+      "source_location": "L28",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_esp32_bridge_serial_client_esp32serialclient",
+      "target": "laser_engraver_server_esp32_bridge_serial_client_esp32serialclient_close",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/esp32_bridge/serial_client.py",
+      "source_location": "L31",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_esp32_bridge_tcp_client",
+      "target": "asyncio",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/esp32_bridge/tcp_client.py",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_esp32_bridge_tcp_client",
+      "target": "socket",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/esp32_bridge/tcp_client.py",
+      "source_location": "L4",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_esp32_bridge_tcp_client",
+      "target": "typing",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/esp32_bridge/tcp_client.py",
+      "source_location": "L5",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_esp32_bridge_tcp_client",
+      "target": "laser_engraver_server_esp32_bridge_tcp_client_esp32tcpclient",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/esp32_bridge/tcp_client.py",
+      "source_location": "L8",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_esp32_bridge_tcp_client_esp32tcpclient",
+      "target": "laser_engraver_server_esp32_bridge_tcp_client_esp32tcpclient_init",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/esp32_bridge/tcp_client.py",
+      "source_location": "L9",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_esp32_bridge_tcp_client_esp32tcpclient",
+      "target": "laser_engraver_server_esp32_bridge_tcp_client_esp32tcpclient_connect",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/esp32_bridge/tcp_client.py",
+      "source_location": "L15",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_esp32_bridge_tcp_client_esp32tcpclient",
+      "target": "laser_engraver_server_esp32_bridge_tcp_client_esp32tcpclient_send_line",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/esp32_bridge/tcp_client.py",
+      "source_location": "L18",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_esp32_bridge_tcp_client_esp32tcpclient",
+      "target": "laser_engraver_server_esp32_bridge_tcp_client_esp32tcpclient_connected",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/esp32_bridge/tcp_client.py",
+      "source_location": "L31",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_esp32_bridge_tcp_client_esp32tcpclient",
+      "target": "laser_engraver_server_esp32_bridge_tcp_client_esp32tcpclient_close",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/esp32_bridge/tcp_client.py",
+      "source_location": "L34",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_main",
+      "target": "json",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/main.py",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_main",
+      "target": "pathlib",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/main.py",
+      "source_location": "L4",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_main",
+      "target": "typing",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/main.py",
+      "source_location": "L5",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_main",
+      "target": "fastapi",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/main.py",
+      "source_location": "L7",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_main",
+      "target": "fastapi_middleware_cors",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/main.py",
+      "source_location": "L8",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_main",
+      "target": "fastapi_responses",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/main.py",
+      "source_location": "L9",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_main",
+      "target": "fastapi_staticfiles",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/main.py",
+      "source_location": "L10",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_main",
+      "target": "laser_engraver_server_config",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/main.py",
+      "source_location": "L12",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_main",
+      "target": "laser_engraver_server_db_database",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/main.py",
+      "source_location": "L13",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_main",
+      "target": "laser_engraver_server_esp32_bridge_serial_client",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/main.py",
+      "source_location": "L14",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_main",
+      "target": "laser_engraver_server_esp32_bridge_tcp_client",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/main.py",
+      "source_location": "L15",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_main",
+      "target": "laser_engraver_server_svg_processor_gcode_gen",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/main.py",
+      "source_location": "L16",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_main",
+      "target": "laser_engraver_server_svg_processor_parser",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/main.py",
+      "source_location": "L17",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_main",
+      "target": "laser_engraver_server_svg_processor_preview",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/main.py",
+      "source_location": "L18",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_main",
+      "target": "laser_engraver_server_svg_processor_sorter",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/main.py",
+      "source_location": "L19",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_main",
+      "target": "laser_engraver_server_svg_processor_transform",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/main.py",
+      "source_location": "L20",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_main_index",
+      "target": "get",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/main.py",
+      "source_location": "L39",
+      "weight": 1.0,
+      "context": "decorator",
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_main",
+      "target": "laser_engraver_server_main_index",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/main.py",
+      "source_location": "L40",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_main_index",
+      "target": "htmlresponse",
+      "relation": "references",
+      "context": "return_type",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/main.py",
+      "source_location": "L40",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_main_health",
+      "target": "get",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/main.py",
+      "source_location": "L44",
+      "weight": 1.0,
+      "context": "decorator",
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_main",
+      "target": "laser_engraver_server_main_health",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/main.py",
+      "source_location": "L45",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_main_health",
+      "target": "laser_engraver_server_main_py_any",
+      "relation": "references",
+      "context": "generic_arg",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/main.py",
+      "source_location": "L45",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_main_home",
+      "target": "post",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/main.py",
+      "source_location": "L52",
+      "weight": 1.0,
+      "context": "decorator",
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_main",
+      "target": "laser_engraver_server_main_home",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/main.py",
+      "source_location": "L53",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_main_home",
+      "target": "laser_engraver_server_main_py_any",
+      "relation": "references",
+      "context": "generic_arg",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/main.py",
+      "source_location": "L53",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_main_laser_power",
+      "target": "post",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/main.py",
+      "source_location": "L67",
+      "weight": 1.0,
+      "context": "decorator",
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_main",
+      "target": "laser_engraver_server_main_laser_power",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/main.py",
+      "source_location": "L68",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_main_laser_power",
+      "target": "laser_engraver_server_main_py_any",
+      "relation": "references",
+      "context": "generic_arg",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/main.py",
+      "source_location": "L68",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_main_upload",
+      "target": "post",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/main.py",
+      "source_location": "L86",
+      "weight": 1.0,
+      "context": "decorator",
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_main",
+      "target": "laser_engraver_server_main_upload",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/main.py",
+      "source_location": "L87",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_main_upload",
+      "target": "uploadfile",
+      "relation": "references",
+      "context": "parameter_type",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/main.py",
+      "source_location": "L87",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_main_upload",
+      "target": "laser_engraver_server_main_py_any",
+      "relation": "references",
+      "context": "generic_arg",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/main.py",
+      "source_location": "L87",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_main_job_preview",
+      "target": "get",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/main.py",
+      "source_location": "L123",
+      "weight": 1.0,
+      "context": "decorator",
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_main",
+      "target": "laser_engraver_server_main_job_preview",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/main.py",
+      "source_location": "L124",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_main_websocket_endpoint",
+      "target": "websocket",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/main.py",
+      "source_location": "L134",
+      "weight": 1.0,
+      "context": "decorator",
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_main",
+      "target": "laser_engraver_server_main_websocket_endpoint",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/main.py",
+      "source_location": "L135",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_main_websocket_endpoint",
+      "target": "websocket",
+      "relation": "references",
+      "context": "parameter_type",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/main.py",
+      "source_location": "L135",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_main",
+      "target": "uvicorn",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/main.py",
+      "source_location": "L151",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_static_app",
+      "target": "laser_engraver_server_static_app_powerslider",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/static/app.js",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_static_app",
+      "target": "laser_engraver_server_static_app_powervalue",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/static/app.js",
+      "source_location": "L2",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_static_app",
+      "target": "laser_engraver_server_static_app_statustag",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/static/app.js",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_static_app",
+      "target": "laser_engraver_server_static_app_transporttag",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/static/app.js",
+      "source_location": "L4",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_static_app",
+      "target": "laser_engraver_server_static_app_gcodeoutput",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/static/app.js",
+      "source_location": "L5",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_static_app",
+      "target": "laser_engraver_server_static_app_previewimage",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/static/app.js",
+      "source_location": "L6",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_static_app",
+      "target": "laser_engraver_server_static_app_homebtn",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/static/app.js",
+      "source_location": "L7",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_static_app",
+      "target": "laser_engraver_server_static_app_uploadform",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/static/app.js",
+      "source_location": "L8",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_static_app",
+      "target": "laser_engraver_server_static_app_refreshhealth",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/static/app.js",
+      "source_location": "L52",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_static_app",
+      "target": "laser_engraver_server_static_app_refreshhealth",
+      "relation": "indirect_call",
+      "context": "argument",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "laser-engraver-server/static/app.js",
+      "source_location": "L63",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_svg_processor_init",
+      "target": "laser_engraver_server_svg_processor_parser",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/svg_processor/__init__.py",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_svg_processor_init",
+      "target": "laser_engraver_server_svg_processor_transform",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/svg_processor/__init__.py",
+      "source_location": "L2",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_svg_processor_init",
+      "target": "laser_engraver_server_svg_processor_sorter",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/svg_processor/__init__.py",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_svg_processor_init",
+      "target": "laser_engraver_server_svg_processor_gcode_gen",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/svg_processor/__init__.py",
+      "source_location": "L4",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_svg_processor_init",
+      "target": "laser_engraver_server_svg_processor_preview",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/svg_processor/__init__.py",
+      "source_location": "L5",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_svg_processor_gcode_gen",
+      "target": "typing",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/svg_processor/gcode_gen.py",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_svg_processor_gcode_gen",
+      "target": "laser_engraver_server_svg_processor_gcode_gen_generate_gcode",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/svg_processor/gcode_gen.py",
+      "source_location": "L8",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_svg_processor_gcode_gen_generate_gcode",
+      "target": "laser_engraver_server_svg_processor_gcode_gen_py_polyline",
+      "relation": "references",
+      "context": "generic_arg",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/svg_processor/gcode_gen.py",
+      "source_location": "L8",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_svg_processor_parser",
+      "target": "os",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/svg_processor/parser.py",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_svg_processor_parser",
+      "target": "re",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/svg_processor/parser.py",
+      "source_location": "L4",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_svg_processor_parser",
+      "target": "tempfile",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/svg_processor/parser.py",
+      "source_location": "L5",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_svg_processor_parser",
+      "target": "typing",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/svg_processor/parser.py",
+      "source_location": "L6",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_svg_processor_parser",
+      "target": "svgpathtools",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/svg_processor/parser.py",
+      "source_location": "L9",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_svg_processor_parser",
+      "target": "laser_engraver_server_svg_processor_parser_parse_svg",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/svg_processor/parser.py",
+      "source_location": "L16",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_svg_processor_parser_parse_svg",
+      "target": "laser_engraver_server_svg_processor_parser_py_polyline",
+      "relation": "references",
+      "context": "generic_arg",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/svg_processor/parser.py",
+      "source_location": "L16",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_svg_processor_parser",
+      "target": "laser_engraver_server_svg_processor_parser_fallback_parse_svg",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/svg_processor/parser.py",
+      "source_location": "L55",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_svg_processor_parser_fallback_parse_svg",
+      "target": "laser_engraver_server_svg_processor_parser_py_polyline",
+      "relation": "references",
+      "context": "generic_arg",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/svg_processor/parser.py",
+      "source_location": "L55",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_svg_processor_parser_parse_svg",
+      "target": "laser_engraver_server_svg_processor_parser_fallback_parse_svg",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/svg_processor/parser.py",
+      "source_location": "L52",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_svg_processor_parser_rationale_17",
+      "target": "laser_engraver_server_svg_processor_parser_parse_svg",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/svg_processor/parser.py",
+      "source_location": "L17",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_svg_processor_preview",
+      "target": "io",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/svg_processor/preview.py",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_svg_processor_preview",
+      "target": "typing",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/svg_processor/preview.py",
+      "source_location": "L4",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_svg_processor_preview",
+      "target": "pil",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/svg_processor/preview.py",
+      "source_location": "L6",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_svg_processor_preview",
+      "target": "laser_engraver_server_svg_processor_preview_render_preview",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/svg_processor/preview.py",
+      "source_location": "L11",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_svg_processor_preview_render_preview",
+      "target": "laser_engraver_server_svg_processor_preview_py_polyline",
+      "relation": "references",
+      "context": "generic_arg",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/svg_processor/preview.py",
+      "source_location": "L11",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_svg_processor_preview_render_preview",
+      "target": "laser_engraver_server_svg_processor_preview_render_preview_to_px",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/svg_processor/preview.py",
+      "source_location": "L32",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_svg_processor_preview",
+      "target": "laser_engraver_server_svg_processor_preview_to_png",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/svg_processor/preview.py",
+      "source_location": "L51",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_svg_processor_preview_to_png",
+      "target": "image",
+      "relation": "references",
+      "context": "parameter_type",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/svg_processor/preview.py",
+      "source_location": "L51",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_svg_processor_preview_render_preview",
+      "target": "laser_engraver_server_svg_processor_preview_to_png",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/svg_processor/preview.py",
+      "source_location": "L25",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_svg_processor_preview_render_preview",
+      "target": "laser_engraver_server_svg_processor_preview_render_preview_to_px",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/svg_processor/preview.py",
+      "source_location": "L41",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_svg_processor_sorter",
+      "target": "math",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/svg_processor/sorter.py",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_svg_processor_sorter",
+      "target": "typing",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/svg_processor/sorter.py",
+      "source_location": "L4",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_svg_processor_sorter",
+      "target": "laser_engraver_server_svg_processor_sorter_distance",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/svg_processor/sorter.py",
+      "source_location": "L9",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_svg_processor_sorter",
+      "target": "laser_engraver_server_svg_processor_sorter_sort_paths_nearest_neighbour",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/svg_processor/sorter.py",
+      "source_location": "L13",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_svg_processor_sorter_sort_paths_nearest_neighbour",
+      "target": "laser_engraver_server_svg_processor_sorter_py_polyline",
+      "relation": "references",
+      "context": "generic_arg",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/svg_processor/sorter.py",
+      "source_location": "L13",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_svg_processor_sorter_sort_paths_nearest_neighbour",
+      "target": "laser_engraver_server_svg_processor_sorter_distance",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/svg_processor/sorter.py",
+      "source_location": "L27",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_svg_processor_transform",
+      "target": "typing",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/svg_processor/transform.py",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_svg_processor_transform",
+      "target": "laser_engraver_server_svg_processor_transform_fit_to_work_area",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/svg_processor/transform.py",
+      "source_location": "L8",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_svg_processor_transform_fit_to_work_area",
+      "target": "laser_engraver_server_svg_processor_transform_py_polyline",
+      "relation": "references",
+      "context": "generic_arg",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/svg_processor/transform.py",
+      "source_location": "L8",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_tests_test_api",
+      "target": "fastapi_testclient",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/tests/test_api.py",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_tests_test_api",
+      "target": "laser_engraver_server_main",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/tests/test_api.py",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_tests_test_api",
+      "target": "laser_engraver_server_tests_test_api_test_health",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/tests/test_api.py",
+      "source_location": "L8",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_tests_test_api",
+      "target": "laser_engraver_server_tests_test_api_test_upload_svg",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/tests/test_api.py",
+      "source_location": "L15",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_tests_test_svg_processor",
+      "target": "laser_engraver_server_svg_processor_gcode_gen",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/tests/test_svg_processor.py",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_tests_test_svg_processor",
+      "target": "laser_engraver_server_svg_processor_parser",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/tests/test_svg_processor.py",
+      "source_location": "L2",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_tests_test_svg_processor",
+      "target": "laser_engraver_server_svg_processor_transform",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/tests/test_svg_processor.py",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_tests_test_svg_processor",
+      "target": "laser_engraver_server_tests_test_svg_processor_test_parse_svg_line",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/tests/test_svg_processor.py",
+      "source_location": "L6",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_tests_test_svg_processor",
+      "target": "laser_engraver_server_tests_test_svg_processor_test_fit_to_work_area_scales_points",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/tests/test_svg_processor.py",
+      "source_location": "L13",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_tests_test_svg_processor",
+      "target": "laser_engraver_server_tests_test_svg_processor_test_generate_gcode_starts_and_ends_properly",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/tests/test_svg_processor.py",
+      "source_location": "L21",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_svg_processor_init",
+      "target": "laser_engraver_server_svg_processor_parser",
+      "relation": "re_exports",
+      "context": "export",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/svg_processor/__init__.py",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_svg_processor_init",
+      "target": "laser_engraver_server_svg_processor_transform",
+      "relation": "re_exports",
+      "context": "export",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/svg_processor/__init__.py",
+      "source_location": "L2",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_svg_processor_init",
+      "target": "laser_engraver_server_svg_processor_sorter",
+      "relation": "re_exports",
+      "context": "export",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/svg_processor/__init__.py",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_svg_processor_init",
+      "target": "laser_engraver_server_svg_processor_gcode_gen",
+      "relation": "re_exports",
+      "context": "export",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/svg_processor/__init__.py",
+      "source_location": "L4",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_svg_processor_init",
+      "target": "laser_engraver_server_svg_processor_preview",
+      "relation": "re_exports",
+      "context": "export",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/svg_processor/__init__.py",
+      "source_location": "L5",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_main",
+      "target": "laser_engraver_server_db_database_get_job",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/main.py",
+      "source_location": "L13",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_main",
+      "target": "laser_engraver_server_db_database_save_job",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/main.py",
+      "source_location": "L13",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_main",
+      "target": "laser_engraver_server_esp32_bridge_serial_client_esp32serialclient",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/main.py",
+      "source_location": "L14",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_main",
+      "target": "laser_engraver_server_esp32_bridge_tcp_client_esp32tcpclient",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/main.py",
+      "source_location": "L15",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_main",
+      "target": "laser_engraver_server_svg_processor_gcode_gen_generate_gcode",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/main.py",
+      "source_location": "L16",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_main",
+      "target": "laser_engraver_server_svg_processor_parser_parse_svg",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/main.py",
+      "source_location": "L17",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_main",
+      "target": "laser_engraver_server_svg_processor_preview_render_preview",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/main.py",
+      "source_location": "L18",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_main",
+      "target": "laser_engraver_server_svg_processor_sorter_sort_paths_nearest_neighbour",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/main.py",
+      "source_location": "L19",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_main",
+      "target": "laser_engraver_server_svg_processor_transform_fit_to_work_area",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/main.py",
+      "source_location": "L20",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_svg_processor_init",
+      "target": "laser_engraver_server_svg_processor_parser_parse_svg",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/svg_processor/__init__.py",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_svg_processor_init",
+      "target": "laser_engraver_server_svg_processor_transform_fit_to_work_area",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/svg_processor/__init__.py",
+      "source_location": "L2",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_svg_processor_init",
+      "target": "laser_engraver_server_svg_processor_sorter_sort_paths_nearest_neighbour",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/svg_processor/__init__.py",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_svg_processor_init",
+      "target": "laser_engraver_server_svg_processor_gcode_gen_generate_gcode",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/svg_processor/__init__.py",
+      "source_location": "L4",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_svg_processor_init",
+      "target": "laser_engraver_server_svg_processor_preview_render_preview",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/svg_processor/__init__.py",
+      "source_location": "L5",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_tests_test_svg_processor",
+      "target": "laser_engraver_server_svg_processor_gcode_gen_generate_gcode",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/tests/test_svg_processor.py",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_tests_test_svg_processor",
+      "target": "laser_engraver_server_svg_processor_parser_parse_svg",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/tests/test_svg_processor.py",
+      "source_location": "L2",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_tests_test_svg_processor",
+      "target": "laser_engraver_server_svg_processor_transform_fit_to_work_area",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/tests/test_svg_processor.py",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_tests_test_svg_processor_test_parse_svg_line",
+      "target": "laser_engraver_server_svg_processor_parser_parse_svg",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/tests/test_svg_processor.py",
+      "source_location": "L8",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_tests_test_svg_processor_test_fit_to_work_area_scales_points",
+      "target": "laser_engraver_server_svg_processor_transform_fit_to_work_area",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/tests/test_svg_processor.py",
+      "source_location": "L15",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_tests_test_svg_processor_test_generate_gcode_starts_and_ends_properly",
+      "target": "laser_engraver_server_svg_processor_gcode_gen_generate_gcode",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "laser-engraver-server/tests/test_svg_processor.py",
+      "source_location": "L22",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_firmware_homing_homingcontroller_homeall",
+      "target": "laser_engraver_firmware_homing_homingcontroller_homex",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "laser-engraver-firmware/homing.cpp",
+      "source_location": "L24",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_firmware_homing_homingcontroller_homeall",
+      "target": "laser_engraver_firmware_homing_homingcontroller_homey",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "laser-engraver-firmware/homing.cpp",
+      "source_location": "L24",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_firmware_laser_lasercontroller_begin",
+      "target": "laser_engraver_firmware_laser_lasercontroller_off",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "laser-engraver-firmware/laser.cpp",
+      "source_location": "L7",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_firmware_laser_lasercontroller_on",
+      "target": "laser_engraver_firmware_laser_lasercontroller_setduty",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "laser-engraver-firmware/laser.cpp",
+      "source_location": "L21",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_main_upload",
+      "target": "laser_engraver_server_svg_processor_parser_parse_svg",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "laser-engraver-server/main.py",
+      "source_location": "L92",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_main_upload",
+      "target": "laser_engraver_server_svg_processor_transform_fit_to_work_area",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "laser-engraver-server/main.py",
+      "source_location": "L96",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_main_upload",
+      "target": "laser_engraver_server_svg_processor_sorter_sort_paths_nearest_neighbour",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "laser-engraver-server/main.py",
+      "source_location": "L101",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_main_upload",
+      "target": "laser_engraver_server_svg_processor_gcode_gen_generate_gcode",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "laser-engraver-server/main.py",
+      "source_location": "L102",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_main_upload",
+      "target": "laser_engraver_server_svg_processor_preview_render_preview",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "laser-engraver-server/main.py",
+      "source_location": "L103",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_main_upload",
+      "target": "laser_engraver_server_db_database_save_job",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "laser-engraver-server/main.py",
+      "source_location": "L112",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_main_job_preview",
+      "target": "laser_engraver_server_db_database_get_job",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "laser-engraver-server/main.py",
+      "source_location": "L125",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_db_database_init_db",
+      "target": "sqlite3",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "laser-engraver-server/db/database.py",
+      "source_location": "L12",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_db_database_save_job",
+      "target": "sqlite3",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "laser-engraver-server/db/database.py",
+      "source_location": "L32",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_db_database_get_job",
+      "target": "sqlite3",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "laser-engraver-server/db/database.py",
+      "source_location": "L46",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_svg_processor_parser_parse_svg",
+      "target": "tempfile",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "laser-engraver-server/svg_processor/parser.py",
+      "source_location": "L22",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_svg_processor_parser_parse_svg",
+      "target": "os",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "laser-engraver-server/svg_processor/parser.py",
+      "source_location": "L29",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_svg_processor_parser_fallback_parse_svg",
+      "target": "re",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "laser-engraver-server/svg_processor/parser.py",
+      "source_location": "L57",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_svg_processor_preview_to_png",
+      "target": "io",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "laser-engraver-server/svg_processor/preview.py",
+      "source_location": "L52",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "laser_engraver_server_svg_processor_sorter_distance",
+      "target": "math",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "laser-engraver-server/svg_processor/sorter.py",
+      "source_location": "L10",
+      "weight": 1.0,
+      "_origin": "ast"
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0,
+  "failed_sources": [],
+  "extracted_sources": [
+    "/home/mushfiq/Desktop/Laser-XY-Scanner/laser-engraver-firmware/config.h",
+    "/home/mushfiq/Desktop/Laser-XY-Scanner/laser-engraver-firmware/gcode_parser.cpp",
+    "/home/mushfiq/Desktop/Laser-XY-Scanner/laser-engraver-firmware/gcode_parser.h",
+    "/home/mushfiq/Desktop/Laser-XY-Scanner/laser-engraver-firmware/homing.cpp",
+    "/home/mushfiq/Desktop/Laser-XY-Scanner/laser-engraver-firmware/homing.h",
+    "/home/mushfiq/Desktop/Laser-XY-Scanner/laser-engraver-firmware/laser.cpp",
+    "/home/mushfiq/Desktop/Laser-XY-Scanner/laser-engraver-firmware/laser.h",
+    "/home/mushfiq/Desktop/Laser-XY-Scanner/laser-engraver-firmware/motion.cpp",
+    "/home/mushfiq/Desktop/Laser-XY-Scanner/laser-engraver-firmware/motion.h",
+    "/home/mushfiq/Desktop/Laser-XY-Scanner/laser-engraver-firmware/status.cpp",
+    "/home/mushfiq/Desktop/Laser-XY-Scanner/laser-engraver-firmware/status.h",
+    "/home/mushfiq/Desktop/Laser-XY-Scanner/laser-engraver-firmware/wifi_server.cpp",
+    "/home/mushfiq/Desktop/Laser-XY-Scanner/laser-engraver-firmware/wifi_server.h",
+    "/home/mushfiq/Desktop/Laser-XY-Scanner/laser-engraver-server/config.py",
+    "/home/mushfiq/Desktop/Laser-XY-Scanner/laser-engraver-server/db/database.py",
+    "/home/mushfiq/Desktop/Laser-XY-Scanner/laser-engraver-server/esp32_bridge/__init__.py",
+    "/home/mushfiq/Desktop/Laser-XY-Scanner/laser-engraver-server/esp32_bridge/serial_client.py",
+    "/home/mushfiq/Desktop/Laser-XY-Scanner/laser-engraver-server/esp32_bridge/tcp_client.py",
+    "/home/mushfiq/Desktop/Laser-XY-Scanner/laser-engraver-server/laser_config.py",
+    "/home/mushfiq/Desktop/Laser-XY-Scanner/laser-engraver-server/main.py",
+    "/home/mushfiq/Desktop/Laser-XY-Scanner/laser-engraver-server/static/app.js",
+    "/home/mushfiq/Desktop/Laser-XY-Scanner/laser-engraver-server/svg_processor/__init__.py",
+    "/home/mushfiq/Desktop/Laser-XY-Scanner/laser-engraver-server/svg_processor/gcode_gen.py",
+    "/home/mushfiq/Desktop/Laser-XY-Scanner/laser-engraver-server/svg_processor/parser.py",
+    "/home/mushfiq/Desktop/Laser-XY-Scanner/laser-engraver-server/svg_processor/preview.py",
+    "/home/mushfiq/Desktop/Laser-XY-Scanner/laser-engraver-server/svg_processor/sorter.py",
+    "/home/mushfiq/Desktop/Laser-XY-Scanner/laser-engraver-server/svg_processor/transform.py",
+    "/home/mushfiq/Desktop/Laser-XY-Scanner/laser-engraver-server/tests/test_api.py",
+    "/home/mushfiq/Desktop/Laser-XY-Scanner/laser-engraver-server/tests/test_svg_processor.py"
+  ]
+}
