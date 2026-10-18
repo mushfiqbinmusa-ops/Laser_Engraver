@@ -1,4 +1,5 @@
-#ifdef ARDUINO
+// PlatformIO entry point. When building in Arduino IDE, open firmware/firmware.ino directly.
+#if defined(PLATFORMIO)
 #include <Arduino.h>
 #include <WiFi.h>
 
