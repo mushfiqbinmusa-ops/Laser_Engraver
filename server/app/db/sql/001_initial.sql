@@ -68,4 +68,4 @@ VALUES
 ('preset-wood', 'Softwood / Basswood', 'Safe baseline for soft wood etching', 200, 100, 25, 1024, 1, 1),
 ('preset-leather', 'Vegetable Tanned Leather', 'Low-power surface marking for leather', 250, 120, 15, 614, 1, 1),
 ('preset-paper', 'Cardstock / Paper', 'High speed low power cutting/scoring', 300, 150, 5, 205, 1, 1),
-('preset-acrylic', 'Dark Acrylic', 'Conservative etching profile for dark opaque acrylic', 150, 80, 45, 1842, 1, 1);
+('preset-acrylic', 'Dark Acrylic', 'Conservative etching profile for dark opaque acrylic', 150, 80, 45, 1843, 1, 1);

@@ -3,6 +3,7 @@ from typing import List
 from fastapi import APIRouter, HTTPException
 from app.db.database import get_db
 from app.models.preset_models import PresetModel, PresetCreate, PresetUpdate, MachineConfigModel
+from app.core.laser import pct_to_duty
 
 router = APIRouter(prefix="/api/presets", tags=["presets"])
 
@@ -16,8 +17,8 @@ def list_presets():
 @router.post("", response_model=PresetModel)
 def create_preset(p: PresetCreate):
     preset_id = f"preset-{uuid.uuid4().hex[:8]}"
-    # Calculate duty from power pct: duty = round((pct / 90.0) * 3685)
-    duty = int(round((p.laser_power_pct / 90.0) * 3685))
+    # Single source of truth for the pct -> duty safety mapping
+    duty = pct_to_duty(p.laser_power_pct)
 
     with get_db() as conn:
         try:

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useMachine } from '../context/MachineContext';
+import { LASER_MAX_DUTY, powerPctToDuty } from '../utils/laser';
 import { Preset, Job } from '../types/jobs';
 
 export const EngraveTab: React.FC = () => {
@@ -26,7 +27,7 @@ export const EngraveTab: React.FC = () => {
   const [pulseSuccess, setPulseSuccess] = useState<string | null>(null);
   const [pulseError, setPulseError] = useState<string | null>(null);
 
-  const pulseDuty = Math.min(3685, Math.max(0, Math.round((pulsePowerPct / 90.0) * 3685)));
+  const pulseDuty = powerPctToDuty(pulsePowerPct);
 
   const handleQuickPulse = async () => {
     if (!safetyConfirmed) {
@@ -503,7 +504,7 @@ export const EngraveTab: React.FC = () => {
               <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', marginBottom: '4px' }}>
                   <span>Power: {pulsePowerPct}%</span>
-                  <span className="mono" style={{ color: 'var(--text-secondary)' }}>Duty: {pulseDuty}/4095</span>
+                  <span className="mono" style={{ color: 'var(--text-secondary)' }}>Duty: {pulseDuty}/{LASER_MAX_DUTY}</span>
                 </div>
                 <input
                   type="range"

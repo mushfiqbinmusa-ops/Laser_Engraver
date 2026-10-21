@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useMachine } from '../context/MachineContext';
+import { LASER_MAX_DUTY, powerPctToDuty } from '../utils/laser';
 
 export const TestsTab: React.FC = () => {
   const { connected, fresh, snapshot, pulse, setDriver, jog, refreshStatus } = useMachine();
@@ -42,7 +43,7 @@ export const TestsTab: React.FC = () => {
   }, []);
 
   // Calculate duty (90% ceiling = 3685)
-  const pulseDuty = Math.min(3685, Math.max(0, Math.round((pulsePowerPct / 90.0) * 3685)));
+  const pulseDuty = powerPctToDuty(pulsePowerPct);
 
   const handlePing = async () => {
     setPinging(true);
@@ -689,7 +690,7 @@ export const TestsTab: React.FC = () => {
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
                 <label htmlFor="pulse-power" style={{ fontSize: '12px', fontWeight: 600 }}>Laser Power: {pulsePowerPct}%</label>
                 <span style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: 'var(--text-secondary)' }}>
-                  PWM Duty: {pulseDuty} / 4095
+                  PWM Duty: {pulseDuty} / {LASER_MAX_DUTY}
                 </span>
               </div>
               <input

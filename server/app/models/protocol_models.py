@@ -1,5 +1,6 @@
 from typing import Optional, Literal
 from pydantic import BaseModel, Field
+from app.core.laser import SAFETY_MAX_DUTY
 
 class BaseRequest(BaseModel):
     v: int = Field(default=1, description="Protocol version, strictly 1")
@@ -47,12 +48,12 @@ class MotionMoveAbsRequest(BaseRequest):
 
 class LaserPulseRequest(BaseRequest):
     type: Literal["laser.pulse"] = "laser.pulse"
-    duty: int = Field(ge=0, le=3685, description="LEDC duty cycle clamped <= 90% (3685)")
+    duty: int = Field(ge=0, le=SAFETY_MAX_DUTY, description="LEDC duty cycle clamped <= 90%")
     duration_ms: int = Field(ge=1, le=500, description="Guarded pulse duration ms")
 
 class LaserSetDutyRequest(BaseRequest):
     type: Literal["laser.set_duty"] = "laser.set_duty"
-    duty: int = Field(ge=0, le=3685)
+    duty: int = Field(ge=0, le=SAFETY_MAX_DUTY)
 
 class JobBeginRequest(BaseRequest):
     type: Literal["job.begin"] = "job.begin"

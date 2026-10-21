@@ -1,5 +1,6 @@
 from pathlib import Path
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from app.core.laser import SAFETY_MAX_DUTY, SAFETY_MAX_PCT
 
 class Settings(BaseSettings):
     app_name: str = "Laser XY Scanner Control Service"
@@ -24,8 +25,8 @@ class Settings(BaseSettings):
     steps_per_mm_y: float = 80.0
     max_speed_sps: int = 25000
     default_jog_speed_sps: int = 100
-    laser_max_pct: int = 90
-    laser_max_duty: int = 3685
+    laser_max_pct: int = SAFETY_MAX_PCT
+    laser_max_duty: int = SAFETY_MAX_DUTY
 
     model_config = SettingsConfigDict(
         env_file=".env",

@@ -16,6 +16,7 @@ from app.svg.preview import render_preview_png
 from app.svg.parametric import ParametricShapeGenerator
 from app.svg.job_planner import JobPlanner
 from app.core.kinematics import REFERENCE_MICROSTEP_MODE, scale_plan_for_microstep
+from app.core.laser import SAFETY_MAX_PCT, pct_to_duty
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/jobs", tags=["jobs"])
@@ -63,6 +64,12 @@ async def upload_svg(
     preset_id: str = Form("preset-wood"),
     override_laser_power_pct: Optional[int] = Form(None)
 ):
+    if override_laser_power_pct is not None and not (0 <= override_laser_power_pct <= SAFETY_MAX_PCT):
+        raise HTTPException(
+            status_code=400,
+            detail=f"override_laser_power_pct must be between 0 and {SAFETY_MAX_PCT}"
+        )
+
     content_bytes = await svg_file.read()
     content_str = content_bytes.decode("utf-8", errors="replace")
 
@@ -85,7 +92,7 @@ async def upload_svg(
 
         # Apply temporary power override if specified
         if override_laser_power_pct is not None:
-            duty = int(round((override_laser_power_pct / 90.0) * 3685))
+            duty = pct_to_duty(override_laser_power_pct)
             preset = preset.model_copy(update={
                 "laser_power_pct": override_laser_power_pct,
                 "laser_duty": duty
@@ -143,7 +150,7 @@ async def create_parametric_shape(req: ParametricShapeCreate):
         preset = _get_preset(conn, req.preset_id)
 
         if req.override_laser_power_pct is not None:
-            duty = int(round((req.override_laser_power_pct / 90.0) * 3685))
+            duty = pct_to_duty(req.override_laser_power_pct)
             preset = preset.model_copy(update={
                 "laser_power_pct": req.override_laser_power_pct,
                 "laser_duty": duty
