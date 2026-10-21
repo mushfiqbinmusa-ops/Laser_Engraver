@@ -159,7 +159,7 @@ export const CalibrationTab: React.FC = () => {
 
           <h3 style={{ fontSize: '13px', fontWeight: 600, marginBottom: '8px' }}>Two-Stage Optical Homing Sequence</h3>
           <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '12px' }}>
-            FastSeek (120 sps) → PullOff (200 steps) → SlowLatch (40 sps) → Margin PullOff (50 steps) → Zero Coordinate Alignment.
+            FastSeek (800 sps) → PullOff until clear → SlowLatch (200 sps) → FinalPullOff (200 steps) → Zero Coordinate Alignment.
           </p>
           <div style={{ display: 'flex', gap: '10px' }}>
             <button
