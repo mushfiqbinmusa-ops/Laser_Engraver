@@ -90,9 +90,10 @@ async def upload_svg(
                 "laser_duty": duty
             })
 
-        plan = JobPlanner.build_plan(job_id, safe_filename, contours, preset, config)
+        toolpath = JobPlanner.prepare_contours(contours, config)
+        plan = JobPlanner.build_plan_from_ordered(job_id, safe_filename, toolpath, preset, config)
         preview_bytes = render_preview_png(
-            contours,
+            toolpath,
             work_w_mm=config.work_area_width_mm,
             work_h_mm=config.work_area_height_mm
         )
@@ -147,9 +148,10 @@ async def create_parametric_shape(req: ParametricShapeCreate):
                 "laser_duty": duty
             })
 
-        plan = JobPlanner.build_plan(job_id, name, contours, preset, config)
+        toolpath = JobPlanner.prepare_contours(contours, config)
+        plan = JobPlanner.build_plan_from_ordered(job_id, name, toolpath, preset, config)
         preview_bytes = render_preview_png(
-            contours,
+            toolpath,
             work_w_mm=config.work_area_width_mm,
             work_h_mm=config.work_area_height_mm
         )

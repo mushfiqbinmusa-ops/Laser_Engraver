@@ -9,6 +9,27 @@ from app.models.job_models import ToolpathSegment, PreparedJobPlan
 from app.models.preset_models import PresetModel, MachineConfigModel
 
 class JobPlanner:
+    MARGIN_MM = 2.0
+
+    @staticmethod
+    def prepare_contours(
+        contours_mm: List[Contour],
+        config: MachineConfigModel
+    ) -> List[Contour]:
+        """Return the exact contour geometry/order used for the toolpath.
+
+        Shared by the planner and the preview so the rendered image cannot
+        drift from what the machine will actually execute.
+        """
+        fitted_contours = SvgTransformer.fit_to_work_area(
+            contours_mm,
+            work_w_mm=config.work_area_width_mm,
+            work_h_mm=config.work_area_height_mm,
+            margin_mm=JobPlanner.MARGIN_MM,
+            center=True
+        )
+        return TspOptimizer.optimize_order(fitted_contours, start_pos=(0.0, 0.0))
+
     @staticmethod
     def build_plan(
         job_id: str,
@@ -17,19 +38,18 @@ class JobPlanner:
         preset: PresetModel,
         config: MachineConfigModel
     ) -> PreparedJobPlan:
-        # 1. Fit to configured work area
-        fitted_contours = SvgTransformer.fit_to_work_area(
-            contours_mm,
-            work_w_mm=config.work_area_width_mm,
-            work_h_mm=config.work_area_height_mm,
-            margin_mm=2.0,
-            center=True
-        )
+        ordered_contours = JobPlanner.prepare_contours(contours_mm, config)
+        return JobPlanner.build_plan_from_ordered(job_id, name, ordered_contours, preset, config)
 
-        # 2. Optimize path ordering with TSP
-        ordered_contours = TspOptimizer.optimize_order(fitted_contours, start_pos=(0.0, 0.0))
-
-        # 3. Convert to step coordinates
+    @staticmethod
+    def build_plan_from_ordered(
+        job_id: str,
+        name: str,
+        ordered_contours: List[Contour],
+        preset: PresetModel,
+        config: MachineConfigModel
+    ) -> PreparedJobPlan:
+        # 1. Convert to step coordinates
         step_contours = SvgTransformer.to_steps(
             ordered_contours,
             steps_per_mm_x=config.steps_per_unit_x,

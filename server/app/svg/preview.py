@@ -59,7 +59,15 @@ def render_preview_png(
 
         curr_pos = contour[-1]
 
-    # 4. Draw origin marker (0, 0)
+    # 4. Draw rapid return to origin, matching the planner toolpath
+    if curr_pos != (0.0, 0.0):
+        draw.line(
+            [to_pixel(curr_pos), to_pixel((0.0, 0.0))],
+            fill=(107, 114, 128, 180),
+            width=1
+        )
+
+    # 5. Draw origin marker (0, 0)
     p_orig = to_pixel((0.0, 0.0))
     r = 4
     draw.ellipse([p_orig[0] - r, p_orig[1] - r, p_orig[0] + r, p_orig[1] + r], fill=(47, 158, 68, 255)) # #2F9E44
