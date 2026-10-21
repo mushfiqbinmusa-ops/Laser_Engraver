@@ -229,7 +229,7 @@ export const SettingsTab: React.FC = () => {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
               <div>
                 <label htmlFor="cfg-steps-x" style={{ display: 'block', fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '4px' }}>
-                  X Steps per mm
+                  X Steps per mm (at 1/16)
                 </label>
                 <input
                   id="cfg-steps-x"
@@ -242,7 +242,7 @@ export const SettingsTab: React.FC = () => {
               </div>
               <div>
                 <label htmlFor="cfg-steps-y" style={{ display: 'block', fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '4px' }}>
-                  Y Steps per mm
+                  Y Steps per mm (at 1/16)
                 </label>
                 <input
                   id="cfg-steps-y"

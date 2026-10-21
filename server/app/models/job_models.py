@@ -14,6 +14,8 @@ class PreparedJobPlan(BaseModel):
     job_id: str
     name: str
     plan_hash: str
+    # Step coordinates below are expressed at this microstep mode (1/16).
+    reference_microstep_mode: int = 16
     total_segments: int
     estimated_duration_s: float
     total_travel_distance_steps: int

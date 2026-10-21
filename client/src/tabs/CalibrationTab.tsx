@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useMachine } from '../context/MachineContext';
+
+const REFERENCE_MICROSTEP_MODE = 16;
 
 export const CalibrationTab: React.FC = () => {
   const { connected, fresh, snapshot, home, jog, resetFault, setMicrostepMode } = useMachine();
@@ -10,10 +12,29 @@ export const CalibrationTab: React.FC = () => {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [isJogging, setIsJogging] = useState<boolean>(false);
   const [isChangingMicrostep, setIsChangingMicrostep] = useState<boolean>(false);
+  const [referenceStepsPerUnit, setReferenceStepsPerUnit] = useState<number>(80);
 
-  const microstepMode = (snapshot?.microstep_mode || 16) as 1 | 2 | 4 | 8 | 16;
-  const stepsPerMm = 5 * microstepMode;
+  const microstepMode = (snapshot?.microstep_mode || REFERENCE_MICROSTEP_MODE) as 1 | 2 | 4 | 8 | 16;
+  // machine_config stores the calibrated resolution at 1/16 mode.
+  const stepsPerMm = referenceStepsPerUnit * (microstepMode / REFERENCE_MICROSTEP_MODE);
   const stepsPerRev = 2048 * microstepMode;
+
+  useEffect(() => {
+    fetch('/api/presets/config')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((cfg) => {
+        if (cfg && typeof cfg.steps_per_unit_x === 'number') {
+          setReferenceStepsPerUnit(cfg.steps_per_unit_x);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const isBusy = Boolean(
+    snapshot?.state === 'running_job' ||
+    snapshot?.state === 'moving' ||
+    snapshot?.state === 'homing'
+  );
 
   const handleMicrostepChange = async (mode: 1 | 2 | 4 | 8 | 16) => {
     setIsChangingMicrostep(true);
@@ -172,6 +193,7 @@ export const CalibrationTab: React.FC = () => {
           </div>
           <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '12px' }}>
             Switch hardware pin states (GPIO 1: MS1, GPIO 2: MS2, GPIO 4: MS3) like in <code>stepper_ir_homing_test</code>.
+            Changing microstepping while idle invalidates homing; re-home before running a job.
           </p>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '6px', marginBottom: '14px' }}>
@@ -185,7 +207,7 @@ export const CalibrationTab: React.FC = () => {
               <button
                 key={m.mode}
                 type="button"
-                disabled={!connected || isChangingMicrostep}
+                disabled={!connected || isChangingMicrostep || isBusy}
                 onClick={() => handleMicrostepChange(m.mode)}
                 style={{
                   padding: '8px 4px',

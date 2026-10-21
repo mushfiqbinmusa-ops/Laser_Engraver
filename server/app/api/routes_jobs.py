@@ -15,6 +15,7 @@ from app.svg.transformer import SvgTransformer
 from app.svg.preview import render_preview_png
 from app.svg.parametric import ParametricShapeGenerator
 from app.svg.job_planner import JobPlanner
+from app.core.kinematics import REFERENCE_MICROSTEP_MODE, scale_plan_for_microstep
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/jobs", tags=["jobs"])
@@ -216,6 +217,11 @@ async def start_job(
                 raise HTTPException(status_code=404, detail="Job not found")
             plan_dict = json.loads(row["plan_json"])
             plan = PreparedJobPlan.model_validate(plan_dict)
+
+        # Plans are built in reference (1/16) steps. Rescale to the mode the
+        # controller is actually in now so dimensions stay correct.
+        live_mode = int(snap.microstep_mode or REFERENCE_MICROSTEP_MODE)
+        plan = scale_plan_for_microstep(plan, live_mode)
 
         _abort_streaming = False
         _active_job_id = job_id

@@ -178,7 +178,18 @@ void ProtocolDispatcher::dispatch(const CommandRequest& req, uint32_t nowUs, uin
     }
 
     case CommandType::DriverSetMicrostep: {
+      // Changing microstepping rescales steps/mm, so it must never happen
+      // mid-motion or mid-job. It also invalidates homing.
+      if (m_state.getState() == MachineStateEnum::Homing ||
+          m_state.getState() == MachineStateEnum::Moving ||
+          m_state.getState() == MachineStateEnum::RunningJob) {
+        sendAck(req.id, false, ErrorCode::Busy);
+        return;
+      }
       setMicrostepMode(req.microstepMode);
+      m_axisX.setHomed(false);
+      m_axisY.setHomed(false);
+      m_state.setHomed(false, false);
       sendAck(req.id, true, ErrorCode::Ok);
       emitSnapshot();
       break;

@@ -147,6 +147,8 @@ async def set_driver(req: DriverSetEnabledRequest, dispatcher=Depends(get_disp))
 async def set_microstep(req: DriverSetMicrostepRequest, dispatcher=Depends(get_disp)):
     try:
         ack = await dispatcher.send_command(req.model_dump())
+        if not ack.accepted:
+            raise HTTPException(status_code=400, detail=f"Microstep change rejected: {ack.code}")
         return ack
     except HTTPException:
         raise
@@ -211,9 +213,22 @@ async def get_status_report(dispatcher=Depends(get_disp)):
     snap_state = _get(snap, "state", "unknown")
     drivers_enabled = _get(snap, "drivers_enabled", False)
     microstep_mode = _get(snap, "microstep_mode", 16) or 16
-    # 28BYJ-48 64:1 has 2048 baseline full steps/rev. A typical GT2 2mm pulley (16T or 20T) or lead screw:
-    # Baseline full-step resolution is 5 steps/mm, giving 80 steps/mm at 1/16 (5 * 16 = 80).
-    steps_per_mm = float(5 * microstep_mode)
+    # 28BYJ-48 64:1 has 2048 baseline full steps/rev. The configured
+    # machine_config.steps_per_unit_* is calibrated at 1/16 (80 steps/mm for
+    # a 5 steps/mm mechanics); derive the live value from that single source.
+    from app.core.kinematics import DEFAULT_REFERENCE_STEPS_PER_UNIT, effective_steps_per_mm
+    reference_steps_per_unit = DEFAULT_REFERENCE_STEPS_PER_UNIT
+    try:
+        from app.db.database import get_db
+        with get_db() as conn:
+            row = conn.execute(
+                "SELECT steps_per_unit_x FROM machine_config WHERE id = 'default';"
+            ).fetchone()
+            if row:
+                reference_steps_per_unit = float(row["steps_per_unit_x"])
+    except Exception:
+        logger.debug("Falling back to default steps/mm for status report", exc_info=True)
+    steps_per_mm = effective_steps_per_mm(reference_steps_per_unit, microstep_mode)
     steps_per_rev = 2048 * microstep_mode
 
     lines = [
