@@ -101,6 +101,15 @@ async def test_e2e_machine_lifecycle_and_safety_gates(sim_environment):
     assert res.status_code == 200
     assert res.json()["accepted"] is True
 
+    # 7b. Server enforces the configured travel bounds (4096 reference steps)
+    res = await client.post("/api/machine/jog", json={"axis": "x", "steps": 5000, "speed_sps": 200})
+    assert res.status_code == 400
+    assert "out of bounds" in res.json()["detail"].lower()
+
+    res = await client.post("/api/machine/move-abs", json={"x": 5000, "y": 0, "speed_sps": 200})
+    assert res.status_code == 400
+    assert "out of bounds" in res.json()["detail"].lower()
+
     # 8. Guarded Laser Pulse Safety Clamp
     # 8a: Within safety limit (3685)
     res = await client.post("/api/machine/laser/pulse", json={"duty": 3685, "duration_ms": 50})

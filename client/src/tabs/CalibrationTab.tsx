@@ -13,11 +13,13 @@ export const CalibrationTab: React.FC = () => {
   const [isJogging, setIsJogging] = useState<boolean>(false);
   const [isChangingMicrostep, setIsChangingMicrostep] = useState<boolean>(false);
   const [referenceStepsPerUnit, setReferenceStepsPerUnit] = useState<number>(80);
+  const [referenceMaxTravel, setReferenceMaxTravel] = useState<number>(4096);
 
   const microstepMode = (snapshot?.microstep_mode || REFERENCE_MICROSTEP_MODE) as 1 | 2 | 4 | 8 | 16;
   // machine_config stores the calibrated resolution at 1/16 mode.
   const stepsPerMm = referenceStepsPerUnit * (microstepMode / REFERENCE_MICROSTEP_MODE);
   const stepsPerRev = 2048 * microstepMode;
+  const liveMaxTravel = Math.floor(referenceMaxTravel * (microstepMode / REFERENCE_MICROSTEP_MODE));
 
   useEffect(() => {
     fetch('/api/presets/config')
@@ -25,6 +27,9 @@ export const CalibrationTab: React.FC = () => {
       .then((cfg) => {
         if (cfg && typeof cfg.steps_per_unit_x === 'number') {
           setReferenceStepsPerUnit(cfg.steps_per_unit_x);
+        }
+        if (cfg && typeof cfg.max_travel_steps_x === 'number') {
+          setReferenceMaxTravel(cfg.max_travel_steps_x);
         }
       })
       .catch(() => {});
@@ -85,7 +90,7 @@ export const CalibrationTab: React.FC = () => {
     setCustomStepInput(val);
     const num = parseInt(val, 10);
     if (!isNaN(num) && num > 0) {
-      setJogStepSize(num);
+      setJogStepSize(Math.min(num, liveMaxTravel));
     }
   };
 
@@ -314,7 +319,7 @@ export const CalibrationTab: React.FC = () => {
               id="microstep-size"
               type="number"
               min="1"
-              max="20000"
+              max={liveMaxTravel}
               value={customStepInput}
               onChange={(e) => handleCustomStepChange(e.target.value)}
               style={{ width: '100px', padding: '4px 8px', fontSize: '12px' }}

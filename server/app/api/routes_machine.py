@@ -18,6 +18,32 @@ def get_disp():
         raise HTTPException(status_code=503, detail="Controller dispatcher not initialized")
     return d
 
+
+def _read_machine_config() -> dict:
+    try:
+        from app.db.database import get_db
+        with get_db() as conn:
+            row = conn.execute(
+                "SELECT * FROM machine_config WHERE id = 'default';"
+            ).fetchone()
+            if row:
+                return dict(row)
+    except Exception:
+        logger.debug("Machine config unavailable", exc_info=True)
+    return {}
+
+
+def _live_travel_limits(dispatcher) -> tuple[float, float]:
+    """Configured travel bounds scaled from 1/16 reference steps to live mode."""
+    from app.core.kinematics import REFERENCE_MICROSTEP_MODE
+    cfg = _read_machine_config()
+    max_x = float(cfg.get("max_travel_steps_x", 4096))
+    max_y = float(cfg.get("max_travel_steps_y", 4096))
+    snap = dispatcher.latest_snapshot
+    mode = int(getattr(snap, "microstep_mode", REFERENCE_MICROSTEP_MODE) or REFERENCE_MICROSTEP_MODE)
+    scale = mode / REFERENCE_MICROSTEP_MODE
+    return max_x * scale, max_y * scale
+
 class ConnectionConfigRequest(BaseModel):
     # Omitted fields fall back to the server's current settings instead of
     # silently forcing a transport (previously defaulted to TCP 192.168.4.1).
@@ -220,17 +246,8 @@ async def get_status_report(dispatcher=Depends(get_disp)):
     # machine_config.steps_per_unit_* is calibrated at 1/16 (80 steps/mm for
     # a 5 steps/mm mechanics); derive the live value from that single source.
     from app.core.kinematics import DEFAULT_REFERENCE_STEPS_PER_UNIT, effective_steps_per_mm
-    reference_steps_per_unit = DEFAULT_REFERENCE_STEPS_PER_UNIT
-    try:
-        from app.db.database import get_db
-        with get_db() as conn:
-            row = conn.execute(
-                "SELECT steps_per_unit_x FROM machine_config WHERE id = 'default';"
-            ).fetchone()
-            if row:
-                reference_steps_per_unit = float(row["steps_per_unit_x"])
-    except Exception:
-        logger.debug("Falling back to default steps/mm for status report", exc_info=True)
+    cfg = _read_machine_config()
+    reference_steps_per_unit = float(cfg.get("steps_per_unit_x", DEFAULT_REFERENCE_STEPS_PER_UNIT))
     steps_per_mm = effective_steps_per_mm(reference_steps_per_unit, microstep_mode)
     steps_per_rev = 2048 * microstep_mode
 
@@ -268,6 +285,16 @@ async def get_status_report(dispatcher=Depends(get_disp)):
 @router.post("/jog")
 async def jog(req: MotionJogRequest, dispatcher=Depends(get_disp)):
     try:
+        max_x, max_y = _live_travel_limits(dispatcher)
+        snap = dispatcher.latest_snapshot
+        if snap:
+            limit = max_x if req.axis == "x" else max_y
+            current = int((snap.pos or {}).get(req.axis, 0))
+            if abs(current + req.steps) > limit:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Jog out of bounds: target {current + req.steps} exceeds configured limit ±{limit:.0f}"
+                )
         ack = await dispatcher.send_command(req.model_dump())
         # If controller is busy executing prior step burst, wait for it to settle and retry
         if not ack.accepted and ack.code == "BUSY":
@@ -293,6 +320,12 @@ async def jog(req: MotionJogRequest, dispatcher=Depends(get_disp)):
 @router.post("/move-abs")
 async def move_abs(req: MotionMoveAbsRequest, dispatcher=Depends(get_disp)):
     try:
+        max_x, max_y = _live_travel_limits(dispatcher)
+        if abs(req.x) > max_x or abs(req.y) > max_y:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Move out of bounds: target exceeds configured limit ({max_x:.0f}, {max_y:.0f})"
+            )
         ack = await dispatcher.send_command(req.model_dump())
         if not ack.accepted:
             raise HTTPException(status_code=400, detail=f"Move rejected: {ack.code}")
