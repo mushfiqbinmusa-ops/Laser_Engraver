@@ -12,8 +12,8 @@ export const SettingsTab: React.FC = () => {
     baudrate: number;
     connected: boolean;
   }>({
-    transport: 'tcp',
-    host: '192.168.4.1',
+    transport: 'serial',
+    host: '127.0.0.1',
     port: 8888,
     serial_port: '/dev/ttyACM0',
     baudrate: 115200,

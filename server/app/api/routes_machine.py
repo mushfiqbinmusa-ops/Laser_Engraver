@@ -19,11 +19,13 @@ def get_disp():
     return d
 
 class ConnectionConfigRequest(BaseModel):
-    transport: Optional[str] = "tcp"
-    host: Optional[str] = "192.168.4.1"
-    port: Optional[int] = 8888
-    serial_port: Optional[str] = "/dev/ttyACM0"
-    baudrate: Optional[int] = 115200
+    # Omitted fields fall back to the server's current settings instead of
+    # silently forcing a transport (previously defaulted to TCP 192.168.4.1).
+    transport: Optional[str] = None
+    host: Optional[str] = None
+    port: Optional[int] = None
+    serial_port: Optional[str] = None
+    baudrate: Optional[int] = None
 
 @router.get("/status")
 async def get_status(dispatcher=Depends(get_disp)):

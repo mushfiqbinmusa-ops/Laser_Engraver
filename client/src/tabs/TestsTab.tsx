@@ -213,7 +213,7 @@ export const TestsTab: React.FC = () => {
     }
   };
 
-  const isMachineFaulted: boolean = Boolean(snapshot?.state === 'Faulted' || (snapshot?.fault && snapshot.fault !== 'none'));
+  const isMachineFaulted: boolean = Boolean(snapshot?.state === 'faulted' || (snapshot?.fault && snapshot.fault !== 'none'));
   const canFirePulse: boolean = Boolean(connected && fresh && !isMachineFaulted && safetyConfirmed && !pulsing);
   // In firmware SnapshotEvent: snap.sensorXFiltered = sx.stableDetected (1 = blocked / obstacle detected, 0 = clear)
   const isSensorXTripped = snapshot ? snapshot.sensors.x_filtered === 1 : false;

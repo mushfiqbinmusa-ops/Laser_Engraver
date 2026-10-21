@@ -7,6 +7,12 @@
 
 ---
 
+> [!WARNING]
+> **Historical audit (superseded).** This document describes early legacy
+> implementations. Use `docs/protocol_v1.md`, `docs/hardware_profile.md`, and
+> `contracts/` as the authoritative current protocol/pin references. Some
+> pin and duty values below still describe legacy fixtures.
+
 ## 1. Executive Summary
 
 This report delivers a thorough audit, architectural review, setup guide, and discrepancy analysis of:
@@ -17,7 +23,7 @@ This report delivers a thorough audit, architectural review, setup guide, and di
 > **Legacy Status & Reality Check:**  
 > Both `laser-engraver-server` and `laser-engraver-firmware` represent early baseline implementations. Since they were drafted, dedicated test fixtures were developed for hardware commissioning:
 > - [`stepper_motor_test/`](file:///home/mushfiq/Desktop/Laser-XY-Scanner/stepper_motor_test) & [`stepper_ir_homing_test/`](file:///home/mushfiq/Desktop/Laser-XY-Scanner/stepper_ir_homing_test) (Dual A4988 bipolar stepper drivers, microstepping on MS1/MS2/MS3, IR homing on GPIO 13/8).
-> - [`laser_pwm_test/`](file:///home/mushfiq/Desktop/Laser-XY-Scanner/laser_pwm_test) (ESP32-S3 LEDC PWM control on GPIO 10).
+> - [`laser_pwm_test/`](file:///home/mushfiq/Desktop/Laser-XY-Scanner/laser_pwm_test) (ESP32-S3 LEDC PWM control on GPIO 12).
 > - [`ir_sensor_test/`](file:///home/mushfiq/Desktop/Laser-XY-Scanner/ir_sensor_test) (Active-LOW digital detection with internal pullups).
 >
 > The legacy firmware and server are **substantially decoupled from current hardware realities**. They require targeted modernization before they can control the physical bench setup safely.
@@ -52,7 +58,7 @@ The server exposes both a graphical web dashboard and RESTful / WebSocket endpoi
 | `/` | `GET` | Serves the web dashboard | None | Returns `static/index.html` |
 | `/api/health` | `GET` | Health check & ESP32 connection state | None | `{"ok": true, "esp_connected": bool, "transport": "tcp"\|"serial"}` |
 | `/api/control/home` | `POST` | Triggers axis homing | None | Sends `G28\n` via TCP/Serial, returns ESP32 response |
-| `/api/control/laser/power` | `POST` | Sets laser test power (0–100%) | Query param `level: int` | Converts percentage to 12-bit duty (`int(level/100 * 4095)`), sends `M3 S<duty>` |
+| `/api/control/laser/power` | `POST` | Sets laser test power (0–100%) | Query param `level: int` | Converts percentage to 12-bit duty with the 90% ceiling (`round(pct/90 * 3685)`), sends `M3 S<duty>` |
 | `/api/upload` | `POST` | Uploads and processes SVG file | Multipart Form: `svg_file: .svg` | 1. Extracts paths (`parser.py`)<br>2. Fits into work area (`transform.py`)<br>3. Solves TSP nearest-neighbor (`sorter.py`)<br>4. Generates G-code (`gcode_gen.py`)<br>5. Generates PNG preview (`preview.py`)<br>6. Saves to SQLite; returns job metadata & preview URL |
 | `/api/jobs/{id}/preview` | `GET` | Retrieves rendered PNG preview | URL Path: `job_id: int` | PNG image stream (`image/png`) |
 | `/ws` | `WebSocket` | Real-time status push | WebSocket connection | Pushes `{"ok": true, "esp_connected": bool, "transport": str}` |
@@ -208,6 +214,6 @@ Use this cheat-sheet when updating configuration files:
 | **Microstepping Bus** | `PIN_MS1`, `MS2`, `MS3` | **GPIO 1, 2, 4** | HIGH, HIGH, HIGH for 1/16 Microstepping |
 | **Optical Homing** | `PIN_SENSOR_X` | **GPIO 13** | `INPUT_PULLUP`, Active LOW (Beam broken / Obstacle) |
 | | `PIN_SENSOR_Y` | **GPIO 8** | `INPUT_PULLUP`, Active LOW (Beam broken / Obstacle) |
-| **Laser Diode** | `LASER_PWM_PIN` | **GPIO 10** | 5000 Hz, 12-bit LEDC, Hard Clamped ≤ 90% duty |
+| **Laser Diode** | `LASER_PWM_PIN` | **GPIO 12** | 5000 Hz, 12-bit LEDC, Hard Clamped ≤ 90% duty |
 | **Communications** | Serial Baud | 115200 | USB CDC (enable in Arduino IDE Tools) |
 | | TCP Socket | Port 8888 | Stream line terminated by `\n` |

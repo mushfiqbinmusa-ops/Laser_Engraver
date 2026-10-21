@@ -11,7 +11,7 @@ export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabId>('engrave');
   const { snapshot, resetFault } = useMachine();
 
-  const isFaulted = snapshot?.state === 'Faulted' || (snapshot?.fault && snapshot.fault !== 'none');
+  const isFaulted = snapshot?.state === 'faulted' || (snapshot?.fault && snapshot.fault !== 'none');
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--bg-app)' }}>

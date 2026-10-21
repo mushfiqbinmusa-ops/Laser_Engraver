@@ -218,7 +218,7 @@ void ProtocolDispatcher::dispatch(const CommandRequest& req, uint32_t nowUs, uin
         sendAck(req.id, false, ErrorCode::Busy);
         return;
       }
-      if (m_state.isPositionValid()) {
+      {
         int32_t currentX = m_axisX.getPosition();
         int32_t currentY = m_axisY.getPosition();
         int32_t targetX = (req.axis == AxisTarget::X) ? (currentX + req.steps) : currentX;
