@@ -246,6 +246,7 @@ async def get_status_report(dispatcher=Depends(get_disp)):
     # machine_config.steps_per_unit_* is calibrated at 1/16 (80 steps/mm for
     # a 5 steps/mm mechanics); derive the live value from that single source.
     from app.core.kinematics import DEFAULT_REFERENCE_STEPS_PER_UNIT, effective_steps_per_mm
+    from app.core.laser import MAX_DUTY, SAFETY_MAX_DUTY, SAFETY_MAX_PCT
     cfg = _read_machine_config()
     reference_steps_per_unit = float(cfg.get("steps_per_unit_x", DEFAULT_REFERENCE_STEPS_PER_UNIT))
     steps_per_mm = effective_steps_per_mm(reference_steps_per_unit, microstep_mode)
@@ -274,8 +275,8 @@ async def get_status_report(dispatcher=Depends(get_disp)):
         "+-----------------------------------------------------------------------+",
         "| LASER DIODE SAFETY (GPIO 12)                                          |",
         "+-----------------------------------------------------------------------+",
-        f"| Laser Emission     : {'ACTIVE RADIATION' if laser_active else 'OFF / SAFE':<20} | Duty: {laser_duty:<4} / 4095           |",
-        f"| Safety Hardware    : 90% Hard Clamp (3685) | Watchdog: 500ms Timer     |",
+        f"| Laser Emission     : {'ACTIVE RADIATION' if laser_active else 'OFF / SAFE':<20} | Duty: {laser_duty:<4} / {MAX_DUTY}           |",
+        f"| Safety Hardware    : {SAFETY_MAX_PCT}% Hard Clamp ({SAFETY_MAX_DUTY}) | Watchdog: 500ms Timer     |",
         "+=======================================================================+"
     ]
     report_text = "\n".join(lines)
