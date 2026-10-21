@@ -300,9 +300,16 @@ void ProtocolDispatcher::dispatch(const CommandRequest& req, uint32_t nowUs, uin
     }
 
     case CommandType::JobEnd: {
+      // Never cut laser power or clear RunningJob while the final segment is
+      // still executing. The host retries job.end on BUSY.
+      if (m_planner.isMoving()) {
+        sendAck(req.id, false, ErrorCode::Busy);
+        return;
+      }
       m_laser.forceOff();
-      m_state.setState(MachineStateEnum::IdleHomed);
+      m_state.setState(m_state.isPositionValid() ? MachineStateEnum::IdleHomed : MachineStateEnum::IdleUnhomed);
       sendAck(req.id, true, ErrorCode::Ok);
+      emitSnapshot();
       break;
     }
 

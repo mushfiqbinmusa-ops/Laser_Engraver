@@ -288,16 +288,28 @@ async def start_job(
                     "total_segments": plan.total_segments
                 })
 
-            # 3. If on physical serial hardware, allow final segment move to finish
-            from app.bridge.serial_bridge import SerialControllerBridge
-            if isinstance(dispatcher.bridge, SerialControllerBridge) and plan.segments:
-                last_seg = plan.segments[-1]
-                last_dist = max(abs(last_seg.dx), abs(last_seg.dy))
-                last_sps = max(1, last_seg.speed_sps)
-                await asyncio.sleep(last_dist / float(last_sps))
-
-            # 4. job.end
-            await dispatcher.send_command({"type": "job.end", "job_id": job_id})
+            # 3. job.end, retrying while the firmware reports BUSY (final move
+            #    still in progress). The firmware ACKs job.segment as soon as
+            #    the move is queued, so this is the only exact completion
+            #    signal and prevents truncating the last segment.
+            end_deadline = time.monotonic() + 10.0
+            while True:
+                if _abort_streaming:
+                    raise asyncio.CancelledError()
+                end_ack = None
+                try:
+                    end_ack = await dispatcher.send_command(
+                        {"type": "job.end", "job_id": job_id}, timeout_s=4.0
+                    )
+                except Exception:
+                    end_ack = None
+                if end_ack and end_ack.accepted:
+                    break
+                if end_ack and end_ack.code != "BUSY":
+                    raise RuntimeError(f"job.end rejected: {end_ack.code}")
+                if time.monotonic() >= end_deadline:
+                    raise RuntimeError("job.end timed out waiting for final segment to finish")
+                await asyncio.sleep(0.05)
 
             with get_db() as conn:
                 conn.execute("UPDATE jobs SET status = 'completed', completed_segments = ? WHERE id = ?;", (plan.total_segments, job_id))
