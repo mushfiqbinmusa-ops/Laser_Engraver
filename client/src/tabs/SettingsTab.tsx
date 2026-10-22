@@ -111,7 +111,7 @@ export const SettingsTab: React.FC = () => {
       setMsg({
         text: data.connected
           ? `Connected to ESP32 at ${data.host}:${data.port}`
-          : `Failed to connect to ${data.host}:${data.port}. Make sure ESP32 is powered and reachable.`,
+          : `Failed to connect to ${data.host}:${data.port}. Check device power and connection.`,
         isError: !data.connected
       });
     } catch (err: any) {
@@ -122,45 +122,48 @@ export const SettingsTab: React.FC = () => {
   };
 
   return (
-    <div style={{ padding: '24px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', maxWidth: '1440px', margin: '0 auto' }}>
       {/* Left Column: Connection & Machine Hardware Configuration */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-        {/* Controller Wi-Fi / Serial Connection */}
-        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: '6px', padding: '20px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-            <h2 style={{ fontSize: '15px', fontWeight: 600 }}>Controller Connection</h2>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        {/* Controller Connection */}
+        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: '4px', padding: '16px', boxShadow: 'var(--shadow-subtle)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+            <h2 style={{ fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 600, color: 'var(--text-primary)' }}>
+              Controller Connection
+            </h2>
             <span style={{
-              fontSize: '11px',
+              fontSize: '10px',
               padding: '2px 8px',
-              borderRadius: '12px',
+              borderRadius: '3px',
               fontWeight: 600,
-              background: connInfo.connected ? 'rgba(47, 158, 68, 0.2)' : 'rgba(240, 140, 0, 0.2)',
-              color: connInfo.connected ? '#B2F2BB' : '#FFD43B'
+              background: connInfo.connected ? '#F3F4F6' : '#FEF3C7',
+              color: connInfo.connected ? '#111827' : '#92400E',
+              border: `1px solid ${connInfo.connected ? '#D1D5DB' : '#FCD34D'}`
             }}>
               {connInfo.connected ? '● CONNECTED' : '○ DISCONNECTED'}
             </span>
           </div>
 
-          <form onSubmit={handleConnectController} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <form onSubmit={handleConnectController} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             <div>
-              <label htmlFor="conn-transport" style={{ display: 'block', fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '4px' }}>
-                Transport Type
+              <label htmlFor="conn-transport" style={{ display: 'block', fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '4px' }}>
+                Transport Interface
               </label>
               <select
                 id="conn-transport"
                 value={connInfo.transport}
                 onChange={(e) => setConnInfo({ ...connInfo, transport: e.target.value })}
-                style={{ width: '100%', padding: '6px 8px', background: 'var(--bg-surface-elevated)', color: 'inherit', border: '1px solid var(--border-subtle)', borderRadius: '4px' }}
+                style={{ width: '100%' }}
               >
-                <option value="tcp">Wi-Fi Network (TCP Socket)</option>
-                <option value="serial">USB Serial Cable</option>
+                <option value="serial">USB Serial (/dev/ttyACM0)</option>
+                <option value="tcp">Wi-Fi TCP Socket (port 8888)</option>
               </select>
             </div>
 
             {connInfo.transport === 'tcp' ? (
-              <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '12px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '8px' }}>
                 <div>
-                  <label htmlFor="conn-host" style={{ display: 'block', fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '4px' }}>
+                  <label htmlFor="conn-host" style={{ display: 'block', fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '4px' }}>
                     ESP32 IP Address
                   </label>
                   <input
@@ -173,7 +176,7 @@ export const SettingsTab: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <label htmlFor="conn-port" style={{ display: 'block', fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '4px' }}>
+                  <label htmlFor="conn-port" style={{ display: 'block', fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '4px' }}>
                     Port
                   </label>
                   <input
@@ -186,9 +189,9 @@ export const SettingsTab: React.FC = () => {
                 </div>
               </div>
             ) : (
-              <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '12px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '8px' }}>
                 <div>
-                  <label htmlFor="conn-serial" style={{ display: 'block', fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '4px' }}>
+                  <label htmlFor="conn-serial" style={{ display: 'block', fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '4px' }}>
                     Serial Device
                   </label>
                   <input
@@ -201,7 +204,7 @@ export const SettingsTab: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <label htmlFor="conn-baud" style={{ display: 'block', fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '4px' }}>
+                  <label htmlFor="conn-baud" style={{ display: 'block', fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '4px' }}>
                     Baudrate
                   </label>
                   <input
@@ -215,118 +218,145 @@ export const SettingsTab: React.FC = () => {
               </div>
             )}
 
-            <button type="submit" disabled={connecting} style={{ padding: '8px 12px', fontWeight: 600 }}>
-              {connecting ? 'Connecting...' : connInfo.connected ? 'Reconnect Controller' : 'Connect to Controller'}
+            <button
+              type="submit"
+              disabled={connecting}
+              style={{
+                padding: '8px 12px',
+                fontWeight: 600,
+                fontSize: '11px',
+                background: '#111827',
+                color: '#FFFFFF',
+                border: '1px solid #111827',
+                marginTop: '4px'
+              }}
+            >
+              {connecting ? 'Connecting...' : connInfo.connected ? 'Reconnect Interface' : 'Connect Interface'}
             </button>
           </form>
         </div>
 
         {/* Machine Hardware Configuration */}
-        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: '6px', padding: '20px' }}>
-          <h2 style={{ fontSize: '15px', fontWeight: 600, marginBottom: '16px' }}>Machine & Calibration Limits</h2>
-        {config ? (
-          <form onSubmit={handleSaveConfig} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-              <div>
-                <label htmlFor="cfg-steps-x" style={{ display: 'block', fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '4px' }}>
-                  X Steps per mm (at 1/16)
-                </label>
-                <input
-                  id="cfg-steps-x"
-                  type="number"
-                  step="0.1"
-                  value={config.steps_per_unit_x}
-                  onChange={(e) => setConfig({ ...config, steps_per_unit_x: Number(e.target.value) })}
-                  style={{ width: '100%' }}
-                />
+        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: '4px', padding: '16px', boxShadow: 'var(--shadow-subtle)' }}>
+          <h2 style={{ fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '14px' }}>
+            Kinematics & Machine Limits
+          </h2>
+          {config ? (
+            <form onSubmit={handleSaveConfig} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                <div>
+                  <label htmlFor="cfg-steps-x" style={{ display: 'block', fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '4px' }}>
+                    X Steps/mm (1/16)
+                  </label>
+                  <input
+                    id="cfg-steps-x"
+                    type="number"
+                    step="0.1"
+                    value={config.steps_per_unit_x}
+                    onChange={(e) => setConfig({ ...config, steps_per_unit_x: Number(e.target.value) })}
+                    style={{ width: '100%' }}
+                  />
+                </div>
+                <div>
+                  <label htmlFor="cfg-steps-y" style={{ display: 'block', fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '4px' }}>
+                    Y Steps/mm (1/16)
+                  </label>
+                  <input
+                    id="cfg-steps-y"
+                    type="number"
+                    step="0.1"
+                    value={config.steps_per_unit_y}
+                    onChange={(e) => setConfig({ ...config, steps_per_unit_y: Number(e.target.value) })}
+                    style={{ width: '100%' }}
+                  />
+                </div>
               </div>
-              <div>
-                <label htmlFor="cfg-steps-y" style={{ display: 'block', fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '4px' }}>
-                  Y Steps per mm (at 1/16)
-                </label>
-                <input
-                  id="cfg-steps-y"
-                  type="number"
-                  step="0.1"
-                  value={config.steps_per_unit_y}
-                  onChange={(e) => setConfig({ ...config, steps_per_unit_y: Number(e.target.value) })}
-                  style={{ width: '100%' }}
-                />
-              </div>
-            </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-              <div>
-                <label htmlFor="cfg-width" style={{ display: 'block', fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '4px' }}>
-                  Work Area Width (mm)
-                </label>
-                <input
-                  id="cfg-width"
-                  type="number"
-                  step="1"
-                  value={config.work_area_width_mm}
-                  onChange={(e) => setConfig({ ...config, work_area_width_mm: Number(e.target.value) })}
-                  style={{ width: '100%' }}
-                />
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                <div>
+                  <label htmlFor="cfg-width" style={{ display: 'block', fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '4px' }}>
+                    Work Width (mm)
+                  </label>
+                  <input
+                    id="cfg-width"
+                    type="number"
+                    step="1"
+                    value={config.work_area_width_mm}
+                    onChange={(e) => setConfig({ ...config, work_area_width_mm: Number(e.target.value) })}
+                    style={{ width: '100%' }}
+                  />
+                </div>
+                <div>
+                  <label htmlFor="cfg-height" style={{ display: 'block', fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '4px' }}>
+                    Work Height (mm)
+                  </label>
+                  <input
+                    id="cfg-height"
+                    type="number"
+                    step="1"
+                    value={config.work_area_height_mm}
+                    onChange={(e) => setConfig({ ...config, work_area_height_mm: Number(e.target.value) })}
+                    style={{ width: '100%' }}
+                  />
+                </div>
               </div>
-              <div>
-                <label htmlFor="cfg-height" style={{ display: 'block', fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '4px' }}>
-                  Work Area Height (mm)
-                </label>
-                <input
-                  id="cfg-height"
-                  type="number"
-                  step="1"
-                  value={config.work_area_height_mm}
-                  onChange={(e) => setConfig({ ...config, work_area_height_mm: Number(e.target.value) })}
-                  style={{ width: '100%' }}
-                />
-              </div>
-            </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-              <div>
-                <label htmlFor="cfg-speed" style={{ display: 'block', fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '4px' }}>
-                  Default Speed (sps)
-                </label>
-                <input
-                  id="cfg-speed"
-                  type="number"
-                  value={config.default_speed_sps}
-                  onChange={(e) => setConfig({ ...config, default_speed_sps: Number(e.target.value) })}
-                  style={{ width: '100%' }}
-                />
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                <div>
+                  <label htmlFor="cfg-speed" style={{ display: 'block', fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '4px' }}>
+                    Default Speed (sps)
+                  </label>
+                  <input
+                    id="cfg-speed"
+                    type="number"
+                    value={config.default_speed_sps}
+                    onChange={(e) => setConfig({ ...config, default_speed_sps: Number(e.target.value) })}
+                    style={{ width: '100%' }}
+                  />
+                </div>
+                <div>
+                  <label htmlFor="cfg-clamp" style={{ display: 'block', fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '4px' }}>
+                    Hardware Clamp (%)
+                  </label>
+                  <input
+                    id="cfg-clamp"
+                    type="number"
+                    value={config.laser_ceiling_pct}
+                    disabled
+                    title="Enforced in firmware at 90% (3685 duty)"
+                    style={{ width: '100%', opacity: 0.7, background: '#F3F4F6' }}
+                  />
+                </div>
               </div>
-              <div>
-                <label htmlFor="cfg-clamp" style={{ display: 'block', fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '4px' }}>
-                  Hard Laser Clamp (%)
-                </label>
-                <input
-                  id="cfg-clamp"
-                  type="number"
-                  value={config.laser_ceiling_pct}
-                  disabled
-                  title="Enforced in firmware at 90% (3685 duty)"
-                  style={{ width: '100%', opacity: 0.6 }}
-                />
-              </div>
-            </div>
 
-            <button type="submit" style={{ marginTop: '8px', padding: '10px', fontWeight: 600 }}>
-              Save Machine Settings
-            </button>
-          </form>
-        ) : (
-          <div>Loading machine config...</div>
-        )}
+              <button
+                type="submit"
+                style={{
+                  marginTop: '4px',
+                  padding: '8px 12px',
+                  fontWeight: 600,
+                  fontSize: '11px',
+                  background: '#111827',
+                  color: '#FFFFFF',
+                  border: '1px solid #111827'
+                }}
+              >
+                Save Machine Configuration
+              </button>
+            </form>
+          ) : (
+            <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Loading configuration...</div>
+          )}
+        </div>
       </div>
-    </div>
 
       {/* Preset Management */}
-      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: '6px', padding: '20px' }}>
-        <h2 style={{ fontSize: '15px', fontWeight: 600, marginBottom: '16px' }}>Process Presets</h2>
+      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: '4px', padding: '16px', boxShadow: 'var(--shadow-subtle)' }}>
+        <h2 style={{ fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '14px' }}>
+          Process Material Presets
+        </h2>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '20px', maxHeight: '280px', overflowY: 'auto' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '16px', maxHeight: '260px', overflowY: 'auto' }}>
           {presets.map((p) => (
             <div
               key={p.id}
@@ -334,24 +364,30 @@ export const SettingsTab: React.FC = () => {
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                padding: '10px 12px',
+                padding: '8px 10px',
                 background: 'var(--bg-surface-elevated)',
                 border: '1px solid var(--border-subtle)',
-                borderRadius: '4px'
+                borderRadius: '3px'
               }}
             >
               <div>
-                <div style={{ fontWeight: 600, fontSize: '13px' }}>
-                  {p.name} {p.is_builtin && <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>(BUILT-IN)</span>}
+                <div style={{ fontWeight: 600, fontSize: '12px', color: 'var(--text-primary)' }}>
+                  {p.name} {p.is_builtin && <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: 400 }}>(BUILT-IN)</span>}
                 </div>
-                <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
-                  Power: {p.laser_power_pct}% ({p.laser_duty} duty) · Engrave: {p.engrave_speed_sps} sps · Passes: {p.passes}
+                <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
+                  Power: {p.laser_power_pct}% ({p.laser_duty} duty) · Speed: {p.engrave_speed_sps} sps · Passes: {p.passes}
                 </div>
               </div>
               {!p.is_builtin && (
                 <button
                   onClick={() => handleDeletePreset(p.id)}
-                  style={{ color: 'var(--accent-estop)', borderColor: 'var(--accent-estop)', fontSize: '11px' }}
+                  style={{
+                    color: '#991B1B',
+                    borderColor: '#FCA5A5',
+                    fontSize: '10px',
+                    padding: '3px 8px',
+                    background: '#FFFFFF'
+                  }}
                 >
                   Delete
                 </button>
@@ -361,10 +397,12 @@ export const SettingsTab: React.FC = () => {
         </div>
 
         {/* Add New Preset */}
-        <h3 style={{ fontSize: '13px', fontWeight: 600, marginBottom: '8px' }}>Create Custom Preset</h3>
+        <h3 style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.03em', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '8px' }}>
+          Create Custom Material Preset
+        </h3>
         <form onSubmit={handleCreatePreset} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
           <div>
-            <label htmlFor="preset-name" style={{ display: 'block', fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '4px' }}>
+            <label htmlFor="preset-name" style={{ display: 'block', fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '3px' }}>
               Preset Name
             </label>
             <input
@@ -378,8 +416,8 @@ export const SettingsTab: React.FC = () => {
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
             <div>
-              <label htmlFor="preset-power" style={{ display: 'block', fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '4px' }}>
-                Power % (0-90)
+              <label htmlFor="preset-power" style={{ display: 'block', fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '3px' }}>
+                Laser Power % (0-90)
               </label>
               <input
                 id="preset-power"
@@ -392,8 +430,8 @@ export const SettingsTab: React.FC = () => {
               />
             </div>
             <div>
-              <label htmlFor="preset-speed" style={{ display: 'block', fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '4px' }}>
-                Speed (sps)
+              <label htmlFor="preset-speed" style={{ display: 'block', fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '3px' }}>
+                Engrave Speed (sps)
               </label>
               <input
                 id="preset-speed"
@@ -404,17 +442,31 @@ export const SettingsTab: React.FC = () => {
               />
             </div>
           </div>
-          <button type="submit" style={{ padding: '8px', fontWeight: 600 }}>Add Preset</button>
+          <button
+            type="submit"
+            style={{
+              padding: '8px 12px',
+              fontWeight: 600,
+              fontSize: '11px',
+              background: '#111827',
+              color: '#FFFFFF',
+              border: '1px solid #111827',
+              marginTop: '4px'
+            }}
+          >
+            Add Preset
+          </button>
         </form>
 
         {msg && (
           <div style={{
             marginTop: '12px',
-            padding: '8px 12px',
+            padding: '8px 10px',
             borderRadius: '4px',
-            fontSize: '12px',
-            background: msg.isError ? 'rgba(224, 49, 49, 0.15)' : 'rgba(47, 158, 68, 0.15)',
-            color: msg.isError ? '#FFA8A8' : '#B2F2BB'
+            fontSize: '11px',
+            background: msg.isError ? '#FEF2F2' : 'var(--bg-surface-elevated)',
+            color: msg.isError ? '#991B1B' : 'var(--text-primary)',
+            border: `1px solid ${msg.isError ? '#FCA5A5' : 'var(--border-subtle)'}`
           }}>
             {msg.text}
           </div>

@@ -15,10 +15,15 @@ class SerialControllerBridge(ControllerBridge):
         self.ser: Optional[serial.Serial] = None
         self._connected = False
         self._line_handler: Optional[Callable[[str], Awaitable[None]]] = None
+        self._raw_line_listener: Optional[Callable[[str], None]] = None
         self._read_task: Optional[asyncio.Task] = None
 
     def set_line_handler(self, handler: Callable[[str], Awaitable[None]]) -> None:
         self._line_handler = handler
+
+    def set_raw_line_listener(self, listener: Callable[[str], None]) -> None:
+        """Called for every received line, before protocol parsing."""
+        self._raw_line_listener = listener
 
     def is_connected(self) -> bool:
         return self._connected and self.ser is not None and self.ser.is_open
@@ -48,7 +53,13 @@ class SerialControllerBridge(ControllerBridge):
         for candidate in candidates:
             try:
                 def _open():
-                    return serial.Serial(candidate, self.baudrate, timeout=0.1)
+                    s = serial.Serial(candidate, self.baudrate, timeout=0.1)
+                    try:
+                        s.dtr = True
+                        s.rts = False
+                    except Exception:
+                        pass
+                    return s
                 self.ser = await loop.run_in_executor(None, _open)
                 self.port = candidate
                 self._connected = True
@@ -94,11 +105,17 @@ class SerialControllerBridge(ControllerBridge):
                 line_bytes = await loop.run_in_executor(None, self.ser.readline)
                 if line_bytes:
                     decoded = line_bytes.decode("utf-8", errors="replace").strip()
-                    if decoded and self._line_handler:
-                        try:
-                            await self._line_handler(decoded)
-                        except Exception as ex:
-                            logger.error(f"Error in serial line handler: {ex}")
+                    if decoded:
+                        if self._raw_line_listener:
+                            try:
+                                self._raw_line_listener(decoded)
+                            except Exception as ex:
+                                logger.debug(f"Raw line listener error: {ex}")
+                        if self._line_handler:
+                            try:
+                                await self._line_handler(decoded)
+                            except Exception as ex:
+                                logger.error(f"Error in serial line handler: {ex}")
                 else:
                     await asyncio.sleep(0.01)
         except asyncio.CancelledError:

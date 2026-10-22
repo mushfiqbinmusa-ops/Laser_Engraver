@@ -14,7 +14,9 @@ from app.db.migrations import run_migrations
 from app.bridge.tcp_bridge import TcpControllerBridge
 from app.bridge.serial_bridge import SerialControllerBridge
 from app.bridge.dispatcher import ControllerDispatcher
+from app.console.hub import console_hub
 from app.api.ws_events import router as ws_router, ws_manager
+from app.api.routes_console import router as console_router
 from app.api.routes_machine import router as machine_router
 from app.api.routes_presets import router as presets_router
 from app.api.routes_jobs import router as jobs_router
@@ -32,6 +34,12 @@ def get_dispatcher() -> Optional[ControllerDispatcher]:
 
 def get_bridge() -> Optional[ControllerBridge]:
     return _bridge
+
+
+def _attach_console(bridge: ControllerBridge) -> None:
+    setter = getattr(bridge, "set_raw_line_listener", None)
+    if setter:
+        setter(console_hub.add_rx)
 
 async def reconfigure_bridge(
     transport: str,
@@ -54,6 +62,7 @@ async def reconfigure_bridge(
         _bridge = SerialControllerBridge(serial_port, baudrate)
     else:
         _bridge = TcpControllerBridge(host, port)
+    _attach_console(_bridge)
 
     if _dispatcher:
         _dispatcher.set_bridge(_bridge)
@@ -111,6 +120,7 @@ async def lifespan(app: FastAPI):
         _bridge = SerialControllerBridge(settings.serial_port, settings.baudrate)
     else:
         _bridge = TcpControllerBridge(settings.esp32_host, settings.esp32_port)
+    _attach_console(_bridge)
 
     _dispatcher = ControllerDispatcher(_bridge)
     # Broadcast all incoming controller events directly to connected WebSocket clients
@@ -154,6 +164,7 @@ app.add_middleware(
 )
 
 app.include_router(ws_router)
+app.include_router(console_router)
 app.include_router(machine_router)
 app.include_router(presets_router)
 app.include_router(jobs_router)

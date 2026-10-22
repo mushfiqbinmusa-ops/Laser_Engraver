@@ -12,8 +12,8 @@ class MachineConfigModel(BaseModel):
     max_travel_steps_y: int = Field(default=4096, gt=0)
     default_speed_sps: int = Field(default=100, gt=0, le=25000)
     max_speed_sps: int = Field(default=25000, gt=0, le=25000)
-    laser_ceiling_pct: int = Field(default=SAFETY_MAX_PCT, ge=1, le=100)
-    laser_ceiling_duty: int = Field(default=SAFETY_MAX_DUTY, ge=1, le=MAX_DUTY)
+    laser_ceiling_pct: int = Field(default=SAFETY_MAX_PCT, ge=1, le=SAFETY_MAX_PCT)
+    laser_ceiling_duty: int = Field(default=SAFETY_MAX_DUTY, ge=1, le=SAFETY_MAX_DUTY)
 
 class PresetModel(BaseModel):
     id: str

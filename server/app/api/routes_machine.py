@@ -40,7 +40,7 @@ def _live_travel_limits(dispatcher) -> tuple[float, float]:
     max_x = float(cfg.get("max_travel_steps_x", 4096))
     max_y = float(cfg.get("max_travel_steps_y", 4096))
     snap = dispatcher.latest_snapshot
-    mode = int(getattr(snap, "microstep_mode", REFERENCE_MICROSTEP_MODE) or REFERENCE_MICROSTEP_MODE)
+    mode = int(getattr(snap, "microstep_mode", 1) or 1)
     scale = mode / REFERENCE_MICROSTEP_MODE
     return max_x * scale, max_y * scale
 
@@ -55,11 +55,6 @@ class ConnectionConfigRequest(BaseModel):
 
 @router.get("/status")
 async def get_status(dispatcher=Depends(get_disp)):
-    if not dispatcher.is_fresh() and dispatcher.bridge.is_connected():
-        try:
-            await dispatcher.send_command({"type": "system.snapshot"}, timeout_s=0.5)
-        except Exception:
-            pass
     return {
         "connected": dispatcher.bridge.is_connected(),
         "fresh": dispatcher.is_fresh(),
@@ -188,9 +183,22 @@ async def set_microstep(req: DriverSetMicrostepRequest, dispatcher=Depends(get_d
 @router.post("/home")
 async def home(req: HomeStartRequest, dispatcher=Depends(get_disp)):
     try:
+        snap = dispatcher.latest_snapshot
+        if snap and snap.fault:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Cannot home: machine is in fault state ({snap.fault}). Reset fault first."
+            )
         # Firmware allows up to 60s per homing phase; a full X+Y sequence can
         # span several phases, so allow enough headroom for both axes.
         ack, ev = await dispatcher.send_operation(req.model_dump(), op_timeout_s=180.0)
+        if ev.result and ev.result != "success":
+            snap = dispatcher.latest_snapshot
+            fault = getattr(snap, "fault", None) if snap else None
+            detail = f"Homing {ev.result}"
+            if fault:
+                detail += f": {fault}"
+            raise HTTPException(status_code=502, detail=detail)
         return {"ack": ack, "event": ev}
     except HTTPException:
         raise
@@ -202,11 +210,6 @@ async def home(req: HomeStartRequest, dispatcher=Depends(get_disp)):
 @router.get("/status/report")
 async def get_status_report(dispatcher=Depends(get_disp)):
     from app.core.config import settings
-    if dispatcher.bridge.is_connected() and not dispatcher.is_fresh():
-        try:
-            await dispatcher.send_command({"type": "system.snapshot"}, timeout_s=1.5)
-        except Exception:
-            pass
     snap = dispatcher.get_effective_snapshot()
 
     conn_info = {
@@ -235,13 +238,13 @@ async def get_status_report(dispatcher=Depends(get_disp)):
     homed_y = _get(homed, "y", False)
     sx_x_raw = _get(sx, "x_raw", 1)
     sx_y_raw = _get(sx, "y_raw", 1)
-    sx_x_filt = _get(sx, "x_filtered", 1)
-    sx_y_filt = _get(sx, "y_filtered", 1)
+    sx_x_filt = _get(sx, "x_filtered", 0)
+    sx_y_filt = _get(sx, "y_filtered", 0)
     laser_active = _get(laser, "active", False)
     laser_duty = _get(laser, "duty", 0)
     snap_state = _get(snap, "state", "unknown")
     drivers_enabled = _get(snap, "drivers_enabled", False)
-    microstep_mode = _get(snap, "microstep_mode", 16) or 16
+    microstep_mode = _get(snap, "microstep_mode", 1) or 1
     # 28BYJ-48 64:1 has 2048 baseline full steps/rev. The configured
     # machine_config.steps_per_unit_* is calibrated at 1/16 (80 steps/mm for
     # a 5 steps/mm mechanics); derive the live value from that single source.
@@ -288,14 +291,18 @@ async def jog(req: MotionJogRequest, dispatcher=Depends(get_disp)):
     try:
         max_x, max_y = _live_travel_limits(dispatcher)
         snap = dispatcher.latest_snapshot
-        if snap:
-            limit = max_x if req.axis == "x" else max_y
-            current = int((snap.pos or {}).get(req.axis, 0))
-            if abs(current + req.steps) > limit:
-                raise HTTPException(
-                    status_code=400,
-                    detail=f"Jog out of bounds: target {current + req.steps} exceeds configured limit ±{limit:.0f}"
-                )
+        if snap and snap.fault:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Cannot jog: machine is in fault state ({snap.fault}). Reset fault first."
+            )
+        limit = max_x if req.axis == "x" else max_y
+        current = int((snap.pos or {}).get(req.axis, 0)) if snap else 0
+        if abs(current + req.steps) > limit:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Jog out of bounds: target {current + req.steps} exceeds configured limit ±{limit:.0f}"
+            )
         ack = await dispatcher.send_command(req.model_dump())
         # If controller is busy executing prior step burst, wait for it to settle and retry
         if not ack.accepted and ack.code == "BUSY":
@@ -321,11 +328,22 @@ async def jog(req: MotionJogRequest, dispatcher=Depends(get_disp)):
 @router.post("/move-abs")
 async def move_abs(req: MotionMoveAbsRequest, dispatcher=Depends(get_disp)):
     try:
-        max_x, max_y = _live_travel_limits(dispatcher)
-        if abs(req.x) > max_x or abs(req.y) > max_y:
+        snap = dispatcher.latest_snapshot
+        if snap and snap.fault:
             raise HTTPException(
                 status_code=400,
-                detail=f"Move out of bounds: target exceeds configured limit ({max_x:.0f}, {max_y:.0f})"
+                detail=f"Cannot move: machine is in fault state ({snap.fault}). Reset fault first."
+            )
+        if snap and not (snap.homed.get("x") and snap.homed.get("y")):
+            raise HTTPException(
+                status_code=400,
+                detail="Move rejected: NOT_HOMED (both X and Y axes must be homed first)"
+            )
+        max_x, max_y = _live_travel_limits(dispatcher)
+        if req.x < 0 or req.x > max_x or req.y < 0 or req.y > max_y:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Move out of bounds: target ({req.x}, {req.y}) exceeds valid range (0..{max_x:.0f}, 0..{max_y:.0f})"
             )
         ack = await dispatcher.send_command(req.model_dump())
         if not ack.accepted:

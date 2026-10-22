@@ -1,83 +1,80 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useMachine } from '../context/MachineContext';
 
-const REFERENCE_MICROSTEP_MODE = 16;
-
 export const CalibrationTab: React.FC = () => {
-  const { connected, fresh, snapshot, home, jog, resetFault, setMicrostepMode } = useMachine();
+  const { connected, snapshot, home, jog, setDriver, setMicrostepMode, resetFault, homePhase, homeResult } = useMachine();
+  const [jogStepSize, setJogStepSize] = useState<number>(100);
+  const [customStepInput, setCustomStepInput] = useState<string>('100');
   const [speedSps, setSpeedSps] = useState<number>(100);
-  const [jogStepSize, setJogStepSize] = useState<number>(16);
-  const [customStepInput, setCustomStepInput] = useState<string>('16');
   const [isHoming, setIsHoming] = useState<boolean>(false);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [isJogging, setIsJogging] = useState<boolean>(false);
   const [isChangingMicrostep, setIsChangingMicrostep] = useState<boolean>(false);
-  const [referenceStepsPerUnit, setReferenceStepsPerUnit] = useState<number>(80);
-  const [referenceMaxTravel, setReferenceMaxTravel] = useState<number>(4096);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [driverFeedback, setDriverFeedback] = useState<{ text: string; isError: boolean } | null>(null);
+  const [togglingDriver, setTogglingDriver] = useState(false);
 
-  const microstepMode = (snapshot?.microstep_mode || REFERENCE_MICROSTEP_MODE) as 1 | 2 | 4 | 8 | 16;
-  // machine_config stores the calibrated resolution at 1/16 mode.
-  const stepsPerMm = referenceStepsPerUnit * (microstepMode / REFERENCE_MICROSTEP_MODE);
+  const homed = snapshot?.homed || { x: false, y: false };
+  const pos = snapshot?.pos || { x: 0, y: 0 };
+  const sx = snapshot?.sensors;
+  const microstepMode = snapshot?.microstep_mode || 1;
+  const isBusy = snapshot?.state === 'running_job' || snapshot?.state === 'moving' || isHoming;
+  const isJogDisabled = !connected || isBusy || Boolean(snapshot?.fault);
+  const isMachineFaulted = Boolean(snapshot?.state === 'faulted' || (snapshot?.fault && snapshot.fault !== 'none'));
+
+  // Scaled linear math: baseline is 80 steps/mm at 1/16 mode
+  const stepsPerMm = Math.max(1, Math.round((80.0 * microstepMode) / 16.0));
   const stepsPerRev = 2048 * microstepMode;
-  const liveMaxTravel = Math.floor(referenceMaxTravel * (microstepMode / REFERENCE_MICROSTEP_MODE));
-
-  useEffect(() => {
-    fetch('/api/presets/config')
-      .then((res) => (res.ok ? res.json() : null))
-      .then((cfg) => {
-        if (cfg && typeof cfg.steps_per_unit_x === 'number') {
-          setReferenceStepsPerUnit(cfg.steps_per_unit_x);
-        }
-        if (cfg && typeof cfg.max_travel_steps_x === 'number') {
-          setReferenceMaxTravel(cfg.max_travel_steps_x);
-        }
-      })
-      .catch(() => {});
-  }, []);
-
-  const isBusy = Boolean(
-    snapshot?.state === 'running_job' ||
-    snapshot?.state === 'moving' ||
-    snapshot?.state === 'homing'
-  );
-
-  const handleMicrostepChange = async (mode: 1 | 2 | 4 | 8 | 16) => {
-    setIsChangingMicrostep(true);
-    setErrorMsg(null);
-    try {
-      await setMicrostepMode(mode);
-    } catch (err: any) {
-      setErrorMsg(`Failed to set microstep mode: ${err.message}`);
-    } finally {
-      setIsChangingMicrostep(false);
-    }
-  };
-
-  const isJogDisabled = Boolean(!connected || !fresh || isHoming || isJogging || snapshot?.fault || snapshot?.state === 'running_job' || snapshot?.state === 'moving');
+  const liveMaxTravel = Math.round((4096 * microstepMode) / 16);
 
   const runHome = async (axis: 'all' | 'x' | 'y') => {
     setIsHoming(true);
     setErrorMsg(null);
     try {
       await home(axis);
-    } catch (err: any) {
-      setErrorMsg(err.message);
+    } catch (e: any) {
+      setErrorMsg(e.message || 'Homing failed');
     } finally {
       setIsHoming(false);
     }
   };
 
   const runJog = async (axis: 'x' | 'y', steps: number) => {
-    setIsJogging(true);
     setErrorMsg(null);
     try {
       await jog(axis, steps, speedSps);
-      const estDurationMs = Math.round((Math.abs(steps) / speedSps) * 1000) + 120;
-      await new Promise((r) => setTimeout(r, estDurationMs));
-    } catch (err: any) {
-      setErrorMsg(err.message);
+    } catch (e: any) {
+      setErrorMsg(e.message || 'Jog rejected');
+    }
+  };
+
+  const handleToggleDriver = async () => {
+    setTogglingDriver(true);
+    setDriverFeedback(null);
+    const targetState = !snapshot?.drivers_enabled;
+    try {
+      await setDriver(targetState);
+      setDriverFeedback({
+        text: targetState
+          ? 'MOTORS ENERGIZED: Holding torque applied to coils. Position is locked.'
+          : 'DRIVERS DISABLED: High-impedance mode. Coils unpowered, carriage can be moved by hand.',
+        isError: false
+      });
+    } catch (e: any) {
+      setDriverFeedback({ text: `Driver control error: ${e.message}`, isError: true });
     } finally {
-      setIsJogging(false);
+      setTogglingDriver(false);
+    }
+  };
+
+  const handleMicrostepChange = async (mode: 1 | 2 | 4 | 8 | 16) => {
+    if (mode === microstepMode) return;
+    setIsChangingMicrostep(true);
+    setErrorMsg(null);
+    try {
+      await setMicrostepMode(mode);
+    } catch (e: any) {
+      setErrorMsg(e.message || 'Failed to switch microstep mode');
+    } finally {
+      setIsChangingMicrostep(false);
     }
   };
 
@@ -88,126 +85,214 @@ export const CalibrationTab: React.FC = () => {
 
   const handleCustomStepChange = (val: string) => {
     setCustomStepInput(val);
-    const num = parseInt(val, 10);
-    if (!isNaN(num) && num > 0) {
-      setJogStepSize(Math.min(num, liveMaxTravel));
+    const parsed = parseInt(val, 10);
+    if (!isNaN(parsed) && parsed > 0 && parsed <= liveMaxTravel) {
+      setJogStepSize(parsed);
     }
   };
 
-  const sx = snapshot?.sensors;
-  const pos = snapshot?.pos || { x: 0, y: 0 };
-  const homed = snapshot?.homed || { x: false, y: false };
-
   return (
-    <div style={{ padding: '24px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', maxWidth: '1440px', margin: '0 auto' }}>
       {/* Left Column: Optical Endstop & Homing Controls */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
         {/* Optical Endstop Telemetry */}
-        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: '6px', padding: '20px' }}>
-          <h2 style={{ fontSize: '15px', fontWeight: 600, marginBottom: '16px' }}>Optical Endstop Telemetry</h2>
+        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: '4px', padding: '16px', boxShadow: 'var(--shadow-subtle)' }}>
+          <h2 style={{ fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '14px' }}>
+            Optical Endstop Telemetry
+          </h2>
           
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '20px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '16px' }}>
             {/* Sensor X */}
-            <div style={{ background: 'var(--bg-surface-elevated)', border: '1px solid var(--border-subtle)', borderRadius: '6px', padding: '16px' }}>
+            <div style={{ background: 'var(--bg-surface-elevated)', border: '1px solid var(--border-subtle)', borderRadius: '4px', padding: '12px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                <span style={{ fontSize: '13px', fontWeight: 600 }}>Sensor X (GPIO 13)</span>
+                <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-primary)' }}>Sensor X (GPIO 13)</span>
                 <span style={{
                   fontSize: '10px',
-                  fontWeight: 700,
+                  fontWeight: 600,
                   padding: '2px 6px',
                   borderRadius: '3px',
-                  background: sx?.x_filtered ? 'rgba(224, 49, 49, 0.2)' : 'rgba(47, 158, 68, 0.15)',
-                  color: sx?.x_filtered ? 'var(--accent-estop)' : 'var(--accent-ready)',
-                  border: `1px solid ${sx?.x_filtered ? 'var(--accent-estop)' : 'var(--accent-ready)'}`
+                  background: sx?.x_filtered ? '#FEF2F2' : '#F3F4F6',
+                  color: sx?.x_filtered ? '#991B1B' : '#374151',
+                  border: `1px solid ${sx?.x_filtered ? '#FCA5A5' : '#E5E7EB'}`
                 }}>
                   {sx ? (sx.x_filtered ? 'TRIPPED (0V)' : 'BEAM OPEN (3.3V)') : '—'}
                 </span>
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '12px' }}>
-                <div>Raw Electrical: <span className="mono">{sx ? (sx.x_raw ? 'HIGH / 3.3V (Unblocked)' : 'LOW / 0V (Obstructed)') : '—'}</span></div>
-                <div>Debounced State: <span className="mono" style={{ fontWeight: 600, color: sx?.x_filtered ? 'var(--accent-estop)' : 'var(--accent-ready)' }}>
-                  {sx ? (sx.x_filtered ? 'BLOCKED / DETECTED (Flag in slot)' : 'CLEAR (Beam unbroken)') : '—'}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '11px', color: 'var(--text-secondary)' }}>
+                <div>Raw Electrical: <span className="mono" style={{ color: 'var(--text-primary)' }}>{sx ? (sx.x_raw ? 'HIGH / 3.3V (Open)' : 'LOW / 0V (Blocked)') : '—'}</span></div>
+                <div>Debounced State: <span className="mono" style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
+                  {sx ? (sx.x_filtered ? 'BLOCKED / DETECTED' : 'CLEAR') : '—'}
                 </span></div>
-                <div>Axis Home Status: <span className="mono" style={{ fontWeight: 600, color: homed.x ? 'var(--accent-ready)' : 'var(--text-muted)' }}>
-                  {homed.x ? 'HOMED ✓ (Origin Calibrated)' : 'UNHOMED ✗ (Needs Homing)'}
+                <div>Axis Homed: <span className="mono" style={{ fontWeight: 600, color: homed.x ? 'var(--text-primary)' : 'var(--text-muted)' }}>
+                  {homed.x ? 'CALIBRATED ✓' : 'UNHOMED'}
                 </span></div>
               </div>
             </div>
 
             {/* Sensor Y */}
-            <div style={{ background: 'var(--bg-surface-elevated)', border: '1px solid var(--border-subtle)', borderRadius: '6px', padding: '16px' }}>
+            <div style={{ background: 'var(--bg-surface-elevated)', border: '1px solid var(--border-subtle)', borderRadius: '4px', padding: '12px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                <span style={{ fontSize: '13px', fontWeight: 600 }}>Sensor Y (GPIO 8)</span>
+                <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-primary)' }}>Sensor Y (GPIO 8)</span>
                 <span style={{
                   fontSize: '10px',
-                  fontWeight: 700,
+                  fontWeight: 600,
                   padding: '2px 6px',
                   borderRadius: '3px',
-                  background: sx?.y_filtered ? 'rgba(224, 49, 49, 0.2)' : 'rgba(47, 158, 68, 0.15)',
-                  color: sx?.y_filtered ? 'var(--accent-estop)' : 'var(--accent-ready)',
-                  border: `1px solid ${sx?.y_filtered ? 'var(--accent-estop)' : 'var(--accent-ready)'}`
+                  background: sx?.y_filtered ? '#FEF2F2' : '#F3F4F6',
+                  color: sx?.y_filtered ? '#991B1B' : '#374151',
+                  border: `1px solid ${sx?.y_filtered ? '#FCA5A5' : '#E5E7EB'}`
                 }}>
                   {sx ? (sx.y_filtered ? 'TRIPPED (0V)' : 'BEAM OPEN (3.3V)') : '—'}
                 </span>
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '12px' }}>
-                <div>Raw Electrical: <span className="mono">{sx ? (sx.y_raw ? 'HIGH / 3.3V (Unblocked)' : 'LOW / 0V (Obstructed)') : '—'}</span></div>
-                <div>Debounced State: <span className="mono" style={{ fontWeight: 600, color: sx?.y_filtered ? 'var(--accent-estop)' : 'var(--accent-ready)' }}>
-                  {sx ? (sx.y_filtered ? 'BLOCKED / DETECTED (Flag in slot)' : 'CLEAR (Beam unbroken)') : '—'}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '11px', color: 'var(--text-secondary)' }}>
+                <div>Raw Electrical: <span className="mono" style={{ color: 'var(--text-primary)' }}>{sx ? (sx.y_raw ? 'HIGH / 3.3V (Open)' : 'LOW / 0V (Blocked)') : '—'}</span></div>
+                <div>Debounced State: <span className="mono" style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
+                  {sx ? (sx.y_filtered ? 'BLOCKED / DETECTED' : 'CLEAR') : '—'}
                 </span></div>
-                <div>Axis Home Status: <span className="mono" style={{ fontWeight: 600, color: homed.y ? 'var(--accent-ready)' : 'var(--text-muted)' }}>
-                  {homed.y ? 'HOMED ✓ (Origin Calibrated)' : 'UNHOMED ✗ (Needs Homing)'}
+                <div>Axis Homed: <span className="mono" style={{ fontWeight: 600, color: homed.y ? 'var(--text-primary)' : 'var(--text-muted)' }}>
+                  {homed.y ? 'CALIBRATED ✓' : 'UNHOMED'}
                 </span></div>
               </div>
             </div>
           </div>
 
-          <h3 style={{ fontSize: '13px', fontWeight: 600, marginBottom: '8px' }}>Two-Stage Optical Homing Sequence</h3>
-          <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '12px' }}>
-            FastSeek (800 sps) → PullOff until clear → SlowLatch (200 sps) → FinalPullOff (200 steps) → Zero Coordinate Alignment.
+          <h3 style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.03em', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '6px' }}>
+            5-Phase Optical Homing
+          </h3>
+          <p style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '12px', lineHeight: '1.4' }}>
+            ClearInitial → FastSeek → PullOff → SlowLatch → FinalPullOff → Zero Origin. Seek directions: X +, Y -.
           </p>
-          <div style={{ display: 'flex', gap: '10px' }}>
+          <div style={{ display: 'flex', gap: '8px' }}>
             <button
               onClick={() => runHome('all')}
               disabled={isHoming || !connected}
-              style={{ flex: 2, padding: '10px', fontWeight: 600 }}
+              style={{
+                flex: 2,
+                padding: '8px 12px',
+                fontWeight: 600,
+                fontSize: '12px',
+                background: '#111827',
+                color: '#FFFFFF',
+                border: '1px solid #111827'
+              }}
             >
               {isHoming ? 'HOMING IN PROGRESS...' : 'HOME ALL AXES (X & Y)'}
             </button>
-            <button onClick={() => runHome('x')} disabled={isHoming || !connected} style={{ flex: 1 }}>Home X</button>
-            <button onClick={() => runHome('y')} disabled={isHoming || !connected} style={{ flex: 1 }}>Home Y</button>
+            <button onClick={() => runHome('x')} disabled={isHoming || !connected} style={{ flex: 1, fontSize: '11px' }}>Home X</button>
+            <button onClick={() => runHome('y')} disabled={isHoming || !connected} style={{ flex: 1, fontSize: '11px' }}>Home Y</button>
           </div>
 
+          {homePhase && (
+            <div style={{ marginTop: '12px', padding: '8px 10px', background: 'var(--bg-surface-elevated)', border: '1px solid var(--border-subtle)', borderRadius: '4px', fontSize: '11px', color: 'var(--text-secondary)' }}>
+              Homing phase: <span className="mono" style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{homePhase}</span>
+            </div>
+          )}
+
+          {homeResult && homeResult !== 'success' && (
+            <div style={{ marginTop: '12px', padding: '8px 10px', background: '#FEF2F2', border: '1px solid #FCA5A5', borderRadius: '4px', fontSize: '11px', color: '#991B1B' }}>
+              Last homing result: <span className="mono" style={{ fontWeight: 600 }}>{homeResult}</span>
+            </div>
+          )}
+
           {snapshot?.fault && (
-            <div style={{ marginTop: '16px', padding: '10px', background: 'rgba(224, 49, 49, 0.15)', border: '1px solid var(--accent-estop)', borderRadius: '4px' }}>
-              <div style={{ color: '#FFA8A8', fontWeight: 600, fontSize: '12px', marginBottom: '6px' }}>
+            <div style={{ marginTop: '14px', padding: '10px 12px', background: '#FEF2F2', border: '1px solid #FCA5A5', borderRadius: '4px' }}>
+              <div style={{ color: '#991B1B', fontWeight: 600, fontSize: '11px', marginBottom: '6px' }}>
                 FAULT: {snapshot.fault}
               </div>
-              <button onClick={resetFault} style={{ fontSize: '12px' }}>Reset Machine Fault</button>
+              <button onClick={resetFault} style={{ fontSize: '11px' }}>Reset Machine Fault</button>
+            </div>
+          )}
+        </div>
+
+        {/* A4988 Driver Energize / De-energize */}
+        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: '4px', padding: '16px', boxShadow: 'var(--shadow-subtle)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+            <h2 style={{ fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 600, color: 'var(--text-primary)' }}>
+              A4988 Driver Power (Coil Energize)
+            </h2>
+            <span
+              className="mono"
+              style={{
+                fontSize: '10px',
+                padding: '2px 8px',
+                borderRadius: '4px',
+                fontWeight: 600,
+                background: 'var(--bg-surface-elevated)',
+                color: 'var(--text-primary)',
+                border: '1px solid var(--border-subtle)',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px'
+              }}
+            >
+              <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: snapshot?.drivers_enabled ? '#111827' : '#9CA3AF' }} />
+              {snapshot?.drivers_enabled ? 'HOLDING TORQUE ACTIVE' : 'DRIVERS DISABLED'}
+            </span>
+          </div>
+
+          <p style={{ fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '12px', lineHeight: 1.5 }}>
+            Controls the A4988 ENABLE lines (active LOW). Energized coils hold position with holding torque. Disabled coils let the carriage move freely by hand.
+          </p>
+
+          <button
+            onClick={handleToggleDriver}
+            disabled={!connected || isMachineFaulted || togglingDriver}
+            style={{
+              fontWeight: 600,
+              padding: '8px 14px',
+              fontSize: '12px',
+              background: snapshot?.drivers_enabled ? 'var(--bg-surface)' : '#111827',
+              color: snapshot?.drivers_enabled ? 'var(--text-primary)' : '#FFFFFF',
+              border: `1px solid ${snapshot?.drivers_enabled ? 'var(--border-strong)' : '#111827'}`
+            }}
+          >
+            {togglingDriver
+              ? 'Updating Drivers...'
+              : snapshot?.drivers_enabled
+                ? 'Disable Drivers (Free Carriage)'
+                : 'Energize Motors (Apply Holding Torque)'}
+          </button>
+
+          {driverFeedback && (
+            <div
+              style={{
+                marginTop: '10px',
+                padding: '8px 12px',
+                borderRadius: '4px',
+                fontSize: '11px',
+                fontWeight: 500,
+                background: driverFeedback.isError ? '#FEF2F2' : 'var(--bg-surface-elevated)',
+                color: driverFeedback.isError ? '#991B1B' : 'var(--text-secondary)',
+                border: `1px solid ${driverFeedback.isError ? '#FCA5A5' : 'var(--border-subtle)'}`
+              }}
+            >
+              {driverFeedback.text}
             </div>
           )}
         </div>
 
         {/* Microstepping Hardware Mode Selection (A4988 MS1/MS2/MS3 Pins) */}
-        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: '6px', padding: '16px' }}>
+        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: '4px', padding: '16px', boxShadow: 'var(--shadow-subtle)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-            <h3 style={{ fontSize: '13px', fontWeight: 600 }}>A4988 Hardware Microstep Mode</h3>
-            <span style={{ fontSize: '11px', fontWeight: 600, color: 'var(--accent-ready)' }}>
-              Active: 1/{microstepMode} Mode
+            <h3 style={{ fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 600, color: 'var(--text-primary)' }}>
+              Microstepping Hardware Mode
+            </h3>
+            <span style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-primary)' }}>
+              Active: 1/{microstepMode}
             </span>
           </div>
-          <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '12px' }}>
-            Switch hardware pin states (GPIO 1: MS1, GPIO 2: MS2, GPIO 4: MS3) like in <code>stepper_ir_homing_test</code>.
-            Changing microstepping while idle invalidates homing; re-home before running a job.
+          <p style={{ fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '12px' }}>
+            Switch hardware pin states (GPIO 1: MS1, GPIO 2: MS2, GPIO 4: MS3). Rescales coordinate plan automatically.
           </p>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '6px', marginBottom: '14px' }}>
             {([
-              { mode: 1, label: '1/1 Full', ms: '000', stepsRev: 2048 },
-              { mode: 2, label: '1/2 Half', ms: '100', stepsRev: 4096 },
-              { mode: 4, label: '1/4 Quad', ms: '010', stepsRev: 8192 },
-              { mode: 8, label: '1/8 Octa', ms: '110', stepsRev: 16384 },
-              { mode: 16, label: '1/16 Hex', ms: '111', stepsRev: 32768 },
+              { mode: 1, label: '1/1 Full', ms: '000' },
+              { mode: 2, label: '1/2 Half', ms: '100' },
+              { mode: 4, label: '1/4 Quad', ms: '010' },
+              { mode: 8, label: '1/8 Octa', ms: '110' },
+              { mode: 16, label: '1/16 Hex', ms: '111' },
             ] as const).map((m) => (
               <button
                 key={m.mode}
@@ -215,77 +300,80 @@ export const CalibrationTab: React.FC = () => {
                 disabled={!connected || isChangingMicrostep || isBusy}
                 onClick={() => handleMicrostepChange(m.mode)}
                 style={{
-                  padding: '8px 4px',
+                  padding: '6px 4px',
                   textAlign: 'center',
-                  background: microstepMode === m.mode ? 'var(--text-primary)' : 'var(--bg-surface-elevated)',
-                  color: microstepMode === m.mode ? 'var(--bg-app)' : 'var(--text-primary)',
-                  border: `1px solid ${microstepMode === m.mode ? 'var(--text-primary)' : 'var(--border-subtle)'}`,
-                  borderRadius: '4px'
+                  background: microstepMode === m.mode ? '#111827' : '#FFFFFF',
+                  color: microstepMode === m.mode ? '#FFFFFF' : 'var(--text-primary)',
+                  border: `1px solid ${microstepMode === m.mode ? '#111827' : 'var(--border-strong)'}`,
+                  borderRadius: '4px',
+                  boxShadow: 'none'
                 }}
               >
-                <div style={{ fontSize: '12px', fontWeight: 700 }}>{m.label}</div>
-                <div style={{ fontSize: '10px', opacity: 0.8 }}>MS: {m.ms}</div>
+                <div style={{ fontSize: '11px', fontWeight: 600 }}>{m.label}</div>
+                <div style={{ fontSize: '9px', opacity: 0.7 }}>MS: {m.ms}</div>
               </button>
             ))}
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', fontSize: '11px', textAlign: 'center' }}>
-            <div style={{ background: 'var(--bg-app)', padding: '6px', borderRadius: '4px' }}>
-              <div style={{ color: 'var(--text-secondary)' }}>Full Step Baseline</div>
-              <div style={{ fontWeight: 600 }}>2048 steps / rev</div>
+            <div style={{ background: 'var(--bg-surface-elevated)', padding: '6px 8px', borderRadius: '4px', border: '1px solid var(--border-subtle)' }}>
+              <div style={{ color: 'var(--text-muted)', fontSize: '10px' }}>Full Step Baseline</div>
+              <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>2048 steps/rev</div>
             </div>
-            <div style={{ background: 'var(--bg-app)', padding: '6px', borderRadius: '4px' }}>
-              <div style={{ color: 'var(--text-secondary)' }}>Effective Resolution</div>
-              <div style={{ fontWeight: 600, color: 'var(--accent-ready)' }}>{stepsPerRev} steps / rev</div>
+            <div style={{ background: 'var(--bg-surface-elevated)', padding: '6px 8px', borderRadius: '4px', border: '1px solid var(--border-subtle)' }}>
+              <div style={{ color: 'var(--text-muted)', fontSize: '10px' }}>Effective Resolution</div>
+              <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{stepsPerRev} steps/rev</div>
             </div>
-            <div style={{ background: 'var(--bg-app)', padding: '6px', borderRadius: '4px' }}>
-              <div style={{ color: 'var(--text-secondary)' }}>Linear Scale</div>
-              <div style={{ fontWeight: 600 }}>{stepsPerMm} steps / mm</div>
+            <div style={{ background: 'var(--bg-surface-elevated)', padding: '6px 8px', borderRadius: '4px', border: '1px solid var(--border-subtle)' }}>
+              <div style={{ color: 'var(--text-muted)', fontSize: '10px' }}>Linear Scale</div>
+              <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{stepsPerMm} steps/mm</div>
             </div>
           </div>
         </div>
       </div>
 
       {/* Right Column: Manual Bounded Jogging & Microstep Size Selection */}
-      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: '6px', padding: '20px' }}>
-        <h2 style={{ fontSize: '15px', fontWeight: 600, marginBottom: '16px' }}>Manual Axis Jogging & Microstep Control</h2>
+      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: '4px', padding: '16px', boxShadow: 'var(--shadow-subtle)' }}>
+        <h2 style={{ fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '14px' }}>
+          Manual Axis Jogging & Microstep Control
+        </h2>
 
         {/* Commanded Coordinates */}
-        <div style={{ background: 'var(--bg-surface-elevated)', border: '1px solid var(--border-subtle)', borderRadius: '6px', padding: '14px', marginBottom: '16px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-            <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Axis Position Coordinates</span>
+        <div style={{ background: 'var(--bg-surface-elevated)', border: '1px solid var(--border-subtle)', borderRadius: '4px', padding: '12px', marginBottom: '14px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+            <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Axis Position Coordinates</span>
             <span style={{
-              fontSize: '11px',
-              fontWeight: 700,
-              padding: '2px 8px',
+              fontSize: '10px',
+              fontWeight: 600,
+              padding: '2px 6px',
               borderRadius: '3px',
-              background: (homed.x && homed.y && snapshot?.pos_valid) ? 'rgba(47, 158, 68, 0.2)' : 'rgba(240, 140, 0, 0.2)',
-              color: (homed.x && homed.y && snapshot?.pos_valid) ? 'var(--accent-ready)' : '#FFD43B',
-              border: `1px solid ${(homed.x && homed.y && snapshot?.pos_valid) ? 'var(--accent-ready)' : 'rgba(240, 140, 0, 0.4)'}`
+              background: (homed.x && homed.y && snapshot?.pos_valid) ? '#F3F4F6' : '#FEF3C7',
+              color: (homed.x && homed.y && snapshot?.pos_valid) ? '#111827' : '#92400E',
+              border: `1px solid ${(homed.x && homed.y && snapshot?.pos_valid) ? '#D1D5DB' : '#FCD34D'}`
             }}>
-              {(homed.x && homed.y && snapshot?.pos_valid) ? '● ORIGIN HOMED & CALIBRATED' : '○ UNHOMED (OPEN-LOOP BASELINE)'}
+              {(homed.x && homed.y && snapshot?.pos_valid) ? '● HOMED & CALIBRATED' : '○ UNHOMED'}
             </span>
           </div>
-          <div className="mono" style={{ fontSize: '20px', fontWeight: 600, margin: '6px 0' }}>
+          <div className="mono" style={{ fontSize: '18px', fontWeight: 600, margin: '4px 0', color: 'var(--text-primary)' }}>
             X: {pos.x} steps ({(pos.x / stepsPerMm).toFixed(2)} mm) | Y: {pos.y} steps ({(pos.y / stepsPerMm).toFixed(2)} mm)
           </div>
           {(!homed.x || !homed.y || !snapshot?.pos_valid) ? (
-            <div style={{ fontSize: '11px', color: '#FFD43B', background: 'rgba(240, 140, 0, 0.1)', padding: '6px 8px', borderRadius: '4px', border: '1px dashed rgba(240, 140, 0, 0.3)' }}>
-              ⚠️ Coordinates (0, 0) are an arbitrary open-loop startup reference. Motors are <strong>UNHOMED</strong>. Run <strong>HOME ALL AXES</strong> to locate physical optical endstops.
+            <div style={{ fontSize: '10px', color: '#92400E', background: '#FEF3C7', padding: '4px 8px', borderRadius: '3px', border: '1px solid #FCD34D' }}>
+              Motors are <strong>UNHOMED</strong>. Run <strong>HOME ALL AXES</strong> to locate physical optical endstops.
             </div>
           ) : (
-            <div style={{ fontSize: '11px', color: 'var(--accent-ready)' }}>
-              ✓ Physical optical endstop origin verified. Absolute coordinate boundary limits enforced.
+            <div style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>
+              Physical optical endstops calibrated. Coordinate boundaries enforced.
             </div>
           )}
         </div>
 
         {/* Microstep Increment Selection */}
-        <div style={{ marginBottom: '18px' }}>
-          <label htmlFor="microstep-size" style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '8px' }}>
+        <div style={{ marginBottom: '16px' }}>
+          <label htmlFor="microstep-size" style={{ display: 'block', fontSize: '11px', fontWeight: 600, marginBottom: '6px', color: 'var(--text-primary)' }}>
             Step Increment per Jog Click:
           </label>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', marginBottom: '8px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '6px', marginBottom: '8px' }}>
             {[
               { label: `1 step (${(1 / stepsPerMm).toFixed(3)}mm)`, steps: 1 },
               { label: `${microstepMode / 2 || 1} steps (Half)`, steps: Math.max(1, Math.round(microstepMode / 2)) },
@@ -299,13 +387,14 @@ export const CalibrationTab: React.FC = () => {
                 key={item.steps}
                 onClick={() => handleStepSizeSelect(item.steps)}
                 style={{
-                  padding: '8px 6px',
+                  padding: '6px 4px',
                   fontSize: '11px',
-                  fontWeight: 600,
-                  background: jogStepSize === item.steps ? 'var(--text-primary)' : 'var(--bg-surface-elevated)',
-                  color: jogStepSize === item.steps ? 'var(--bg-app)' : 'var(--text-primary)',
-                  border: '1px solid var(--border-subtle)',
-                  borderRadius: '4px'
+                  fontWeight: 500,
+                  background: jogStepSize === item.steps ? '#111827' : '#FFFFFF',
+                  color: jogStepSize === item.steps ? '#FFFFFF' : 'var(--text-primary)',
+                  border: `1px solid ${jogStepSize === item.steps ? '#111827' : 'var(--border-strong)'}`,
+                  borderRadius: '3px',
+                  boxShadow: 'none'
                 }}
               >
                 {item.label}
@@ -314,7 +403,7 @@ export const CalibrationTab: React.FC = () => {
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Custom Steps:</span>
+            <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Custom Steps:</span>
             <input
               id="microstep-size"
               type="number"
@@ -322,7 +411,7 @@ export const CalibrationTab: React.FC = () => {
               max={liveMaxTravel}
               value={customStepInput}
               onChange={(e) => handleCustomStepChange(e.target.value)}
-              style={{ width: '100px', padding: '4px 8px', fontSize: '12px' }}
+              style={{ width: '90px', padding: '3px 6px', fontSize: '11px' }}
             />
             <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
               = {(jogStepSize / stepsPerMm).toFixed(3)} mm
@@ -331,17 +420,17 @@ export const CalibrationTab: React.FC = () => {
         </div>
 
         {/* Directional Jog Pad */}
-        <div style={{ marginBottom: '20px', background: 'var(--bg-app)', padding: '16px', borderRadius: '6px', border: '1px solid var(--border-subtle)' }}>
-          <div style={{ fontSize: '12px', fontWeight: 600, marginBottom: '12px', textAlign: 'center' }}>
+        <div style={{ marginBottom: '16px', background: '#FAFAFA', padding: '12px', borderRadius: '4px', border: '1px solid var(--border-subtle)' }}>
+          <div style={{ fontSize: '11px', fontWeight: 600, marginBottom: '10px', textAlign: 'center', color: 'var(--text-primary)' }}>
             Directional Jog (±{jogStepSize} steps)
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '80px 80px 80px', justifyContent: 'center', gap: '8px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '70px 70px 70px', justifyContent: 'center', gap: '6px' }}>
             <div />
             <button
               disabled={isJogDisabled}
               onClick={() => runJog('y', jogStepSize)}
-              style={{ padding: '12px 6px', fontWeight: 600, fontSize: '13px' }}
+              style={{ padding: '10px 4px', fontWeight: 600, fontSize: '12px' }}
               aria-label={`Jog Y +${jogStepSize} steps`}
             >
               ▲ +Y
@@ -351,18 +440,18 @@ export const CalibrationTab: React.FC = () => {
             <button
               disabled={isJogDisabled}
               onClick={() => runJog('x', -jogStepSize)}
-              style={{ padding: '12px 6px', fontWeight: 600, fontSize: '13px' }}
+              style={{ padding: '10px 4px', fontWeight: 600, fontSize: '12px' }}
               aria-label={`Jog X -${jogStepSize} steps`}
             >
               ◄ -X
             </button>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', color: 'var(--text-muted)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
               XY
             </div>
             <button
               disabled={isJogDisabled}
               onClick={() => runJog('x', jogStepSize)}
-              style={{ padding: '12px 6px', fontWeight: 600, fontSize: '13px' }}
+              style={{ padding: '10px 4px', fontWeight: 600, fontSize: '12px' }}
               aria-label={`Jog X +${jogStepSize} steps`}
             >
               +X ►
@@ -372,7 +461,7 @@ export const CalibrationTab: React.FC = () => {
             <button
               disabled={isJogDisabled}
               onClick={() => runJog('y', -jogStepSize)}
-              style={{ padding: '12px 6px', fontWeight: 600, fontSize: '13px' }}
+              style={{ padding: '10px 4px', fontWeight: 600, fontSize: '12px' }}
               aria-label={`Jog Y -${jogStepSize} steps`}
             >
               ▼ -Y
@@ -382,12 +471,12 @@ export const CalibrationTab: React.FC = () => {
         </div>
 
         {/* Jog Speed Selection */}
-        <div style={{ marginBottom: '16px' }}>
+        <div style={{ marginBottom: '14px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-            <label style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
+            <label style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
               Jog Stepping Rate (Steps / Second)
             </label>
-            <span style={{ fontSize: '11px', color: 'var(--accent-ready)', fontWeight: 600 }}>
+            <span className="mono" style={{ fontSize: '11px', color: 'var(--text-primary)', fontWeight: 600 }}>
               {speedSps} sps ({(speedSps / stepsPerMm).toFixed(2)} mm/s)
             </span>
           </div>
@@ -398,32 +487,31 @@ export const CalibrationTab: React.FC = () => {
                 onClick={() => setSpeedSps(sps)}
                 style={{
                   flex: 1,
-                  padding: '6px 4px',
+                  padding: '5px 2px',
                   fontSize: '11px',
                   fontWeight: 600,
-                  background: speedSps === sps ? 'var(--text-primary)' : 'var(--bg-surface-elevated)',
-                  color: speedSps === sps ? 'var(--bg-app)' : 'var(--text-primary)'
+                  background: speedSps === sps ? '#111827' : '#FFFFFF',
+                  color: speedSps === sps ? '#FFFFFF' : 'var(--text-primary)',
+                  border: `1px solid ${speedSps === sps ? '#111827' : 'var(--border-strong)'}`,
+                  boxShadow: 'none'
                 }}
               >
                 {sps}
               </button>
             ))}
           </div>
-          <div style={{ fontSize: '11px', color: 'var(--text-muted)', lineHeight: '1.4' }}>
-            💡 <strong>Note on 28BYJ-48 Steppers:</strong> High pulse frequencies (&gt;300 sps in full-step or &gt;1000 sps in microstepping) exceed the 64:1 magnetic rotor pull-in torque limit and cause stalling/cogging, making it appear sluggish. 80–200 sps gives maximum torque and smooth rotation.
-          </div>
         </div>
 
-        {/* Quick Multi-Step Buttons */}
+        {/* Quick Jumps */}
         <div>
-          <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '6px' }}>Quick Jumps:</div>
+          <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '6px' }}>Quick Travel Jumps:</div>
           <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
             {[-200, -50, -10, 10, 50, 200].map((steps) => (
               <button
                 key={`qx-${steps}`}
                 disabled={isJogDisabled}
                 onClick={() => runJog('x', steps)}
-                style={{ fontSize: '11px', padding: '4px 8px' }}
+                style={{ fontSize: '10px', padding: '3px 8px' }}
               >
                 X {steps > 0 ? `+${steps}` : steps}
               </button>
@@ -433,7 +521,7 @@ export const CalibrationTab: React.FC = () => {
                 key={`qy-${steps}`}
                 disabled={isJogDisabled}
                 onClick={() => runJog('y', steps)}
-                style={{ fontSize: '11px', padding: '4px 8px' }}
+                style={{ fontSize: '10px', padding: '3px 8px' }}
               >
                 Y {steps > 0 ? `+${steps}` : steps}
               </button>
@@ -446,13 +534,13 @@ export const CalibrationTab: React.FC = () => {
             role="alert"
             aria-live="assertive"
             style={{
-              marginTop: '16px',
+              marginTop: '14px',
               padding: '8px 12px',
-              background: 'rgba(224, 49, 49, 0.15)',
-              border: '1px solid var(--accent-estop)',
+              background: '#FEF2F2',
+              border: '1px solid #FCA5A5',
               borderRadius: '4px',
-              color: '#FFA8A8',
-              fontSize: '12px'
+              color: '#991B1B',
+              fontSize: '11px'
             }}
           >
             {errorMsg}

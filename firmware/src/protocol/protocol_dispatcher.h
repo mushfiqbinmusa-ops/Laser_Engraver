@@ -30,12 +30,14 @@ public:
   // Cooperative loop update (serves motion, homing, watchdog, and event emission)
   void update(uint32_t nowUs, uint32_t nowMs);
 
+  bool isActive() const;
   void emitSnapshot();
 
 private:
   void sendAck(const char* reqId, bool accepted, ErrorCode code, const char* opId = nullptr);
   void sendOperationEvent(const char* type, const char* opId, const char* phase, uint32_t steps = 0);
   void sendOperationCompleted(const char* opId, const char* result);
+  void invalidateHomingState();
 
   MachineStateManager& m_state;
   StepperAxis& m_axisX;
@@ -51,7 +53,10 @@ private:
   char m_currentOpId[32];
   uint32_t m_opCounter;
   bool m_opRunning;
+  uint32_t m_lastActivityMs;
   uint32_t m_lastSnapshotMs;
   bool m_lastSensorX;
   bool m_lastSensorY;
+  HomePhase m_lastHomePhase;
+  AxisTarget m_lastHomeAxis;
 };

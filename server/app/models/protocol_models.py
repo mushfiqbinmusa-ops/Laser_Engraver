@@ -44,7 +44,7 @@ class MotionMoveAbsRequest(BaseRequest):
     type: Literal["motion.move_abs"] = "motion.move_abs"
     x: int
     y: int
-    speed_sps: Optional[int] = 150
+    speed_sps: Optional[int] = 100
 
 class LaserPulseRequest(BaseRequest):
     type: Literal["laser.pulse"] = "laser.pulse"
@@ -117,5 +117,5 @@ class SystemSnapshot(BaseModel):
     sensors: SensorReadout
     laser: LaserReadout
     drivers_enabled: bool
-    microstep_mode: Optional[int] = 16
+    microstep_mode: Optional[int] = 1
     fault: Optional[str] = None

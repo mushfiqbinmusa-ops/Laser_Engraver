@@ -4,21 +4,21 @@ import { useMachine } from '../../context/MachineContext';
 export const Header: React.FC = () => {
   const { connected, fresh, snapshot, lastSeen, estop, stop } = useMachine();
 
-  const getStatusColor = () => {
-    if (!connected) return 'var(--text-muted)';
-    if (!fresh) return 'var(--accent-warning)';
-    if (snapshot?.fault) return 'var(--accent-estop)';
-    if (snapshot?.state === 'idle_homed') return 'var(--accent-ready)';
-    if (snapshot?.state === 'idle_unhomed') return '#FFD43B';
-    return 'var(--text-primary)';
+  const getStatusDotColor = () => {
+    if (!connected) return '#9CA3AF';
+    if (!fresh) return '#D97706';
+    if (snapshot?.fault) return '#DC2626';
+    if (snapshot?.state === 'idle_homed') return '#15803D';
+    if (snapshot?.state === 'idle_unhomed') return '#D97706';
+    return '#111827';
   };
 
   const getStatusText = () => {
-    if (!connected) return 'CONTROLLER OFFLINE';
+    if (!connected) return 'OFFLINE';
     if (!fresh) return 'TELEMETRY STALE';
     if (snapshot?.fault) return `FAULT: ${snapshot.fault}`;
-    if (snapshot?.state === 'idle_homed') return 'IDLE (HOMED)';
-    if (snapshot?.state === 'idle_unhomed') return 'IDLE (UNHOMED)';
+    if (snapshot?.state === 'idle_homed') return 'IDLE · HOMED';
+    if (snapshot?.state === 'idle_unhomed') return 'IDLE · UNHOMED';
     return snapshot?.state.toUpperCase() || 'UNKNOWN';
   };
 
@@ -26,19 +26,19 @@ export const Header: React.FC = () => {
     <header style={{
       background: 'var(--bg-surface)',
       borderBottom: '1px solid var(--border-subtle)',
-      padding: '12px 24px',
+      padding: '10px 24px',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-between',
       gap: '16px'
     }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
         <div>
-          <h1 style={{ fontSize: '16px', fontWeight: 600, letterSpacing: '0.02em' }}>
+          <div style={{ fontSize: '14px', fontWeight: 700, letterSpacing: '0.03em', color: 'var(--text-primary)' }}>
             LASER XY SCANNER
-          </h1>
+          </div>
           <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
-            v1.0 Production Station · Profile: <span className="mono">{snapshot?.profile_id || 'esp32s3_a4988_v1'}</span>
+            System Controller · <span className="mono">{snapshot?.profile_id || 'esp32s3_a4988_v1'}</span>
           </div>
         </div>
 
@@ -50,34 +50,37 @@ export const Header: React.FC = () => {
           background: 'var(--bg-surface-elevated)',
           borderRadius: '4px',
           border: '1px solid var(--border-subtle)',
-          fontSize: '12px'
+          fontSize: '11px'
         }}>
           <span style={{
-            width: '8px',
-            height: '8px',
+            width: '6px',
+            height: '6px',
             borderRadius: '50%',
-            backgroundColor: getStatusColor(),
+            backgroundColor: getStatusDotColor(),
             display: 'inline-block'
           }} />
-          <span className="mono" style={{ fontWeight: 600, color: getStatusColor() }}>
+          <span className="mono" style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
             {getStatusText()}
           </span>
           {lastSeen && (
-            <span style={{ fontSize: '11px', color: 'var(--text-muted)', marginLeft: '4px' }}>
-              ({lastSeen.toLocaleTimeString()})
+            <span style={{ fontSize: '11px', color: 'var(--text-muted)', marginLeft: '2px' }}>
+              · {lastSeen.toLocaleTimeString()}
             </span>
           )}
         </div>
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
         <button
           onClick={stop}
           style={{
-            background: 'var(--bg-surface-elevated)',
+            background: 'var(--bg-surface)',
             border: '1px solid var(--border-strong)',
+            color: 'var(--text-primary)',
             fontWeight: 600,
-            padding: '8px 16px'
+            padding: '6px 14px',
+            fontSize: '11px',
+            letterSpacing: '0.02em'
           }}
           title="Stop motion safely and cut laser output"
         >
@@ -89,10 +92,11 @@ export const Header: React.FC = () => {
           style={{
             background: 'var(--accent-estop)',
             color: '#FFFFFF',
-            border: 'none',
+            border: '1px solid var(--accent-estop-hover)',
             fontWeight: 700,
             letterSpacing: '0.04em',
-            padding: '8px 20px'
+            padding: '6px 14px',
+            fontSize: '11px'
           }}
           title="Immediate Emergency Halt"
         >

@@ -27,7 +27,7 @@ void MachineStateManager::setFault(const char* reason) {
 
 void MachineStateManager::clearFault() {
   m_fault[0] = '\0';
-  m_state = (m_homedX && m_homedY) ? MachineStateEnum::IdleHomed : MachineStateEnum::IdleUnhomed;
+  m_state = MachineStateEnum::IdleUnhomed;
 }
 
 void MachineStateManager::setHomed(bool homedX, bool homedY) {
@@ -51,5 +51,5 @@ bool MachineStateManager::canStartJob() const {
 }
 
 bool MachineStateManager::canHome() const {
-  return (m_state != MachineStateEnum::Moving && m_state != MachineStateEnum::RunningJob);
+  return (m_state == MachineStateEnum::IdleUnhomed || m_state == MachineStateEnum::IdleHomed);
 }

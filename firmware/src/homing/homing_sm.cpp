@@ -28,7 +28,21 @@ HomingStateMachine::HomingStateMachine(StepperAxis& axisX, StepperAxis& axisY, S
     m_phaseStartMs(0),
     m_phaseSteps(0),
     m_lastStepUs(0),
-    m_stepIntervalUs(1000000UL / HOMING_FAST_SPS) {}
+    m_stepIntervalUs(1000000UL / HOMING_FAST_SPS),
+    m_microstepMode(1),
+    m_sweepOrigin(0),
+    m_seekTravelSteps(0),
+    m_seekDirection(1) {}
+
+uint32_t HomingStateMachine::scaledRate(uint32_t referenceSps) const {
+  uint32_t scaled = (referenceSps * m_microstepMode) / 16U;
+  return scaled < 1U ? 1U : scaled;
+}
+
+uint32_t HomingStateMachine::scaledSteps(uint32_t referenceSteps) const {
+  uint32_t scaled = (referenceSteps * m_microstepMode) / 16U;
+  return scaled < 1U ? 1U : scaled;
+}
 
 bool HomingStateMachine::start(AxisTarget target, uint32_t nowMs) {
   if (target == AxisTarget::None) return false;
@@ -54,13 +68,17 @@ void HomingStateMachine::startAxis(AxisTarget axis, uint32_t nowMs) {
   if (axis == AxisTarget::X) m_axisX.setHomed(false);
   if (axis == AxisTarget::Y) m_axisY.setHomed(false);
 
+  m_sweepOrigin = currentPosition();
+  m_seekTravelSteps = 0;
+  m_seekDirection = seekForward() ? 1 : -1;
+
   // Check initial sensor
   if (isCurrentSensorTriggered()) {
     m_phase = HomePhase::ClearInitial;
-    m_stepIntervalUs = 1000000UL / HOMING_SLOW_SPS;
+    m_stepIntervalUs = 1000000UL / scaledRate(HOMING_SLOW_SPS);
   } else {
     m_phase = HomePhase::FastSeek;
-    m_stepIntervalUs = 1000000UL / HOMING_FAST_SPS;
+    m_stepIntervalUs = 1000000UL / scaledRate(HOMING_FAST_SPS);
   }
 }
 
@@ -79,6 +97,29 @@ void HomingStateMachine::stepCurrentAxis(bool forward) {
   } else if (m_currentAxis == AxisTarget::Y) {
     m_axisY.step(forward);
   }
+}
+
+bool HomingStateMachine::seekForward() const {
+  if (m_currentAxis == AxisTarget::X) return HOMING_SEEK_FORWARD_X;
+  if (m_currentAxis == AxisTarget::Y) return HOMING_SEEK_FORWARD_Y;
+  return true;
+}
+
+int32_t HomingStateMachine::currentPosition() const {
+  if (m_currentAxis == AxisTarget::X) return m_axisX.getPosition();
+  if (m_currentAxis == AxisTarget::Y) return m_axisY.getPosition();
+  return 0;
+}
+
+bool HomingStateMachine::atOrBeyondSweepBound(int8_t directionSign) const {
+  const int32_t sweep = static_cast<int32_t>(scaledSteps(HOMING_SWEEP_STEPS_REF));
+  const int32_t position = currentPosition();
+  if (directionSign > 0) return position >= m_sweepOrigin + sweep;
+  return position <= m_sweepOrigin - sweep;
+}
+
+void HomingStateMachine::stepAwayFromSensor() {
+  stepCurrentAxis(!seekForward());
 }
 
 bool HomingStateMachine::tick(uint32_t nowUs, uint32_t nowMs) {
@@ -100,16 +141,18 @@ bool HomingStateMachine::tick(uint32_t nowUs, uint32_t nowMs) {
 
   switch (m_phase) {
     case HomePhase::ClearInitial: {
-      // Step away from endstop (reverse direction, false)
-      stepCurrentAxis(false);
+      // Step away from the endstop so the sensor clears.
+      stepAwayFromSensor();
       m_phaseSteps++;
       if (!isCurrentSensorTriggered()) {
-        // Sensor cleared! Proceed to FastSeek
+        // Sensor cleared! Proceed to bounded oscillating seek.
         m_phase = HomePhase::FastSeek;
         m_phaseSteps = 0;
         m_phaseStartMs = nowMs;
-        m_stepIntervalUs = 1000000UL / HOMING_FAST_SPS;
-      } else if (m_phaseSteps >= HOMING_MAX_CLEAR_STEPS) {
+        m_seekTravelSteps = 0;
+        m_seekDirection = seekForward() ? 1 : -1;
+        m_stepIntervalUs = 1000000UL / scaledRate(HOMING_FAST_SPS);
+      } else if (m_phaseSteps >= scaledSteps(HOMING_MAX_CLEAR_STEPS)) {
         m_phase = HomePhase::Failed;
         m_result = ErrorCode::SensorStuckActive;
         m_active = false;
@@ -119,16 +162,21 @@ bool HomingStateMachine::tick(uint32_t nowUs, uint32_t nowMs) {
     }
 
     case HomePhase::FastSeek: {
-      // Step toward endstop (forward direction, true)
-      stepCurrentAxis(true);
+      // Bounded oscillation: sweep toward the endstop first, then reverse at
+      // +/-HOMING_SWEEP_DEG around the position where the search began.
+      if (atOrBeyondSweepBound(m_seekDirection)) {
+        m_seekDirection = -m_seekDirection;
+      }
+      stepCurrentAxis(m_seekDirection > 0);
       m_phaseSteps++;
+      m_seekTravelSteps++;
       if (isCurrentSensorTriggered()) {
         // Detected! Transition to PullOff
         m_phase = HomePhase::PullOff;
         m_phaseSteps = 0;
         m_phaseStartMs = nowMs;
-        m_stepIntervalUs = 1000000UL / HOMING_SLOW_SPS;
-      } else if (m_phaseSteps >= HOMING_MAX_SEEK_STEPS) {
+        m_stepIntervalUs = 1000000UL / scaledRate(HOMING_SLOW_SPS);
+      } else if (m_seekTravelSteps >= scaledSteps(HOMING_MAX_SEEK_STEPS)) {
         m_phase = HomePhase::Failed;
         m_result = ErrorCode::HomeSeekLimit;
         m_active = false;
@@ -138,17 +186,17 @@ bool HomingStateMachine::tick(uint32_t nowUs, uint32_t nowMs) {
     }
 
     case HomePhase::PullOff: {
-      // Retract away from endstop (reverse direction, false)
-      stepCurrentAxis(false);
+      // Retract away from the endstop.
+      stepAwayFromSensor();
       m_phaseSteps++;
       // Require clearing sensor and advancing at least 20 steps past clearance
-      if (!isCurrentSensorTriggered() && m_phaseSteps >= 20) {
+      if (!isCurrentSensorTriggered() && m_phaseSteps >= scaledSteps(20)) {
         // Cleared! Transition to SlowLatch
         m_phase = HomePhase::SlowLatch;
         m_phaseSteps = 0;
         m_phaseStartMs = nowMs;
-        m_stepIntervalUs = 1000000UL / HOMING_SLOW_SPS;
-      } else if (m_phaseSteps >= HOMING_MAX_RETRACT_STEPS) {
+        m_stepIntervalUs = 1000000UL / scaledRate(HOMING_SLOW_SPS);
+      } else if (m_phaseSteps >= scaledSteps(HOMING_MAX_RETRACT_STEPS)) {
         m_phase = HomePhase::Failed;
         m_result = ErrorCode::SensorStuckActive;
         m_active = false;
@@ -158,16 +206,23 @@ bool HomingStateMachine::tick(uint32_t nowUs, uint32_t nowMs) {
     }
 
     case HomePhase::SlowLatch: {
-      // Precision approach toward endstop
-      stepCurrentAxis(true);
+      // Precision approach toward the endstop. The latch must re-trigger
+      // inside the same bounded sweep window.
+      if (atOrBeyondSweepBound(m_seekDirection)) {
+        m_phase = HomePhase::Failed;
+        m_result = ErrorCode::HomeSeekLimit;
+        m_active = false;
+        return false;
+      }
+      stepCurrentAxis(m_seekDirection > 0);
       m_phaseSteps++;
       if (isCurrentSensorTriggered()) {
         // Precision latch detected! Now perform FinalPullOff so the optical beam is clear
         m_phase = HomePhase::FinalPullOff;
         m_phaseSteps = 0;
         m_phaseStartMs = nowMs;
-        m_stepIntervalUs = 1000000UL / HOMING_SLOW_SPS;
-      } else if (m_phaseSteps >= HOMING_MAX_LATCH_STEPS) {
+        m_stepIntervalUs = 1000000UL / scaledRate(HOMING_SLOW_SPS);
+      } else if (m_phaseSteps >= scaledSteps(HOMING_MAX_LATCH_STEPS)) {
         m_phase = HomePhase::Failed;
         m_result = ErrorCode::HomeSeekLimit;
         m_active = false;
@@ -177,10 +232,10 @@ bool HomingStateMachine::tick(uint32_t nowUs, uint32_t nowMs) {
     }
 
     case HomePhase::FinalPullOff: {
-      // Move away from endstop by HOMING_FINAL_PULLOFF_STEPS so the flag is outside the optical sensor
-      stepCurrentAxis(false);
+      // Move away so the flag is outside the optical sensor.
+      stepAwayFromSensor();
       m_phaseSteps++;
-      if (m_phaseSteps >= HOMING_FINAL_PULLOFF_STEPS) {
+      if (m_phaseSteps >= scaledSteps(HOMING_FINAL_PULLOFF_STEPS)) {
         // Axis homing complete! Zero position and mark homed
         if (m_currentAxis == AxisTarget::X) {
           m_axisX.setPosition(0);

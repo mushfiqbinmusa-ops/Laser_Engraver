@@ -30,15 +30,24 @@ public:
 
   void abort();
 
+  void setMicrostepMode(uint8_t mode) { m_microstepMode = mode ? mode : 1; }
+
   bool isActive() const { return m_active; }
   HomePhase getPhase() const { return m_phase; }
   ErrorCode getResult() const { return m_result; }
   AxisTarget getCurrentAxis() const { return m_currentAxis; }
+  uint32_t getPhaseSteps() const { return m_phaseSteps; }
 
 private:
   void startAxis(AxisTarget axis, uint32_t nowMs);
   void stepCurrentAxis(bool forward);
+  void stepAwayFromSensor();
+  bool seekForward() const;
+  int32_t currentPosition() const;
+  bool atOrBeyondSweepBound(int8_t directionSign) const;
+  uint32_t scaledSteps(uint32_t referenceSteps) const;
   bool isCurrentSensorTriggered() const;
+  uint32_t scaledRate(uint32_t referenceSps) const;
 
   StepperAxis& m_axisX;
   StepperAxis& m_axisY;
@@ -54,4 +63,10 @@ private:
   uint32_t m_phaseSteps;
   uint32_t m_lastStepUs;
   uint32_t m_stepIntervalUs;
+  uint8_t m_microstepMode;
+
+  // Bounded oscillation search state.
+  int32_t m_sweepOrigin;
+  uint32_t m_seekTravelSteps;
+  int8_t m_seekDirection;
 };

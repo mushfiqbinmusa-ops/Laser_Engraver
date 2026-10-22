@@ -6,6 +6,7 @@ import { CalibrationTab } from './tabs/CalibrationTab';
 import { SettingsTab } from './tabs/SettingsTab';
 import { TestsTab } from './tabs/TestsTab';
 import { useMachine } from './context/MachineContext';
+import { SerialConsoleDrawer } from './components/console/SerialConsoleDrawer';
 
 export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabId>('engrave');
@@ -14,38 +15,42 @@ export const App: React.FC = () => {
   const isFaulted = snapshot?.state === 'faulted' || (snapshot?.fault && snapshot.fault !== 'none');
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--bg-app)' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--bg-app)', paddingBottom: '34px' }}>
       {/* Global E-Stop / Fault Banner */}
       {isFaulted && (
         <div
           role="alert"
           style={{
-            background: 'var(--accent-estop)',
-            color: '#FFFFFF',
-            padding: '12px 24px',
+            background: '#FEF2F2',
+            borderBottom: '1px solid #FCA5A5',
+            color: '#991B1B',
+            padding: '10px 24px',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
+            fontSize: '12px',
             fontWeight: 600
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <span style={{ fontSize: '18px' }}>⚠️</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ fontSize: '10px', color: '#DC2626' }}>●</span>
             <span>
-              EMERGENCY STOP / SYSTEM FAULT ACTIVE: {snapshot?.fault || 'Hardware Interlock Tripped'}
+              INTERLOCK / HARDWARE FAULT ACTIVE: {snapshot?.fault || 'Hardware Interlock Tripped'}
             </span>
           </div>
           <button
             onClick={() => resetFault()}
             style={{
-              background: '#FFFFFF',
-              color: 'var(--accent-estop)',
-              border: 'none',
-              fontWeight: 700,
-              padding: '6px 14px'
+              background: '#991B1B',
+              color: '#FFFFFF',
+              border: '1px solid #7F1D1D',
+              fontWeight: 600,
+              padding: '4px 10px',
+              fontSize: '11px',
+              borderRadius: '4px'
             }}
           >
-            Clear Fault State
+            Reset Fault
           </button>
         </div>
       )}
@@ -57,7 +62,7 @@ export const App: React.FC = () => {
       <TabsNav activeTab={activeTab} onTabChange={setActiveTab} />
 
       {/* Tab Panels */}
-      <main style={{ flex: 1, padding: '24px', overflowY: 'auto' }}>
+      <main style={{ flex: 1, padding: '20px 24px', overflowY: 'auto' }}>
         <div role="tabpanel" id={`panel-${activeTab}`} aria-labelledby={`tab-${activeTab}`}>
           {activeTab === 'engrave' && <EngraveTab />}
           {activeTab === 'calibration' && <CalibrationTab />}
@@ -65,6 +70,8 @@ export const App: React.FC = () => {
           {activeTab === 'tests' && <TestsTab />}
         </div>
       </main>
+
+      <SerialConsoleDrawer />
     </div>
   );
 };

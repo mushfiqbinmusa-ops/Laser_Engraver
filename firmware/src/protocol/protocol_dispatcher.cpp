@@ -17,17 +17,21 @@ ProtocolDispatcher::ProtocolDispatcher(MachineStateManager& state,
     m_sensors(sensors),
     m_sendFn(nullptr),
     m_microstepFn(nullptr),
-    m_microstepMode(16),
+    m_microstepMode(1),
     m_opCounter(0),
     m_opRunning(false),
+    m_lastActivityMs(0),
     m_lastSnapshotMs(0),
     m_lastSensorX(false),
-    m_lastSensorY(false) {
+    m_lastSensorY(false),
+    m_lastHomePhase(HomePhase::Idle),
+    m_lastHomeAxis(AxisTarget::None) {
   m_currentOpId[0] = '\0';
 }
 
 void ProtocolDispatcher::setMicrostepMode(uint8_t mode) {
   m_microstepMode = mode;
+  m_homing.setMicrostepMode(mode);
   if (m_microstepFn) {
     m_microstepFn(mode);
   }
@@ -78,6 +82,12 @@ void ProtocolDispatcher::sendOperationCompleted(const char* opId, const char* re
   if (ProtocolParser::serializeOperationEvent(ev, buf, sizeof(buf)) > 0) {
     m_sendFn(buf);
   }
+}
+
+void ProtocolDispatcher::invalidateHomingState() {
+  m_axisX.setHomed(false);
+  m_axisY.setHomed(false);
+  m_state.setHomed(false, false);
 }
 
 void ProtocolDispatcher::emitSnapshot() {
@@ -131,12 +141,18 @@ void ProtocolDispatcher::dispatch(const CommandRequest& req, uint32_t nowUs, uin
       m_planner.abort();
       m_homing.abort();
       m_laser.forceOff();
-      m_state.setState(m_state.isPositionValid() ? MachineStateEnum::IdleHomed : MachineStateEnum::IdleUnhomed);
+      if (m_state.getState() != MachineStateEnum::Faulted) {
+        // Re-derive homed state from the axes. A stop during homing must not
+        // report the interrupted axis as still homed.
+        m_state.setHomed(m_axisX.isHomed(), m_axisY.isHomed());
+        m_state.setState(m_state.isPositionValid() ? MachineStateEnum::IdleHomed : MachineStateEnum::IdleUnhomed);
+      }
       if (m_opRunning) {
         sendOperationCompleted(m_currentOpId, "aborted");
         m_opRunning = false;
       }
       sendAck(req.id, true, ErrorCode::Ok);
+      emitSnapshot();
       break;
     }
 
@@ -146,6 +162,7 @@ void ProtocolDispatcher::dispatch(const CommandRequest& req, uint32_t nowUs, uin
       m_laser.forceOff();
       m_axisX.setEnabled(false);
       m_axisY.setEnabled(false);
+      invalidateHomingState();
       m_state.setFault("ESTOP_ACTIVATED");
       if (m_opRunning) {
         sendOperationCompleted(m_currentOpId, "aborted");
@@ -158,6 +175,7 @@ void ProtocolDispatcher::dispatch(const CommandRequest& req, uint32_t nowUs, uin
 
     case CommandType::SystemResetFault: {
       m_state.clearFault();
+      invalidateHomingState();
       m_laser.forceOff();
       sendAck(req.id, true, ErrorCode::Ok);
       emitSnapshot();
@@ -167,6 +185,9 @@ void ProtocolDispatcher::dispatch(const CommandRequest& req, uint32_t nowUs, uin
     case CommandType::DriverSetEnabled: {
       m_axisX.setEnabled(req.boolArg);
       m_axisY.setEnabled(req.boolArg);
+      if (req.boolArg) {
+        m_lastActivityMs = nowMs;
+      }
       if (!req.boolArg) {
         m_axisX.setHomed(false);
         m_axisY.setHomed(false);
@@ -197,12 +218,23 @@ void ProtocolDispatcher::dispatch(const CommandRequest& req, uint32_t nowUs, uin
 
     case CommandType::HomeStart: {
       if (!m_state.canHome()) {
-        sendAck(req.id, false, ErrorCode::Busy);
+        ErrorCode code = (m_state.getState() == MachineStateEnum::Faulted)
+                           ? ErrorCode::SafetyInterlockTripped
+                           : ErrorCode::Busy;
+        sendAck(req.id, false, code);
         return;
       }
       snprintf(m_currentOpId, sizeof(m_currentOpId), "op-home-%u", ++m_opCounter);
-      m_state.setState(MachineStateEnum::Homing);
+      m_axisX.setEnabled(true);
+      m_axisY.setEnabled(true);
+      m_lastActivityMs = nowMs;
+      m_lastHomePhase = HomePhase::Idle;
+      m_lastHomeAxis = AxisTarget::None;
       m_homing.start(req.axis, nowMs);
+      // Keep the state manager in sync with the axes that homing just
+      // invalidated, so a stop mid-home cannot restore IdleHomed.
+      m_state.setHomed(m_axisX.isHomed(), m_axisY.isHomed());
+      m_state.setState(MachineStateEnum::Homing);
       m_opRunning = true;
       sendAck(req.id, true, ErrorCode::Ok, m_currentOpId);
       sendOperationEvent("operation.started", m_currentOpId, "homing");
@@ -330,11 +362,30 @@ void ProtocolDispatcher::dispatch(const CommandRequest& req, uint32_t nowUs, uin
   }
 }
 
+bool ProtocolDispatcher::isActive() const {
+  if (m_homing.isActive() || m_planner.isMoving()) {
+    return true;
+  }
+  MachineStateEnum state = m_state.getState();
+  return state == MachineStateEnum::Homing ||
+         state == MachineStateEnum::Moving ||
+         state == MachineStateEnum::RunningJob;
+}
+
 void ProtocolDispatcher::update(uint32_t nowUs, uint32_t nowMs) {
   m_laser.checkWatchdog(nowMs);
 
   if (m_homing.isActive()) {
     bool ongoing = m_homing.tick(nowUs, nowMs);
+    HomePhase phase = m_homing.getPhase();
+    AxisTarget axis = m_homing.getCurrentAxis();
+    if (phase != m_lastHomePhase || axis != m_lastHomeAxis) {
+      m_lastHomePhase = phase;
+      m_lastHomeAxis = axis;
+      if (m_opRunning) {
+        sendOperationEvent("operation.progress", m_currentOpId, homePhaseToString(phase), m_homing.getPhaseSteps());
+      }
+    }
     if (!ongoing) {
       // Homing finished or failed
       if (m_homing.getResult() == ErrorCode::Ok) {
@@ -345,6 +396,9 @@ void ProtocolDispatcher::update(uint32_t nowUs, uint32_t nowMs) {
         }
         emitSnapshot(); // Immediately emit snapshot updating homed status!
       } else {
+        // A failed home invalidates every axis, even one that completed
+        // earlier in a Home-All run, so a partial result is never reused.
+        invalidateHomingState();
         m_state.setFault(errorCodeToString(m_homing.getResult()));
         if (m_opRunning) {
           sendOperationCompleted(m_currentOpId, "failed");
@@ -361,6 +415,18 @@ void ProtocolDispatcher::update(uint32_t nowUs, uint32_t nowMs) {
         emitSnapshot(); // Emit position snapshot immediately when motion completes!
       }
     }
+  }
+
+  if (isActive()) {
+    m_lastActivityMs = nowMs;
+  } else if (AUTO_DISABLE_MS > 0 &&
+             (m_axisX.isEnabled() || m_axisY.isEnabled()) &&
+             (nowMs - m_lastActivityMs) >= AUTO_DISABLE_MS) {
+    m_axisX.setEnabled(false);
+    m_axisY.setEnabled(false);
+    // Coils are de-energized but the last known position remains valid.
+    // Manual carriage movement while disabled is an operator responsibility.
+    emitSnapshot();
   }
 
   // Live dynamic telemetry:

@@ -85,6 +85,8 @@ static void sendOutput(const char* line) {
 }
 
 void setup() {
+  setCpuFrequencyMhz(CPU_FREQ_MHZ);
+
   // 1. NON-NEGOTIABLE SAFETY FIRST: Force outputs safe before Wi-Fi or Serial
   pinMode(PIN_LASER_PWM, OUTPUT);
   digitalWrite(PIN_LASER_PWM, LOW);
@@ -109,7 +111,7 @@ void setup() {
   pinMode(PIN_MS1, OUTPUT);
   pinMode(PIN_MS2, OUTPUT);
   pinMode(PIN_MS3, OUTPUT);
-  nativeSetMicrostepMode(16); // Default 1/16 mode
+  nativeSetMicrostepMode(1); // Default full-step mode for low-cost motors
 
   // Sensors (INPUT_PULLUP)
   pinMode(PIN_SENSOR_X, INPUT_PULLUP);
@@ -135,7 +137,11 @@ void setup() {
   Serial.begin(SERIAL_BAUD);
 
   // 5. Initialize Wi-Fi (Station Mode with SoftAP Fallback)
-  WiFi.mode(WIFI_AP_STA);
+  WiFi.mode(WIFI_STA);
+  WiFi.setHostname("Laser-XY-Scanner");
+  WiFi.setSleep(true);
+  WiFi.setTxPower(WIFI_POWER_11dBm);
+  delay(100);
   bool connected = false;
 
   // Check if custom credentials were provided
@@ -143,8 +149,8 @@ void setup() {
     Serial.printf("\n[Wi-Fi] Connecting to '%s'...\n", WIFI_SSID);
     WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
     uint32_t startAttemptTime = millis();
-    while (WiFi.status() != WL_CONNECTED && (millis() - startAttemptTime) < 10000) {
-      delay(250);
+    while (WiFi.status() != WL_CONNECTED && (millis() - startAttemptTime) < 25000) {
+      delay(400);
       Serial.print(".");
     }
     if (WiFi.status() == WL_CONNECTED) {
@@ -153,17 +159,23 @@ void setup() {
       Serial.print("[Wi-Fi] IP Address: ");
       Serial.println(WiFi.localIP());
     } else {
-      Serial.println("\n[Wi-Fi] Station connection timed out.");
+      Serial.printf("\n[Wi-Fi] Station connection timed out (status: %d).\n", (int)WiFi.status());
     }
   }
 
-  // If station is not connected, bring up SoftAP
+  // If station is not connected, either bring up SoftAP or disable the radio
   if (!connected) {
+#if WIFI_AP_FALLBACK
     WiFi.softAP(WIFI_AP_SSID, WIFI_AP_PASS);
     Serial.println("[Wi-Fi] SoftAP Access Point started.");
     Serial.printf("[Wi-Fi] Connect your PC to SSID: %s (Password: %s)\n", WIFI_AP_SSID, WIFI_AP_PASS);
     Serial.print("[Wi-Fi] ESP32 AP IP Address: ");
     Serial.println(WiFi.softAPIP());
+#else
+    WiFi.disconnect(true);
+    WiFi.mode(WIFI_OFF);
+    Serial.println("[Wi-Fi] Station unavailable; serial-only mode (radio off).");
+#endif
   }
 
   // 6. Start TCP Machine Control Socket
@@ -213,47 +225,53 @@ void loop() {
   }
 
   // 2. Service TCP client
-  if (!s_tcpClient || !s_tcpClient.connected()) {
-#if defined(ESP_ARDUINO_VERSION_MAJOR) && (ESP_ARDUINO_VERSION_MAJOR >= 3)
-    WiFiClient newClient = s_tcpServer.accept();
-#else
-    WiFiClient newClient = s_tcpServer.available();
-#endif
-    if (newClient) {
-      s_tcpClient = newClient;
+  if (s_tcpServer.hasClient()) {
+    WiFiClient incoming = s_tcpServer.accept();
+    if (incoming) {
+      if (s_tcpClient) {
+        s_tcpClient.stop();
+      }
+      s_tcpClient = incoming;
+      s_tcpClient.setNoDelay(true);
       s_tcpLineReader.reset();
       s_dispatcher.emitSnapshot(); // Emit snapshot immediately on connect!
     }
-  } else {
-    while (s_tcpClient.available()) {
-      char c = (char)s_tcpClient.read();
-      if (s_tcpLineReader.feedByte(c)) {
-        if (s_tcpLineReader.hasOverflow()) {
-          AckResponse ack;
-          ack.v = 1;
-          ack.accepted = false;
-          ack.code = ErrorCode::CommandTooLong;
-          char buf[MAX_FRAME_SIZE] = {0};
-          if (ProtocolParser::serializeAck(ack, buf, sizeof(buf)) > 0) {
-            sendOutput(buf);
-          }
-        } else {
-          CommandRequest req;
-          ErrorCode err = ProtocolParser::parseLine(s_tcpLineReader.getLine(), s_tcpLineReader.getLength(), req);
-          if (err == ErrorCode::Ok) {
-            s_dispatcher.dispatch(req, nowUs, nowMs);
-          } else {
+  }
+
+  if (s_tcpClient) {
+    if (!s_tcpClient.connected()) {
+      s_tcpClient.stop();
+    } else {
+      while (s_tcpClient.available()) {
+        char c = (char)s_tcpClient.read();
+        if (s_tcpLineReader.feedByte(c)) {
+          if (s_tcpLineReader.hasOverflow()) {
             AckResponse ack;
             ack.v = 1;
             ack.accepted = false;
-            ack.code = err;
+            ack.code = ErrorCode::CommandTooLong;
             char buf[MAX_FRAME_SIZE] = {0};
             if (ProtocolParser::serializeAck(ack, buf, sizeof(buf)) > 0) {
               sendOutput(buf);
             }
+          } else {
+            CommandRequest req;
+            ErrorCode err = ProtocolParser::parseLine(s_tcpLineReader.getLine(), s_tcpLineReader.getLength(), req);
+            if (err == ErrorCode::Ok) {
+              s_dispatcher.dispatch(req, nowUs, nowMs);
+            } else {
+              AckResponse ack;
+              ack.v = 1;
+              ack.accepted = false;
+              ack.code = err;
+              char buf[MAX_FRAME_SIZE] = {0};
+              if (ProtocolParser::serializeAck(ack, buf, sizeof(buf)) > 0) {
+                sendOutput(buf);
+              }
+            }
           }
+          s_tcpLineReader.clearLine();
         }
-        s_tcpLineReader.clearLine();
       }
     }
   }
@@ -265,4 +283,8 @@ void loop() {
 
   // 4. Update dispatcher (motion ticks, homing state machine, laser watchdog)
   s_dispatcher.update(nowUs, nowMs);
+
+  if (!s_dispatcher.isActive()) {
+    delay(IDLE_LOOP_DELAY_MS);
+  }
 }

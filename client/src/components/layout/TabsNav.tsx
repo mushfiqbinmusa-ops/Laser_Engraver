@@ -9,10 +9,10 @@ interface TabsNavProps {
 
 export const TabsNav: React.FC<TabsNavProps> = ({ activeTab, onTabChange }) => {
   const tabs: { id: TabId; label: string }[] = [
-    { id: 'engrave', label: '1. Engrave' },
-    { id: 'calibration', label: '2. Calibration & Homing' },
-    { id: 'settings', label: '3. Settings & Presets' },
-    { id: 'tests', label: '4. Tests & Diagnostics' }
+    { id: 'engrave', label: 'Engrave' },
+    { id: 'calibration', label: 'Calibration & Motion' },
+    { id: 'settings', label: 'Settings & Config' },
+    { id: 'tests', label: 'Diagnostics & Tests' }
   ];
 
   const handleKeyDown = (e: React.KeyboardEvent, index: number) => {
@@ -34,7 +34,7 @@ export const TabsNav: React.FC<TabsNavProps> = ({ activeTab, onTabChange }) => {
         background: 'var(--bg-surface)',
         borderBottom: '1px solid var(--border-subtle)',
         padding: '0 24px',
-        gap: '4px'
+        gap: '8px'
       }}
     >
       {tabs.map((tab, idx) => {
@@ -54,10 +54,12 @@ export const TabsNav: React.FC<TabsNavProps> = ({ activeTab, onTabChange }) => {
               border: 'none',
               borderBottom: isActive ? '2px solid var(--text-primary)' : '2px solid transparent',
               borderRadius: 0,
+              boxShadow: 'none',
               color: isActive ? 'var(--text-primary)' : 'var(--text-secondary)',
               fontWeight: isActive ? 600 : 400,
-              padding: '12px 16px',
-              fontSize: '13px'
+              padding: '10px 14px',
+              fontSize: '12px',
+              cursor: 'pointer'
             }}
           >
             {tab.label}

@@ -6,6 +6,8 @@ interface MachineContextType {
   fresh: boolean;
   snapshot: SystemSnapshot | null;
   lastSeen: Date | null;
+  homePhase: string | null;
+  homeResult: string | null;
   estop: () => Promise<void>;
   stop: () => Promise<void>;
   resetFault: () => Promise<void>;
@@ -24,6 +26,8 @@ export const MachineProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [fresh, setFresh] = useState<boolean>(false);
   const [snapshot, setSnapshot] = useState<SystemSnapshot | null>(null);
   const [lastSeen, setLastSeen] = useState<Date | null>(null);
+  const [homePhase, setHomePhase] = useState<string | null>(null);
+  const [homeResult, setHomeResult] = useState<string | null>(null);
 
   const refreshStatus = useCallback(async () => {
     try {
@@ -68,6 +72,12 @@ export const MachineProvider: React.FC<{ children: React.ReactNode }> = ({ child
             setConnected(true);
             setFresh(true);
             setLastSeen(new Date());
+          } else if (data.type === 'operation.started' || data.type === 'operation.progress') {
+            setHomePhase(data.phase || 'homing');
+            if (data.type === 'operation.started') setHomeResult(null);
+          } else if (data.type === 'operation.completed') {
+            setHomePhase(null);
+            setHomeResult(data.result || 'unknown');
           }
         } catch {
           // ignore malformed frame
@@ -138,16 +148,25 @@ export const MachineProvider: React.FC<{ children: React.ReactNode }> = ({ child
   }, [refreshStatus]);
 
   const home = useCallback(async (axis: 'all' | 'x' | 'y') => {
-    const res = await fetch('/api/machine/home', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ axis })
-    });
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err.detail || 'Homing failed');
+    setHomePhase('starting');
+    setHomeResult(null);
+    try {
+      const res = await fetch('/api/machine/home', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ axis })
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.detail || 'Homing failed');
+      }
+      await refreshStatus();
+    } catch (err) {
+      setHomePhase(null);
+      throw err;
+    } finally {
+      setHomePhase((phase) => (phase === 'starting' ? null : phase));
     }
-    await refreshStatus();
   }, [refreshStatus]);
 
   const jog = useCallback(async (axis: 'x' | 'y', steps: number, speed_sps: number = 100) => {
@@ -205,6 +224,8 @@ export const MachineProvider: React.FC<{ children: React.ReactNode }> = ({ child
     fresh,
     snapshot,
     lastSeen,
+    homePhase,
+    homeResult,
     estop,
     stop,
     resetFault,
@@ -219,6 +240,8 @@ export const MachineProvider: React.FC<{ children: React.ReactNode }> = ({ child
     fresh,
     snapshot,
     lastSeen,
+    homePhase,
+    homeResult,
     estop,
     stop,
     resetFault,

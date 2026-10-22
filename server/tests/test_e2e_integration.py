@@ -97,7 +97,7 @@ async def test_e2e_machine_lifecycle_and_safety_gates(sim_environment):
     assert snap["pos"]["y"] == 0
 
     # 7. Calibrated MoveAbs
-    res = await client.post("/api/machine/move-abs", json={"x": 400, "y": 400, "speed_sps": 200})
+    res = await client.post("/api/machine/move-abs", json={"x": 20, "y": 20, "speed_sps": 200})
     assert res.status_code == 200
     assert res.json()["accepted"] is True
 

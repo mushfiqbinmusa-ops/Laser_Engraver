@@ -4,6 +4,7 @@ import logging
 import time
 from typing import Optional, Callable, Awaitable, Any
 from app.bridge.base import ControllerBridge
+from app.console.hub import console_hub
 from app.models.protocol_models import AckResponse, SystemSnapshot, OperationEvent
 
 logger = logging.getLogger(__name__)
@@ -49,8 +50,8 @@ class ControllerDispatcher:
             "pos_valid": False,
             "sensors": {"x_raw": 1, "x_filtered": 0, "y_raw": 1, "y_filtered": 0},
             "laser": {"duty": 0, "active": False, "hard_clamped": False},
-            "drivers_enabled": True,
-            "microstep_mode": 16,
+            "drivers_enabled": False,
+            "microstep_mode": 1,
             "fault": None
         }
 
@@ -63,7 +64,7 @@ class ControllerDispatcher:
         try:
             data = json.loads(line)
         except Exception as e:
-            logger.warning(f"Malformed JSON from controller: {line} - {e}")
+            logger.debug(f"Non-JSON controller line: {line} - {e}")
             return
 
         frame_type = data.get("type")
@@ -129,6 +130,7 @@ class ControllerDispatcher:
             self._pending_acks[req_id] = ack_future
 
             frame_json = json.dumps(payload)
+            console_hub.add_tx(frame_json)
             try:
                 await self.bridge.send_frame(frame_json)
                 ack = await asyncio.wait_for(ack_future, timeout=timeout_s)

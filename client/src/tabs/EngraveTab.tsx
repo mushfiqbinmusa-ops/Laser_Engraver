@@ -182,13 +182,15 @@ export const EngraveTab: React.FC = () => {
   const isReady = connected && fresh && isHomed && noFaults && !!activeJob;
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '320px 1fr 300px', gap: '20px', padding: '24px' }}>
+    <div style={{ display: 'grid', gridTemplateColumns: '320px 1fr 310px', gap: '20px', maxWidth: '1440px', margin: '0 auto' }}>
       {/* Left Pane: Vector Source & Preset Selection */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: '6px', padding: '16px' }}>
-          <h2 style={{ fontSize: '14px', fontWeight: 600, marginBottom: '12px' }}>Vector Input Source</h2>
+        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: '4px', padding: '16px', boxShadow: 'var(--shadow-subtle)' }}>
+          <h2 style={{ fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '12px' }}>
+            Vector Input Source
+          </h2>
           
-          <label style={{ display: 'block', fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '6px' }}>
+          <label style={{ display: 'block', fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '6px' }}>
             Upload SVG File
           </label>
           <input
@@ -196,12 +198,14 @@ export const EngraveTab: React.FC = () => {
             accept=".svg"
             onChange={handleFileUpload}
             disabled={isLoading}
-            style={{ width: '100%', marginBottom: '16px' }}
+            style={{ width: '100%', marginBottom: '14px', fontSize: '11px' }}
           />
 
           <hr style={{ borderColor: 'var(--border-subtle)', margin: '12px 0' }} />
 
-          <h3 style={{ fontSize: '13px', fontWeight: 600, marginBottom: '8px' }}>Or Built-In Parametric Shape</h3>
+          <h3 style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.03em', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '8px' }}>
+            Built-In Parametric Geometry
+          </h3>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '8px' }}>
             <select
               id="parametric-shape-type"
@@ -242,15 +246,15 @@ export const EngraveTab: React.FC = () => {
               />
             </div>
           )}
-          <button onClick={handleCreateShape} disabled={isLoading} style={{ width: '100%' }}>
-            Generate Vector Shape
+          <button onClick={handleCreateShape} disabled={isLoading} style={{ width: '100%', fontSize: '11px' }}>
+            Generate Shape Path
           </button>
         </div>
 
         {/* Preset Configuration */}
-        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: '6px', padding: '16px' }}>
-          <label htmlFor="engrave-preset-select" style={{ display: 'block', fontSize: '14px', fontWeight: 600, marginBottom: '12px' }}>
-            Process Preset
+        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: '4px', padding: '16px', boxShadow: 'var(--shadow-subtle)' }}>
+          <label htmlFor="engrave-preset-select" style={{ display: 'block', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 600, marginBottom: '12px', color: 'var(--text-primary)' }}>
+            Process Material Preset
           </label>
           <select
             id="engrave-preset-select"
@@ -266,8 +270,8 @@ export const EngraveTab: React.FC = () => {
             ))}
           </select>
 
-          <label htmlFor="power-override-input" style={{ display: 'block', fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '4px' }}>
-            Temporary Job Power Override (0–90%)
+          <label htmlFor="power-override-input" style={{ display: 'block', fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '4px' }}>
+            Temporary Power Override (0–90%)
           </label>
           <input
             id="power-override-input"
@@ -283,21 +287,23 @@ export const EngraveTab: React.FC = () => {
         </div>
       </div>
 
-      {/* Center Pane: High-Fidelity Toolpath Preview */}
-      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: '6px', padding: '16px', display: 'flex', flexDirection: 'column' }}>
+      {/* Center Pane: Toolpath Preview */}
+      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: '4px', padding: '16px', display: 'flex', flexDirection: 'column', boxShadow: 'var(--shadow-subtle)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-          <h2 style={{ fontSize: '14px', fontWeight: 600 }}>Toolpath Preview & Work-Area Fit</h2>
+          <h2 style={{ fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 600, color: 'var(--text-primary)' }}>
+            Toolpath Work-Area Fit
+          </h2>
           {activeJob && (
-            <span className="mono" style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
-              {activeJob.name} ({activeJob.total_segments} segments)
+            <span className="mono" style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
+              {activeJob.name} ({activeJob.total_segments} segs)
             </span>
           )}
         </div>
 
         <div style={{
           flex: 1,
-          minHeight: '420px',
-          background: 'var(--bg-app)',
+          minHeight: '440px',
+          background: '#FAFAFA',
           border: '1px solid var(--border-subtle)',
           borderRadius: '4px',
           display: 'flex',
@@ -308,15 +314,17 @@ export const EngraveTab: React.FC = () => {
             <img
               src={`/api/jobs/${activeJob.id}/preview?t=${activeJob.updated_at}`}
               alt="Toolpath preview"
-              style={{ maxWidth: '100%', maxHeight: '450px', objectFit: 'contain' }}
+              style={{ maxWidth: '100%', maxHeight: '460px', objectFit: 'contain' }}
             />
           ) : (
-            <span style={{ color: 'var(--text-muted)' }}>Upload an SVG or generate a shape to preview toolpath</span>
+            <span style={{ color: 'var(--text-muted)', fontSize: '12px' }}>
+              Upload an SVG or generate a shape to preview toolpath
+            </span>
           )}
         </div>
 
         {errorMsg && (
-          <div style={{ marginTop: '12px', padding: '8px 12px', background: 'rgba(224, 49, 49, 0.15)', border: '1px solid var(--accent-estop)', borderRadius: '4px', color: '#FFA8A8', fontSize: '12px' }}>
+          <div style={{ marginTop: '12px', padding: '8px 12px', background: '#FEF2F2', border: '1px solid #FCA5A5', borderRadius: '4px', color: '#991B1B', fontSize: '11px' }}>
             {errorMsg}
           </div>
         )}
@@ -324,27 +332,35 @@ export const EngraveTab: React.FC = () => {
 
       {/* Right Pane: Readiness Gate & Run Controls */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: '6px', padding: '16px' }}>
-          <h2 style={{ fontSize: '14px', fontWeight: 600, marginBottom: '12px' }}>Readiness Gate</h2>
+        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: '4px', padding: '16px', boxShadow: 'var(--shadow-subtle)' }}>
+          <h2 style={{ fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 600, marginBottom: '12px', color: 'var(--text-primary)' }}>
+            Readiness Gate
+          </h2>
           
           <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '12px' }}>
             <li style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span>{connected ? '✓' : '✗'}</span>
-              <span style={{ color: connected ? 'var(--text-primary)' : 'var(--accent-warning)' }}>
+              <span className="mono" style={{ color: connected ? 'var(--text-primary)' : 'var(--text-muted)', fontWeight: 700 }}>
+                {connected ? '✓' : '○'}
+              </span>
+              <span style={{ color: connected ? 'var(--text-primary)' : 'var(--text-muted)' }}>
                 Controller Online
               </span>
             </li>
             <li style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span>{fresh ? '✓' : '✗'}</span>
-              <span style={{ color: fresh ? 'var(--text-primary)' : 'var(--accent-warning)' }}>
+              <span className="mono" style={{ color: fresh ? 'var(--text-primary)' : 'var(--text-muted)', fontWeight: 700 }}>
+                {fresh ? '✓' : '○'}
+              </span>
+              <span style={{ color: fresh ? 'var(--text-primary)' : 'var(--text-muted)' }}>
                 Telemetry Fresh (&lt;2s)
               </span>
             </li>
             <li style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span>{isHomed ? '✓' : '✗'}</span>
-                <span style={{ color: isHomed ? 'var(--text-primary)' : 'var(--accent-warning)' }}>
-                  Both Axes Physically Homed
+                <span className="mono" style={{ color: isHomed ? 'var(--text-primary)' : 'var(--text-muted)', fontWeight: 700 }}>
+                  {isHomed ? '✓' : '○'}
+                </span>
+                <span style={{ color: isHomed ? 'var(--text-primary)' : 'var(--text-muted)' }}>
+                  Axes Homed (X & Y)
                 </span>
               </div>
               {!isHomed && (
@@ -353,29 +369,33 @@ export const EngraveTab: React.FC = () => {
                   onClick={handleQuickHome}
                   disabled={isHoming || !connected}
                   style={{
-                    fontSize: '11px',
+                    fontSize: '10px',
                     padding: '2px 8px',
                     background: 'var(--bg-surface-elevated)',
-                    border: '1px solid var(--border-subtle)',
-                    borderRadius: '4px',
+                    border: '1px solid var(--border-strong)',
+                    borderRadius: '3px',
                     cursor: connected && !isHoming ? 'pointer' : 'not-allowed',
                     color: 'var(--text-primary)'
                   }}
                 >
-                  {isHoming ? 'Homing...' : 'Home Now'}
+                  {isHoming ? 'Homing...' : 'Home'}
                 </button>
               )}
             </li>
             <li style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span>{noFaults ? '✓' : '✗'}</span>
-              <span style={{ color: noFaults ? 'var(--text-primary)' : 'var(--accent-estop)' }}>
-                No Active Hardware Faults
+              <span className="mono" style={{ color: noFaults ? 'var(--text-primary)' : '#DC2626', fontWeight: 700 }}>
+                {noFaults ? '✓' : '●'}
+              </span>
+              <span style={{ color: noFaults ? 'var(--text-primary)' : '#DC2626' }}>
+                Hardware Faults Clear
               </span>
             </li>
             <li style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span>{activeJob ? '✓' : '✗'}</span>
+              <span className="mono" style={{ color: activeJob ? 'var(--text-primary)' : 'var(--text-muted)', fontWeight: 700 }}>
+                {activeJob ? '✓' : '○'}
+              </span>
               <span style={{ color: activeJob ? 'var(--text-primary)' : 'var(--text-muted)' }}>
-                Valid Job Prepared in Bounds
+                Job Prepared in Bounds
               </span>
             </li>
           </ul>
@@ -384,9 +404,9 @@ export const EngraveTab: React.FC = () => {
             style={{
               marginTop: '14px',
               padding: '10px 12px',
-              background: isDryRun ? 'rgba(34, 139, 230, 0.15)' : 'var(--bg-app)',
-              border: `1px solid ${isDryRun ? '#339af0' : 'var(--border-subtle)'}`,
-              borderRadius: '6px',
+              background: 'var(--bg-surface-elevated)',
+              border: '1px solid var(--border-subtle)',
+              borderRadius: '4px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
@@ -394,11 +414,11 @@ export const EngraveTab: React.FC = () => {
             }}
           >
             <div>
-              <label htmlFor="engrave-dry-run-toggle" style={{ fontWeight: 600, fontSize: '12px', display: 'block', cursor: 'pointer', color: isDryRun ? '#74c0fc' : 'var(--text-primary)' }}>
+              <label htmlFor="engrave-dry-run-toggle" style={{ fontWeight: 600, fontSize: '11px', display: 'block', cursor: 'pointer', color: 'var(--text-primary)' }}>
                 False Engraving (Motors Only)
               </label>
-              <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
-                Trace toolpath with steppers, force laser OFF (duty = 0)
+              <span style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>
+                Laser forced OFF (duty = 0)
               </span>
             </div>
             <input
@@ -406,7 +426,7 @@ export const EngraveTab: React.FC = () => {
               type="checkbox"
               checked={isDryRun}
               onChange={(e) => setIsDryRun(e.target.checked)}
-              style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+              style={{ width: '16px', height: '16px', cursor: 'pointer' }}
             />
           </div>
 
@@ -417,23 +437,23 @@ export const EngraveTab: React.FC = () => {
             disabled={!isReady || isLoading || snapshot?.state === 'running_job'}
             style={{
               width: '100%',
-              padding: '12px',
-              fontSize: '13px',
-              fontWeight: 700,
+              padding: '10px',
+              fontSize: '12px',
+              fontWeight: 600,
+              letterSpacing: '0.02em',
               background: !isReady
                 ? 'var(--bg-surface-elevated)'
                 : isDryRun
-                  ? '#1971c2'
-                  : 'var(--accent-ready)',
+                  ? '#374151'
+                  : '#111827',
               color: isReady ? '#FFFFFF' : 'var(--text-muted)',
-              border: 'none',
+              border: isReady ? '1px solid #111827' : '1px solid var(--border-subtle)',
               borderRadius: '4px',
               cursor: isReady ? 'pointer' : 'not-allowed',
-              marginBottom: '8px',
-              transition: 'background 0.15s ease'
+              marginBottom: '8px'
             }}
           >
-            {isDryRun ? 'START FALSE ENGRAVING (MOTORS ONLY)' : 'START LASER ENGRAVING'}
+            {isDryRun ? 'START FALSE ENGRAVING (DRY RUN)' : 'START LASER ENGRAVING'}
           </button>
 
           {snapshot?.state === 'running_job' && (
@@ -441,10 +461,12 @@ export const EngraveTab: React.FC = () => {
               onClick={handleCancelJob}
               style={{
                 width: '100%',
-                background: 'var(--accent-estop)',
-                color: '#FFF',
-                border: 'none',
-                fontWeight: 600
+                background: '#FFFFFF',
+                color: '#DC2626',
+                border: '1px solid #DC2626',
+                fontWeight: 600,
+                fontSize: '11px',
+                padding: '8px'
               }}
             >
               CANCEL RUNNING JOB
@@ -452,27 +474,29 @@ export const EngraveTab: React.FC = () => {
           )}
         </div>
 
-        {/* Quick Laser Pulse Test Station */}
-        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: '6px', padding: '16px' }}>
+        {/* Laser Pulse Test Station */}
+        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: '4px', padding: '16px', boxShadow: 'var(--shadow-subtle)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: showPulseStation ? '12px' : '0' }}>
             <div>
-              <h2 style={{ fontSize: '13px', fontWeight: 600 }}>Laser Pulse Test</h2>
-              <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Direct test without switching tabs</span>
+              <h2 style={{ fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 600, color: 'var(--text-primary)' }}>
+                Laser Pulse Test
+              </h2>
+              <span style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>Direct emission diagnostic</span>
             </div>
             <button
               type="button"
               onClick={() => setShowPulseStation(!showPulseStation)}
               style={{
-                fontSize: '11px',
-                padding: '4px 10px',
-                background: 'var(--bg-surface-elevated)',
-                border: '1px solid var(--border-subtle)',
-                borderRadius: '4px',
+                fontSize: '10px',
+                padding: '3px 8px',
+                background: 'var(--bg-surface)',
+                border: '1px solid var(--border-strong)',
+                borderRadius: '3px',
                 cursor: 'pointer',
                 color: 'var(--text-primary)'
               }}
             >
-              {showPulseStation ? 'Hide Station' : 'Open Station'}
+              {showPulseStation ? 'Hide' : 'Open'}
             </button>
           </div>
 
@@ -484,8 +508,8 @@ export const EngraveTab: React.FC = () => {
                   alignItems: 'flex-start',
                   gap: '8px',
                   padding: '8px 10px',
-                  background: safetyConfirmed ? 'rgba(47, 158, 68, 0.1)' : 'var(--bg-app)',
-                  border: `1px solid ${safetyConfirmed ? 'var(--accent-ready)' : 'var(--border-subtle)'}`,
+                  background: 'var(--bg-surface-elevated)',
+                  border: '1px solid var(--border-subtle)',
                   borderRadius: '4px'
                 }}
               >
@@ -496,8 +520,8 @@ export const EngraveTab: React.FC = () => {
                   onChange={(e) => setSafetyConfirmed(e.target.checked)}
                   style={{ marginTop: '2px', cursor: 'pointer' }}
                 />
-                <label htmlFor="engrave-pulse-safety" style={{ fontSize: '11px', cursor: 'pointer', userSelect: 'none' }}>
-                  <strong>Safety Interlock:</strong> OD4+ 450nm eyewear donned & beam path clear.
+                <label htmlFor="engrave-pulse-safety" style={{ fontSize: '11px', cursor: 'pointer', userSelect: 'none', color: 'var(--text-primary)' }}>
+                  <strong>Safety Confirmation:</strong> Certified eyewear active & beam path isolated.
                 </label>
               </div>
 
@@ -539,25 +563,25 @@ export const EngraveTab: React.FC = () => {
                 style={{
                   width: '100%',
                   padding: '8px',
-                  fontSize: '12px',
+                  fontSize: '11px',
                   fontWeight: 600,
-                  background: !safetyConfirmed || !connected ? 'var(--bg-surface-elevated)' : 'var(--accent-estop)',
+                  background: !safetyConfirmed || !connected ? 'var(--bg-surface-elevated)' : '#111827',
                   color: !safetyConfirmed || !connected ? 'var(--text-muted)' : '#FFFFFF',
-                  border: 'none',
+                  border: '1px solid var(--border-strong)',
                   borderRadius: '4px',
                   cursor: !safetyConfirmed || !connected ? 'not-allowed' : 'pointer'
                 }}
               >
-                {pulsing ? 'FIRING PULSE...' : `FIRE LASER PULSE (${pulseDurationMs}ms @ ${pulsePowerPct}%)`}
+                {pulsing ? 'FIRING...' : `FIRE PULSE (${pulseDurationMs}ms @ ${pulsePowerPct}%)`}
               </button>
 
               {pulseSuccess && (
-                <div style={{ fontSize: '11px', color: 'var(--accent-ready)', background: 'rgba(47, 158, 68, 0.15)', padding: '6px 8px', borderRadius: '4px' }}>
+                <div style={{ fontSize: '11px', color: '#166534', background: '#F0FDF4', border: '1px solid #BBF7D0', padding: '6px 8px', borderRadius: '4px' }}>
                   {pulseSuccess}
                 </div>
               )}
               {pulseError && (
-                <div style={{ fontSize: '11px', color: 'var(--accent-estop)', background: 'rgba(224, 49, 49, 0.15)', padding: '6px 8px', borderRadius: '4px' }}>
+                <div style={{ fontSize: '11px', color: '#991B1B', background: '#FEF2F2', border: '1px solid #FCA5A5', padding: '6px 8px', borderRadius: '4px' }}>
                   {pulseError}
                 </div>
               )}
@@ -566,9 +590,11 @@ export const EngraveTab: React.FC = () => {
         </div>
 
         {/* Recent Jobs History */}
-        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: '6px', padding: '16px', flex: 1 }}>
-          <h2 style={{ fontSize: '13px', fontWeight: 600, marginBottom: '8px' }}>Recent Jobs</h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', maxHeight: '200px', overflowY: 'auto' }}>
+        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: '4px', padding: '16px', flex: 1, boxShadow: 'var(--shadow-subtle)' }}>
+          <h2 style={{ fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 600, marginBottom: '8px', color: 'var(--text-primary)' }}>
+            Recent Jobs
+          </h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', maxHeight: '180px', overflowY: 'auto' }}>
             {jobsHistory.map((j) => (
               <button
                 type="button"
@@ -578,18 +604,18 @@ export const EngraveTab: React.FC = () => {
                   display: 'block',
                   width: '100%',
                   textAlign: 'left',
-                  padding: '6px 8px',
+                  padding: '6px 10px',
                   borderRadius: '4px',
-                  background: activeJob?.id === j.id ? 'var(--border-strong)' : 'var(--bg-surface-elevated)',
-                  border: '1px solid var(--border-subtle)',
+                  background: activeJob?.id === j.id ? '#F3F4F6' : '#FFFFFF',
+                  border: `1px solid ${activeJob?.id === j.id ? '#9CA3AF' : 'var(--border-subtle)'}`,
                   cursor: 'pointer',
-                  fontSize: '12px',
-                  color: 'inherit',
-                  fontFamily: 'inherit'
+                  fontSize: '11px',
+                  color: 'var(--text-primary)',
+                  boxShadow: 'none'
                 }}
               >
                 <div style={{ fontWeight: 600 }}>{j.name}</div>
-                <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
+                <div style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>
                   {j.status.toUpperCase()} · {j.total_segments} segs
                 </div>
               </button>
