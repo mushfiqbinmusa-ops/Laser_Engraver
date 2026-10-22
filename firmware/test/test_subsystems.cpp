@@ -337,6 +337,38 @@ int main() {
     assert(!axisX.isHomed());
     std::cout << "  ✓ STOP mid-home invalidates position verified" << std::endl;
 
+    // Job end always invalidates homing; the host is expected to re-home.
+    axisX.setHomed(true);
+    axisY.setHomed(true);
+    state.setHomed(true, true);
+    assert(state.getState() == MachineStateEnum::IdleHomed);
+    s_sentLines.clear();
+    CommandRequest reqJobEnd;
+    reqJobEnd.v = 1;
+    strcpy(reqJobEnd.id, "test-job-end");
+    reqJobEnd.type = CommandType::JobEnd;
+    dispatcher.dispatch(reqJobEnd, 2500, 25);
+    assert(state.getState() == MachineStateEnum::IdleUnhomed);
+    assert(!axisX.isHomed());
+    assert(!axisY.isHomed());
+    assert(!state.isPositionValid());
+    std::cout << "  ✓ Job end invalidates homing verified" << std::endl;
+
+    // A STOP while idle must preserve a valid homed state.
+    axisX.setHomed(true);
+    axisY.setHomed(true);
+    state.setHomed(true, true);
+    assert(state.getState() == MachineStateEnum::IdleHomed);
+    s_sentLines.clear();
+    CommandRequest reqIdleStop;
+    reqIdleStop.v = 1;
+    strcpy(reqIdleStop.id, "test-idle-stop");
+    reqIdleStop.type = CommandType::SystemStop;
+    dispatcher.dispatch(reqIdleStop, 2600, 26);
+    assert(state.getState() == MachineStateEnum::IdleHomed);
+    assert(state.isPositionValid());
+    std::cout << "  ✓ STOP while idle preserves homing verified" << std::endl;
+
     // Simulate a fully homed machine, then E-Stop.
     axisX.setHomed(true);
     axisY.setHomed(true);

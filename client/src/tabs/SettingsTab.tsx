@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Preset, MachineConfig } from '../types/jobs';
 
 export const SettingsTab: React.FC = () => {
@@ -23,12 +23,22 @@ export const SettingsTab: React.FC = () => {
   const [newPresetName, setNewPresetName] = useState<string>('');
   const [newPowerPct, setNewPowerPct] = useState<number>(20);
   const [newSpeedSps, setNewSpeedSps] = useState<number>(100);
+  const [newMicrostepMode, setNewMicrostepMode] = useState<number>(16);
+  const [updatingPresetId, setUpdatingPresetId] = useState<string | null>(null);
   const [msg, setMsg] = useState<{ text: string; isError: boolean } | null>(null);
+  const microstepInitialized = useRef(false);
 
   const fetchData = async () => {
     try {
       const cRes = await fetch('/api/presets/config');
-      if (cRes.ok) setConfig(await cRes.json());
+      if (cRes.ok) {
+        const cfg: MachineConfig = await cRes.json();
+        setConfig(cfg);
+        if (!microstepInitialized.current) {
+          setNewMicrostepMode(cfg.default_microstep_mode ?? 16);
+          microstepInitialized.current = true;
+        }
+      }
 
       const pRes = await fetch('/api/presets');
       if (pRes.ok) setPresets(await pRes.json());
@@ -72,7 +82,8 @@ export const SettingsTab: React.FC = () => {
           laser_power_pct: newPowerPct,
           engrave_speed_sps: newSpeedSps,
           travel_speed_sps: 200,
-          passes: 1
+          passes: 1,
+          microstep_mode: newMicrostepMode
         })
       });
       if (!res.ok) throw new Error('Failed to create preset');
@@ -94,6 +105,27 @@ export const SettingsTab: React.FC = () => {
       fetchData();
     } catch (err: any) {
       setMsg({ text: err.message, isError: true });
+    }
+  };
+
+  const handleUpdatePresetMicrostep = async (presetId: string, mode: number) => {
+    setUpdatingPresetId(presetId);
+    try {
+      const res = await fetch(`/api/presets/${presetId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ microstep_mode: mode })
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.detail || 'Failed to update preset microstep');
+      }
+      await fetchData();
+      setMsg({ text: `Preset microstep set to 1/${mode}`, isError: false });
+    } catch (err: any) {
+      setMsg({ text: err.message, isError: true });
+    } finally {
+      setUpdatingPresetId(null);
     }
   };
 
@@ -329,6 +361,22 @@ export const SettingsTab: React.FC = () => {
                 </div>
               </div>
 
+              <div>
+                <label htmlFor="cfg-default-microstep" style={{ display: 'block', fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '4px' }}>
+                  Default Microstep Mode (applied by presets at job start)
+                </label>
+                <select
+                  id="cfg-default-microstep"
+                  value={config.default_microstep_mode}
+                  onChange={(e) => setConfig({ ...config, default_microstep_mode: Number(e.target.value) })}
+                  style={{ width: '100%' }}
+                >
+                  {[1, 2, 4, 8, 16].map((mode) => (
+                    <option key={mode} value={mode}>1/{mode} microstep</option>
+                  ))}
+                </select>
+              </div>
+
               <button
                 type="submit"
                 style={{
@@ -375,23 +423,36 @@ export const SettingsTab: React.FC = () => {
                   {p.name} {p.is_builtin && <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: 400 }}>(BUILT-IN)</span>}
                 </div>
                 <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
-                  Power: {p.laser_power_pct}% ({p.laser_duty} duty) · Speed: {p.engrave_speed_sps} sps · Passes: {p.passes}
+                  Power: {p.laser_power_pct}% ({p.laser_duty} duty) · Speed: {p.engrave_speed_sps} sps · Passes: {p.passes} · Microstep: 1/{p.microstep_mode}
                 </div>
               </div>
-              {!p.is_builtin && (
-                <button
-                  onClick={() => handleDeletePreset(p.id)}
-                  style={{
-                    color: '#991B1B',
-                    borderColor: '#FCA5A5',
-                    fontSize: '10px',
-                    padding: '3px 8px',
-                    background: '#FFFFFF'
-                  }}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <select
+                  aria-label={`Microstep mode for ${p.name}`}
+                  value={p.microstep_mode}
+                  disabled={updatingPresetId === p.id}
+                  onChange={(e) => handleUpdatePresetMicrostep(p.id, Number(e.target.value))}
+                  style={{ fontSize: '10px', padding: '3px 4px' }}
                 >
-                  Delete
-                </button>
-              )}
+                  {[1, 2, 4, 8, 16].map((mode) => (
+                    <option key={mode} value={mode}>1/{mode}</option>
+                  ))}
+                </select>
+                {!p.is_builtin && (
+                  <button
+                    onClick={() => handleDeletePreset(p.id)}
+                    style={{
+                      color: '#991B1B',
+                      borderColor: '#FCA5A5',
+                      fontSize: '10px',
+                      padding: '3px 8px',
+                      background: '#FFFFFF'
+                    }}
+                  >
+                    Delete
+                  </button>
+                )}
+              </div>
             </div>
           ))}
         </div>
@@ -441,6 +502,21 @@ export const SettingsTab: React.FC = () => {
                 style={{ width: '100%' }}
               />
             </div>
+          </div>
+          <div>
+            <label htmlFor="preset-microstep" style={{ display: 'block', fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '3px' }}>
+              Microstep Mode (applied at job start)
+            </label>
+            <select
+              id="preset-microstep"
+              value={newMicrostepMode}
+              onChange={(e) => setNewMicrostepMode(Number(e.target.value))}
+              style={{ width: '100%' }}
+            >
+              {[1, 2, 4, 8, 16].map((mode) => (
+                <option key={mode} value={mode}>1/{mode} microstep</option>
+              ))}
+            </select>
           </div>
           <button
             type="submit"

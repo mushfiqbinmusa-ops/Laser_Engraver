@@ -20,6 +20,7 @@ class FakeEsp32Server:
         self.pos_y = 0
         self.laser_duty = 0
         self.drivers_enabled = False
+        self.microstep_mode = 16
         self.fault = None
         self.op_counter = 0
 
@@ -64,6 +65,7 @@ class FakeEsp32Server:
             "sensors": {"x_raw": 1, "x_filtered": 0, "y_raw": 1, "y_filtered": 0},
             "laser": {"duty": self.laser_duty, "active": self.laser_duty > 0, "hard_clamped": False},
             "drivers_enabled": self.drivers_enabled,
+            "microstep_mode": self.microstep_mode,
             "fault": self.fault
         }
         await self._broadcast(snap)
@@ -117,9 +119,15 @@ class FakeEsp32Server:
             await self._emit_snapshot()
 
         elif cmd_type == "system.stop":
+            interrupting = self.state in ("running_job", "moving", "homing")
             self.laser_duty = 0
             if self.state != "faulted":
-                self.state = "idle_homed" if (self.homed_x and self.homed_y) else "idle_unhomed"
+                if interrupting:
+                    self.homed_x = False
+                    self.homed_y = False
+                    self.state = "idle_unhomed"
+                else:
+                    self.state = "idle_homed" if (self.homed_x and self.homed_y) else "idle_unhomed"
             ack = {"v": 1, "id": cmd_id, "type": "ack", "accepted": True, "code": "OK"}
             writer.write((json.dumps(ack) + "\n").encode("utf-8"))
             await writer.drain()
@@ -152,6 +160,20 @@ class FakeEsp32Server:
                 self.homed_y = False
                 self.state = "idle_unhomed"
             ack = {"v": 1, "id": cmd_id, "type": "ack", "accepted": True, "code": "OK"}
+            writer.write((json.dumps(ack) + "\n").encode("utf-8"))
+            await writer.drain()
+            await self._emit_snapshot()
+
+        elif cmd_type == "driver.set_microstep":
+            mode = req.get("mode", 16)
+            if self.state in ("running_job", "moving", "homing") or mode not in (1, 2, 4, 8, 16):
+                ack = {"v": 1, "id": cmd_id, "type": "ack", "accepted": False, "code": "BUSY"}
+            else:
+                self.microstep_mode = mode
+                self.homed_x = False
+                self.homed_y = False
+                self.state = "idle_unhomed"
+                ack = {"v": 1, "id": cmd_id, "type": "ack", "accepted": True, "code": "OK"}
             writer.write((json.dumps(ack) + "\n").encode("utf-8"))
             await writer.drain()
             await self._emit_snapshot()
@@ -238,7 +260,9 @@ class FakeEsp32Server:
 
         elif cmd_type == "job.end":
             self.laser_duty = 0
-            self.state = "idle_homed"
+            self.homed_x = False
+            self.homed_y = False
+            self.state = "idle_unhomed"
             ack = {"v": 1, "id": cmd_id, "type": "ack", "accepted": True, "code": "OK"}
             writer.write((json.dumps(ack) + "\n").encode("utf-8"))
             await writer.drain()

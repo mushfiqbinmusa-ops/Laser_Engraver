@@ -100,6 +100,11 @@
    - **Phase 5 (FinalPullOff):** Motor retracts 200 steps so the beam remains completely open during normal workspace operation.
 3. Both axes zero their coordinates to `(0, 0)`, and the state transitions to `IDLE_HOMED`.
 
+**Homing lifecycle rules:**
+- **Job completion always re-homes:** when the last segment finishes, the server runs a full Home All before marking the job `completed`. The machine normally ends in `IDLE_HOMED`; if that automatic home fails, the job is still recorded as completed but the machine remains `IDLE_UNHOMED`/faulted and a warning is shown.
+- **STOP while active invalidates homing:** stopping during a job, a move, or homing aborts motion and transitions to `IDLE_UNHOMED`. Re-home before the next job.
+- **STOP while idle preserves homing:** pressing STOP when the machine is already idle and calibrated leaves `IDLE_HOMED` untouched.
+
 ### Phase 5: Vector Art Preparation & Upload
 1. Prepare artwork in vector format (SVG) using Inkscape, Illustrator, or CAD:
    - Keep design dimensions within the **50 mm x 50 mm** work area.
@@ -107,7 +112,7 @@
    - Ungroup nested objects and remove hidden or clipping layers.
 2. In the **Engrave** tab:
    - Under **Vector Input Source**, upload your `.svg` file (or generate a quick test shape using the Parametric Generator).
-   - Select a material preset (e.g., `Softwood / Basswood` at 25% power, 100 sps; or `Cardstock` at 5% power, 150 sps).
+   - Select a material preset (e.g., `Softwood / Basswood` at 25% power, 100 sps; or `Cardstock` at 5% power, 150 sps). Presets also carry a microstep mode; the server applies it and re-homes automatically at job start when it differs from the machine's current mode.
    - Review the rendered **Toolpath Preview** in the center pane to confirm scaling and orientation.
 
 ### Phase 6: The Readiness Gate Verification
@@ -142,7 +147,7 @@ Before the **Start Engraving** button unlocks, the system automatically checks a
 
 | Prohibited Action | Why It Is Dangerous / Harmful | Correct Procedure |
 | :--- | :--- | :--- |
-| **Never change microstepping mode during motion or while running a job.** | Modifying MS1/MS2/MS3 pins while stepping alters steps/mm dynamically, ruins position calibration, causes skipped steps, and invalidates homing. | Only change microstep mode from the Calibration tab while the machine is stationary in `IDLE`. Always re-home immediately after changing. |
+| **Never change microstepping mode during motion or while running a job.** | Modifying MS1/MS2/MS3 pins while stepping alters steps/mm dynamically, ruins position calibration, causes skipped steps, and invalidates homing. | Each material preset carries its own microstep mode (`1/1`–`1/16`). The server applies it automatically at job start: if it differs from the live mode, the machine changes mode and **re-homes both axes before moving**. Manual changes in the Calibration tab require a stationary `IDLE` machine and an immediate re-home. |
 | **Do not exceed 100–120 sps for 28BYJ-48 stepper moves.** | Geared 28BYJ-48 motors have high rotor reluctance. Running speeds above 120 sps causes torque loss, stalling, and lost steps. | Use preset defaults (80–100 sps for engraving; 150–200 sps for non-burn travel moves). |
 | **Do not force laser duty above 90% (3685/4095).** | Diode lasers driven beyond 90% duty experience severe thermal degradation, optical wavelength shift, and rapid premature diode failure. | Stay within presets (5% to 45% is optimal for wood/paper/acrylic). The firmware will reject commands >90% with `LASER_DUTY_CLAMPED`. |
 | **Do not bypass the Readiness Gate or force unhomed jobs.** | Running without homing means absolute position is unknown. The laser can deflect past the workpiece, burning machine casing or desktop. | Always run **Home All** after powering on or waking from driver idle. |

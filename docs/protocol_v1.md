@@ -14,6 +14,7 @@
 3. **Correlation:** Every request from the host includes an `id` string (e.g. `"req-001"`). The controller must reply with an acknowledgment echoing the same `id`.
 4. **Operation Lifecycle:** `home.start` returns an immediate acceptance acknowledgment containing an `operation_id`, followed by asynchronous `operation.started` / `operation.completed` events. Job streaming is synchronous: `job.begin`, every `job.segment`, and `job.end` are acknowledged individually. `job.end` returns `BUSY` while the final segment is still moving and must be retried until accepted.
 5. **Reconnection Snapshot:** Upon connecting via TCP or Serial, the host requests `system.snapshot` to obtain full machine state, coordinates, homing validity, and sensor status before issuing motion commands.
+6. **Homing Invalidation:** `job.end` always invalidates homing. `driver.set_microstep` always invalidates homing. `system.stop` invalidates homing only when it interrupts active motion, homing, or a running job; a stop issued while idle preserves a valid `IDLE_HOMED` state.
 
 ---
 
@@ -27,6 +28,7 @@
 | `system.estop` | none | Immediate hardware halt. Disables steppers and laser immediately. |
 | `system.reset_fault` | none | Clears recoverable faults. Requires re-homing before motion. |
 | `driver.set_enabled` | `enabled: bool` | Powers stepper driver FETs on (`true`) or off (`false`). |
+| `driver.set_microstep` | `mode: 1 \| 2 \| 4 \| 8 \| 16` | Changes shared X/Y microstep mode. Rejected with `BUSY` while moving, homing, or running a job. Always invalidates homing. |
 | `home.start` | `axis: "all" \| "x" \| "y"` | Initiates 2-stage optical homing state machine. |
 | `motion.jog` | `axis: "x" \| "y"`, `steps: int`, `speed_sps: int` | Relative bounded step jog. |
 | `motion.move_abs` | `x: int`, `y: int`, `speed_sps: int` | Absolute coordinate move (requires `homed = true`). |
@@ -34,7 +36,7 @@
 | `laser.set_duty` | `duty: int` | Sets continuous laser duty (subject to 500 ms watchdog). |
 | `job.begin` | `job_id: str`, `total_segments: int` | Initializes toolpath execution stream. |
 | `job.segment` | `job_id: str`, `seg_idx: int`, `dx: int`, `dy: int`, `speed_sps: int`, `duty: int` | Relative coordinated toolpath segment. |
-| `job.end` | `job_id: str` | Finalizes job execution; turns off laser. |
+| `job.end` | `job_id: str` | Finalizes job execution; turns off laser and invalidates homing (`IDLE_UNHOMED`). The host must re-home before the next motion. |
 
 ---
 

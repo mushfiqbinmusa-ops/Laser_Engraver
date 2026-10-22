@@ -1,6 +1,8 @@
-from typing import Optional
+from typing import Literal, Optional
 from pydantic import BaseModel, Field
 from app.core.laser import MAX_DUTY, SAFETY_MAX_DUTY, SAFETY_MAX_PCT, pct_to_duty
+
+MicrostepMode = Literal[1, 2, 4, 8, 16]
 
 class MachineConfigModel(BaseModel):
     id: str = "default"
@@ -12,6 +14,7 @@ class MachineConfigModel(BaseModel):
     max_travel_steps_y: int = Field(default=4096, gt=0)
     default_speed_sps: int = Field(default=100, gt=0, le=25000)
     max_speed_sps: int = Field(default=25000, gt=0, le=25000)
+    default_microstep_mode: MicrostepMode = 16
     laser_ceiling_pct: int = Field(default=SAFETY_MAX_PCT, ge=1, le=SAFETY_MAX_PCT)
     laser_ceiling_duty: int = Field(default=SAFETY_MAX_DUTY, ge=1, le=SAFETY_MAX_DUTY)
 
@@ -24,6 +27,7 @@ class PresetModel(BaseModel):
     laser_power_pct: int = Field(default=15, ge=0, le=SAFETY_MAX_PCT)
     laser_duty: int = Field(default=pct_to_duty(15), ge=0, le=SAFETY_MAX_DUTY)
     passes: int = Field(default=1, ge=1, le=20)
+    microstep_mode: MicrostepMode = 16
     is_builtin: bool = False
 
 class PresetCreate(BaseModel):
@@ -33,6 +37,7 @@ class PresetCreate(BaseModel):
     engrave_speed_sps: int = Field(default=100, gt=0, le=25000)
     laser_power_pct: int = Field(default=15, ge=0, le=SAFETY_MAX_PCT)
     passes: int = Field(default=1, ge=1, le=20)
+    microstep_mode: MicrostepMode = 16
 
 class PresetUpdate(BaseModel):
     name: Optional[str] = None
@@ -41,3 +46,4 @@ class PresetUpdate(BaseModel):
     engrave_speed_sps: Optional[int] = Field(default=None, gt=0, le=25000)
     laser_power_pct: Optional[int] = Field(default=None, ge=0, le=SAFETY_MAX_PCT)
     passes: Optional[int] = Field(default=None, ge=1, le=20)
+    microstep_mode: Optional[MicrostepMode] = None

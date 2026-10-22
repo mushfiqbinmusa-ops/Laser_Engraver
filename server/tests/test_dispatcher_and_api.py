@@ -86,6 +86,38 @@ async def test_api_endpoints(setup_environment):
         assert resp_presets.status_code == 200
         presets = resp_presets.json()
         assert len(presets) >= 4
+        assert all("microstep_mode" in p for p in presets)
+
+        # 2b. Microstep config persistence
+        resp_cfg = await client.get("/api/presets/config")
+        assert resp_cfg.status_code == 200
+        cfg = resp_cfg.json()
+        assert cfg["default_microstep_mode"] == 16
+        cfg["default_microstep_mode"] = 8
+        resp_cfg_put = await client.put("/api/presets/config", json=cfg)
+        assert resp_cfg_put.status_code == 200
+        assert resp_cfg_put.json()["default_microstep_mode"] == 8
+
+        resp_new_preset = await client.post("/api/presets", json={
+            "name": "Microstep Test Material",
+            "laser_power_pct": 10,
+            "engrave_speed_sps": 120,
+            "microstep_mode": 4
+        })
+        assert resp_new_preset.status_code == 200
+        new_preset = resp_new_preset.json()
+        assert new_preset["microstep_mode"] == 4
+
+        resp_patch = await client.put(f"/api/presets/{new_preset['id']}", json={"microstep_mode": 2})
+        assert resp_patch.status_code == 200
+        assert resp_patch.json()["microstep_mode"] == 2
+
+        # Built-ins allow execution microstep changes but stay otherwise immutable.
+        resp_builtin = await client.put("/api/presets/preset-wood", json={"microstep_mode": 1})
+        assert resp_builtin.status_code == 200
+        assert resp_builtin.json()["microstep_mode"] == 1
+        resp_builtin_bad = await client.put("/api/presets/preset-wood", json={"name": "Renamed"})
+        assert resp_builtin_bad.status_code == 400
 
         # 3. Parametric shape generation
         resp_shape = await client.post("/api/jobs/shape", json={

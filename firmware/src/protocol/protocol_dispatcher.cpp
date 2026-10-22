@@ -138,14 +138,27 @@ void ProtocolDispatcher::dispatch(const CommandRequest& req, uint32_t nowUs, uin
     }
 
     case CommandType::SystemStop: {
+      // A stop that interrupts real motion invalidates the coordinate
+      // reference so the operator must re-home before the next job. A stop
+      // while idle preserves a valid homed state.
+      const bool interrupting =
+          m_planner.isMoving() ||
+          m_homing.isActive() ||
+          m_state.getState() == MachineStateEnum::Moving ||
+          m_state.getState() == MachineStateEnum::Homing ||
+          m_state.getState() == MachineStateEnum::RunningJob;
+
       m_planner.abort();
       m_homing.abort();
       m_laser.forceOff();
       if (m_state.getState() != MachineStateEnum::Faulted) {
-        // Re-derive homed state from the axes. A stop during homing must not
-        // report the interrupted axis as still homed.
-        m_state.setHomed(m_axisX.isHomed(), m_axisY.isHomed());
-        m_state.setState(m_state.isPositionValid() ? MachineStateEnum::IdleHomed : MachineStateEnum::IdleUnhomed);
+        if (interrupting) {
+          invalidateHomingState();
+          m_state.setState(MachineStateEnum::IdleUnhomed);
+        } else {
+          m_state.setHomed(m_axisX.isHomed(), m_axisY.isHomed());
+          m_state.setState(m_state.isPositionValid() ? MachineStateEnum::IdleHomed : MachineStateEnum::IdleUnhomed);
+        }
       }
       if (m_opRunning) {
         sendOperationCompleted(m_currentOpId, "aborted");
@@ -350,7 +363,11 @@ void ProtocolDispatcher::dispatch(const CommandRequest& req, uint32_t nowUs, uin
         return;
       }
       m_laser.forceOff();
-      m_state.setState(m_state.isPositionValid() ? MachineStateEnum::IdleHomed : MachineStateEnum::IdleUnhomed);
+      // A finished job invalidates the coordinate reference. The host
+      // automatically homes after completion, and also requires a fresh home
+      // before the next job if auto-homing fails.
+      invalidateHomingState();
+      m_state.setState(MachineStateEnum::IdleUnhomed);
       sendAck(req.id, true, ErrorCode::Ok);
       emitSnapshot();
       break;

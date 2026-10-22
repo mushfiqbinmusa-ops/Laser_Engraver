@@ -29,6 +29,10 @@ def test_migration_and_seed(tmp_path: Path):
         assert cfg is not None
         assert cfg["laser_ceiling_pct"] == 90
         assert cfg["laser_ceiling_duty"] == 3685
+        assert cfg["default_microstep_mode"] == 16
+
+        cursor = conn.execute("SELECT microstep_mode FROM presets WHERE is_builtin = 1 LIMIT 1;")
+        assert cursor.fetchone()["microstep_mode"] == 16
 
     # Re-running migrations should be idempotent
     applied_again = run_migrations(db_file)

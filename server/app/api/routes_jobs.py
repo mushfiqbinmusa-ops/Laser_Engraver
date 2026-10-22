@@ -212,23 +212,76 @@ async def start_job(
             raise HTTPException(status_code=400, detail="No snapshot received from controller")
         
         snap = dispatcher.latest_snapshot
-        if not (snap.homed.get("x") and snap.homed.get("y")):
-            raise HTTPException(status_code=400, detail="Cannot start: Both X and Y axes must be homed")
         if snap.fault:
             raise HTTPException(status_code=400, detail=f"Cannot start: Machine in fault state ({snap.fault})")
+        if snap.state in ("running_job", "moving", "homing"):
+            raise HTTPException(status_code=400, detail=f"Cannot start: machine is busy ({snap.state})")
 
         with get_db() as conn:
-            cursor = conn.execute("SELECT plan_json FROM jobs WHERE id = ?;", (job_id,))
+            cursor = conn.execute(
+                "SELECT plan_json, preset_snapshot_json FROM jobs WHERE id = ?;",
+                (job_id,)
+            )
             row = cursor.fetchone()
             if not row:
                 raise HTTPException(status_code=404, detail="Job not found")
             plan_dict = json.loads(row["plan_json"])
             plan = PreparedJobPlan.model_validate(plan_dict)
+            preset = PresetModel.model_validate(json.loads(row["preset_snapshot_json"]))
 
-        # Plans are built in reference (1/16) steps. Rescale to the mode the
-        # controller is actually in now so dimensions stay correct.
         live_mode = int(snap.microstep_mode or REFERENCE_MICROSTEP_MODE)
-        plan = scale_plan_for_microstep(plan, live_mode)
+        target_mode = int(preset.microstep_mode or live_mode)
+        if target_mode not in (1, 2, 4, 8, 16):
+            target_mode = REFERENCE_MICROSTEP_MODE
+
+        if target_mode != live_mode:
+            # Microstepping is shared by both axes and changing it invalidates
+            # every coordinate. Apply the preset mode, then establish a fresh
+            # physical reference before any job motion is allowed.
+            mode_ack = await dispatcher.send_command({
+                "type": "driver.set_microstep",
+                "mode": target_mode
+            })
+            if not mode_ack.accepted:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Preset microstep 1/{target_mode} rejected: {mode_ack.code}"
+                )
+            with get_db() as conn:
+                conn.execute(
+                    "INSERT INTO job_events (job_id, event_type, details_json) VALUES (?, 'MICROSTEP_APPLIED', ?);",
+                    (job_id, json.dumps({"mode": target_mode}))
+                )
+
+            try:
+                _, home_ev = await dispatcher.send_operation(
+                    {"type": "home.start", "axis": "all"},
+                    op_timeout_s=180.0
+                )
+                if home_ev.result != "success":
+                    raise RuntimeError(f"auto-home after microstep change failed: {home_ev.result}")
+            except Exception as exc:
+                raise HTTPException(
+                    status_code=502,
+                    detail=f"Changed to 1/{target_mode} microstep but re-homing failed: {exc}"
+                )
+            with get_db() as conn:
+                conn.execute(
+                    "INSERT INTO job_events (job_id, event_type, details_json) VALUES (?, 'AUTO_HOME_BEFORE_JOB', ?);",
+                    (job_id, json.dumps({"reason": "microstep_change", "mode": target_mode}))
+                )
+            snap = dispatcher.latest_snapshot
+            if not snap or not (snap.homed.get("x") and snap.homed.get("y")):
+                raise HTTPException(
+                    status_code=502,
+                    detail="Re-homing did not report both axes as homed"
+                )
+        elif not (snap.homed.get("x") and snap.homed.get("y")):
+            raise HTTPException(status_code=400, detail="Cannot start: Both X and Y axes must be homed")
+
+        # Plans are stored in the 1/16 reference mode. Rescale to the mode the
+        # controller will actually run so dimensions stay correct.
+        plan = scale_plan_for_microstep(plan, target_mode)
 
         _abort_streaming = False
         _active_job_id = job_id
@@ -326,14 +379,50 @@ async def start_job(
                     raise RuntimeError("job.end timed out waiting for final segment to finish")
                 await asyncio.sleep(0.05)
 
+            # The firmware invalidates homing when a job ends. Always establish
+            # a fresh optical reference before handing the machine back to the
+            # operator. A homing failure still leaves the job completed, but
+            # the machine stays unhomed/faulted and is reported as such.
+            auto_home_result = "failed"
+            auto_home_error: Optional[str] = None
+            try:
+                _, home_ev = await dispatcher.send_operation(
+                    {"type": "home.start", "axis": "all"},
+                    op_timeout_s=180.0
+                )
+                auto_home_result = home_ev.result or "unknown"
+            except asyncio.CancelledError:
+                raise
+            except Exception as exc:
+                auto_home_error = str(exc)
+                logger.error(f"Auto-home after job {job_id} failed: {exc}")
+
             with get_db() as conn:
                 conn.execute("UPDATE jobs SET status = 'completed', completed_segments = ? WHERE id = ?;", (plan.total_segments, job_id))
                 conn.execute("INSERT INTO job_events (job_id, event_type) VALUES (?, 'COMPLETED');", (job_id,))
+                if auto_home_result == "success":
+                    conn.execute(
+                        "INSERT INTO job_events (job_id, event_type, details_json) VALUES (?, 'AUTO_HOME', ?);",
+                        (job_id, json.dumps({"axis": "all", "result": auto_home_result}))
+                    )
+                else:
+                    conn.execute(
+                        "INSERT INTO job_events (job_id, event_type, details_json) VALUES (?, 'AUTO_HOME_FAILED', ?);",
+                        (job_id, json.dumps({"result": auto_home_result, "error": auto_home_error}))
+                    )
 
             await ws_manager.broadcast({
                 "type": "job.completed",
-                "job_id": job_id
+                "job_id": job_id,
+                "auto_home": auto_home_result
             })
+            if auto_home_result != "success":
+                await ws_manager.broadcast({
+                    "type": "job.auto_home_failed",
+                    "job_id": job_id,
+                    "result": auto_home_result,
+                    "detail": auto_home_error
+                })
 
         except asyncio.CancelledError:
             logger.info(f"Job {job_id} was canceled by operator")

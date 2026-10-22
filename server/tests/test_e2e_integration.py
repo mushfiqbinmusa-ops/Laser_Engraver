@@ -149,6 +149,13 @@ async def test_e2e_machine_lifecycle_and_safety_gates(sim_environment):
     assert target_job["status"] == "completed"
     assert target_job["completed_segments"] == target_job["total_segments"]
 
+    # Auto-home after completion restores a calibrated state.
+    res = await client.get("/api/machine/status")
+    snap = res.json()["snapshot"]
+    assert snap["homed"]["x"] is True
+    assert snap["homed"]["y"] is True
+    assert snap["state"] == "idle_homed"
+
     # 9b. False Engraving (Dry Run: motors only, laser forced to 0 duty)
     res = await client.post("/api/jobs/shape", json={
         "shape_type": "square",
@@ -196,3 +203,75 @@ async def test_e2e_machine_lifecycle_and_safety_gates(sim_environment):
     snap = res.json()["snapshot"]
     assert snap["fault"] is None
     assert snap["state"] == "idle_unhomed"
+
+@pytest.mark.asyncio
+async def test_e2e_preset_microstep_applied_and_completion_auto_homes(sim_environment):
+    client, sim, _ = sim_environment
+
+    res = await client.post("/api/machine/home", json={"axis": "all"})
+    assert res.status_code == 200
+
+    res = await client.post("/api/presets", json={
+        "name": "1/8 Microstep Test",
+        "laser_power_pct": 10,
+        "engrave_speed_sps": 120,
+        "microstep_mode": 8
+    })
+    assert res.status_code == 200
+    preset_id = res.json()["id"]
+
+    res = await client.post("/api/jobs/shape", json={
+        "shape_type": "square",
+        "preset_id": preset_id,
+        "width_mm": 5.0,
+        "name": "Microstep E2E"
+    })
+    assert res.status_code == 200
+    job_id = res.json()["id"]
+
+    res = await client.post(f"/api/jobs/{job_id}/start")
+    assert res.status_code == 200
+
+    target_job = None
+    for _ in range(100):
+        await asyncio.sleep(0.1)
+        res = await client.get("/api/jobs")
+        target_job = next((j for j in res.json() if j["id"] == job_id), None)
+        if target_job and target_job["status"] == "completed":
+            break
+
+    assert target_job is not None
+    assert target_job["status"] == "completed"
+    assert sim.microstep_mode == 8
+
+    res = await client.get("/api/machine/status")
+    snap = res.json()["snapshot"]
+    assert snap["homed"]["x"] is True
+    assert snap["homed"]["y"] is True
+    assert snap["state"] == "idle_homed"
+
+
+@pytest.mark.asyncio
+async def test_e2e_stop_invalidates_homing_only_while_active(sim_environment):
+    client, sim, _ = sim_environment
+
+    res = await client.post("/api/machine/home", json={"axis": "all"})
+    assert res.status_code == 200
+
+    # Interrupting nothing preserves the calibrated reference.
+    res = await client.post("/api/machine/stop")
+    assert res.status_code == 200
+    snap = (await client.get("/api/machine/status")).json()["snapshot"]
+    assert snap["homed"]["x"] is True
+    assert snap["homed"]["y"] is True
+    assert snap["state"] == "idle_homed"
+
+    # Interrupting an active job invalidates homing.
+    sim.state = "running_job"
+    res = await client.post("/api/machine/stop")
+    assert res.status_code == 200
+    snap = (await client.get("/api/machine/status")).json()["snapshot"]
+    assert snap["homed"]["x"] is False
+    assert snap["homed"]["y"] is False
+    assert snap["state"] == "idle_unhomed"
+    assert snap["pos_valid"] is False

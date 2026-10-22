@@ -265,7 +265,7 @@ export const EngraveTab: React.FC = () => {
           >
             {presets.map((p) => (
               <option key={p.id} value={p.id}>
-                {p.name} ({p.laser_power_pct}% power, {p.engrave_speed_sps} sps)
+                {p.name} ({p.laser_power_pct}% power, {p.engrave_speed_sps} sps, 1/{p.microstep_mode} microstep)
               </option>
             ))}
           </select>
